@@ -24,7 +24,9 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::Star: return "*";
         case TokenKind::Slash: return "/";
         case TokenKind::Equal: return "=";
+        case TokenKind::Colon: return ":";
         case TokenKind::ColonColon: return "::";
+        case TokenKind::Arrow: return "->";
     }
     return "unknown";
 }

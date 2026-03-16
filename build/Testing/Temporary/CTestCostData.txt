@@ -1,3 +1,6 @@
-pinggen-check-example 1 0.0838249
-pinggen-build-example 1 0.17367
+pinggen-check-example 2 0.00630885
+pinggen-build-example 2 0.0900846
+pinggen-check-invalid-arity 1 0.0111405
+pinggen-check-invalid-return 1 0.0102465
+pinggen-check-invalid-duplicate-param 1 0.0101788
 ---

@@ -1,8 +1,19 @@
 import std::{ io }
 
+func greet(name: string) {
+    io::println(name);
+}
+
+func compute_damage(base: int, bonus: int) -> int {
+    return scale_damage(base + bonus);
+}
+
+func scale_damage(value: int) -> int {
+    return value * 2;
+}
+
 func main() {
-    let mut hp = 100;
-    hp = hp - 20;
-    io::println("pinggen online");
-    io::println(hp);
+    let damage = compute_damage(30, 10);
+    greet("pinggen online");
+    io::println(damage);
 }

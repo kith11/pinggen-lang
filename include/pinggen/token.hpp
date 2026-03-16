@@ -25,7 +25,9 @@ enum class TokenKind {
     Star,
     Slash,
     Equal,
-    ColonColon
+    Colon,
+    ColonColon,
+    Arrow
 };
 
 struct SourceLocation {

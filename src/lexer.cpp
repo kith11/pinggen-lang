@@ -37,15 +37,22 @@ std::vector<Token> Lexer::tokenize() {
             case ',': tokens.push_back(make_token(TokenKind::Comma, start_line, start_column, ",")); break;
             case ';': tokens.push_back(make_token(TokenKind::Semicolon, start_line, start_column, ";")); break;
             case '+': tokens.push_back(make_token(TokenKind::Plus, start_line, start_column, "+")); break;
-            case '-': tokens.push_back(make_token(TokenKind::Minus, start_line, start_column, "-")); break;
+            case '-':
+                if (match('>')) {
+                    tokens.push_back(make_token(TokenKind::Arrow, start_line, start_column, "->"));
+                } else {
+                    tokens.push_back(make_token(TokenKind::Minus, start_line, start_column, "-"));
+                }
+                break;
             case '*': tokens.push_back(make_token(TokenKind::Star, start_line, start_column, "*")); break;
             case '/': tokens.push_back(make_token(TokenKind::Slash, start_line, start_column, "/")); break;
             case '=': tokens.push_back(make_token(TokenKind::Equal, start_line, start_column, "=")); break;
             case ':':
-                if (!match(':')) {
-                    fail({start_line, start_column}, "expected ':' after ':'");
+                if (match(':')) {
+                    tokens.push_back(make_token(TokenKind::ColonColon, start_line, start_column, "::"));
+                } else {
+                    tokens.push_back(make_token(TokenKind::Colon, start_line, start_column, ":"));
                 }
-                tokens.push_back(make_token(TokenKind::ColonColon, start_line, start_column, "::"));
                 break;
             case '"':
                 --index_;

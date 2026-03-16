@@ -5,17 +5,44 @@ declare i32 @printf(ptr, ...)
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
 @.str.1 = private unnamed_addr constant [15 x i8] c"pinggen online\00"
 
-define i32 @main() {
+define void @greet(ptr %arg0) {
+  %1 = alloca ptr
+  store ptr %arg0, ptr %1
+  %2 = load ptr, ptr %1
+  %3 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %4 = call i32 (ptr, ...) @printf(ptr %3, ptr %2)
+  ret void
+}
+
+define i64 @compute_damage(i64 %arg0, i64 %arg1) {
   %1 = alloca i64
-  store i64 100, ptr %1
+  store i64 %arg0, ptr %1
+  %2 = alloca i64
+  store i64 %arg1, ptr %2
+  %3 = load i64, ptr %1
+  %4 = load i64, ptr %2
+  %5 = add i64 %3, %4
+  %6 = call i64 @scale_damage(i64 %5)
+  ret i64 %6
+}
+
+define i64 @scale_damage(i64 %arg0) {
+  %1 = alloca i64
+  store i64 %arg0, ptr %1
   %2 = load i64, ptr %1
-  %3 = sub i64 %2, 20
-  store i64 %3, ptr %1
-  %4 = getelementptr inbounds [15 x i8], ptr @.str.1, i64 0, i64 0
-  %5 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %6 = call i32 (ptr, ...) @printf(ptr %5, ptr %4)
-  %7 = load i64, ptr %1
-  %8 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %9 = call i32 (ptr, ...) @printf(ptr %8, i64 %7)
+  %3 = mul i64 %2, 2
+  ret i64 %3
+}
+
+define i32 @main() {
+  %1 = call i64 @compute_damage(i64 30, i64 10)
+  %2 = alloca i64
+  store i64 %1, ptr %2
+  %3 = getelementptr inbounds [15 x i8], ptr @.str.1, i64 0, i64 0
+  call void @greet(ptr %3)
+  %4 = load i64, ptr %2
+  %5 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %6 = call i32 (ptr, ...) @printf(ptr %5, i64 %4)
   ret i32 0
 }
+

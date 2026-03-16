@@ -28,4 +28,19 @@ if(BUILD_TESTING)
         NAME pinggen-build-example
         COMMAND pinggen build ${CMAKE_SOURCE_DIR}/examples/hello
     )
+    add_test(
+        NAME pinggen-check-invalid-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_wrong_arity
+    )
+    set_tests_properties(pinggen-check-invalid-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-return
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_missing_return
+    )
+    set_tests_properties(pinggen-check-invalid-return PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-duplicate-param
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_duplicate_param
+    )
+    set_tests_properties(pinggen-check-invalid-duplicate-param PROPERTIES WILL_FAIL TRUE)
 endif()

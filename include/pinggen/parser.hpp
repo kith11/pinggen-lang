@@ -31,6 +31,7 @@ class Parser {
     std::unique_ptr<Expr> parse_term();
     std::unique_ptr<Expr> parse_factor();
     std::unique_ptr<Expr> parse_primary();
+    ValueType parse_type();
     std::string parse_qualified_name();
 
     std::vector<Token> tokens_;

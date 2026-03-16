@@ -1,0 +1,7 @@
+func value() -> int {
+    let base = 10;
+}
+
+func main() {
+    let result = value();
+}

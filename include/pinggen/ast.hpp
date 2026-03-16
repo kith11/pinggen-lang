@@ -9,6 +9,18 @@
 
 namespace pinggen {
 
+enum class ValueType {
+    Int,
+    String,
+    Void
+};
+
+struct Parameter {
+    SourceLocation location;
+    std::string name;
+    ValueType type = ValueType::Void;
+};
+
 struct Expr {
     explicit Expr(SourceLocation loc) : location(loc) {}
     virtual ~Expr() = default;
@@ -84,6 +96,8 @@ struct ImportDecl {
 struct FunctionDecl {
     SourceLocation location;
     std::string name;
+    std::vector<Parameter> params;
+    ValueType return_type = ValueType::Void;
     std::vector<std::unique_ptr<Stmt>> body;
 };
 

@@ -71,7 +71,20 @@ FunctionDecl Parser::parse_function() {
     decl.location = func_token.location;
     decl.name = consume(TokenKind::Identifier, "expected function name").lexeme;
     consume(TokenKind::LParen, "expected '(' after function name");
-    consume(TokenKind::RParen, "expected ')' after function name");
+    if (!check(TokenKind::RParen)) {
+        do {
+            Parameter param;
+            param.location = current().location;
+            param.name = consume(TokenKind::Identifier, "expected parameter name").lexeme;
+            consume(TokenKind::Colon, "expected ':' after parameter name");
+            param.type = parse_type();
+            decl.params.push_back(std::move(param));
+        } while (match(TokenKind::Comma));
+    }
+    consume(TokenKind::RParen, "expected ')' after function parameters");
+    if (match(TokenKind::Arrow)) {
+        decl.return_type = parse_type();
+    }
     consume(TokenKind::LBrace, "expected '{' before function body");
     decl.body = parse_block();
     return decl;
@@ -202,6 +215,20 @@ std::string Parser::parse_qualified_name() {
         name += consume(TokenKind::Identifier, "expected name after '::'").lexeme;
     }
     return name;
+}
+
+ValueType Parser::parse_type() {
+    const Token token = consume(TokenKind::Identifier, "expected type name");
+    if (token.lexeme == "int") {
+        return ValueType::Int;
+    }
+    if (token.lexeme == "string") {
+        return ValueType::String;
+    }
+    if (token.lexeme == "void") {
+        return ValueType::Void;
+    }
+    fail(token.location, "unknown type '" + token.lexeme + "'");
 }
 
 }  // namespace pinggen
