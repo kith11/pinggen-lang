@@ -110,13 +110,27 @@ FunctionDecl Parser::parse_function(const std::string& impl_target) {
         do {
             Parameter param;
             param.location = current().location;
-            param.name = consume(TokenKind::Identifier, "expected parameter name").lexeme;
-            if (!impl_target.empty() && first_param && param.name == "self") {
-                param.is_self = true;
-                param.type = Type::struct_type(impl_target);
+            if (!impl_target.empty() && first_param && check(TokenKind::KwMut)) {
+                consume(TokenKind::KwMut, "expected 'mut'");
+                param.location = current().location;
+                param.name = consume(TokenKind::Identifier, "expected receiver name").lexeme;
+                if (param.name == "self") {
+                    param.is_self = true;
+                    param.is_mut_self = true;
+                    param.type = Type::struct_type(impl_target);
+                } else {
+                    consume(TokenKind::Colon, "expected ':' after parameter name");
+                    param.type = parse_type();
+                }
             } else {
-                consume(TokenKind::Colon, "expected ':' after parameter name");
-                param.type = parse_type();
+                param.name = consume(TokenKind::Identifier, "expected parameter name").lexeme;
+                if (!impl_target.empty() && first_param && param.name == "self") {
+                    param.is_self = true;
+                    param.type = Type::struct_type(impl_target);
+                } else {
+                    consume(TokenKind::Colon, "expected ':' after parameter name");
+                    param.type = parse_type();
+                }
             }
             decl.params.push_back(std::move(param));
             first_param = false;

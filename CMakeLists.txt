@@ -173,4 +173,29 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_unknown_method
     )
     set_tests_properties(pinggen-check-invalid-unknown-method PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-self-field-write
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_self_field_write
+    )
+    set_tests_properties(pinggen-check-invalid-self-field-write PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-mut-method-immutable
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_mut_method_immutable
+    )
+    set_tests_properties(pinggen-check-invalid-mut-method-immutable PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-mut-method-temporary
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_mut_method_temporary
+    )
+    set_tests_properties(pinggen-check-invalid-mut-method-temporary PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-mut-method-field-receiver
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_mut_method_field_receiver
+    )
+    set_tests_properties(pinggen-check-invalid-mut-method-field-receiver PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-mut-self-position
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_mut_self_position
+    )
+    set_tests_properties(pinggen-check-invalid-mut-self-position PROPERTIES WILL_FAIL TRUE)
 endif()

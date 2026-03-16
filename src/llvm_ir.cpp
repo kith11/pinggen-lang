@@ -20,6 +20,7 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     variables_.clear();
     variable_types_.clear();
     function_return_types_.clear();
+    mutating_methods_.clear();
     register_counter_ = 0;
     string_counter_ = 0;
     label_counter_ = 0;
@@ -50,6 +51,7 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     for (const auto& function : program.functions) {
         function_return_types_[lowered_function_name(function)] =
             function.return_type == Type::void_type() && function.name == "main" ? Type::int_type() : function.return_type;
+        mutating_methods_[lowered_function_name(function)] = function.is_mutating_method();
     }
 
     std::ostringstream out;
@@ -77,12 +79,21 @@ std::string LLVMIRGenerator::generate(const Program& program) {
             if (i != 0) {
                 signature << ", ";
             }
-            signature << llvm_type(function.params[i].type) << " %arg" << i;
+            if (function.is_mutating_method() && i == 0) {
+                signature << "ptr %arg" << i;
+            } else {
+                signature << llvm_type(function.params[i].type) << " %arg" << i;
+            }
         }
         signature << ") {\n";
 
         for (std::size_t i = 0; i < function.params.size(); ++i) {
             const auto& param = function.params[i];
+            if (function.is_mutating_method() && i == 0) {
+                variables_[param.name] = "%arg" + std::to_string(i);
+                variable_types_[param.name] = param.type;
+                continue;
+            }
             const std::string storage = next_register();
             body_ += "  " + storage + " = alloca " + llvm_type(param.type) + "\n";
             body_ += "  store " + llvm_type(param.type) + " %arg" + std::to_string(i) + ", ptr " + storage + "\n";
@@ -340,21 +351,42 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
         return {reg, return_type};
     }
     if (const auto* node = dynamic_cast<const MethodCallExpr*>(&expr)) {
-        const TypedIRValue self_arg = emit_expr(*node->object);
         std::vector<TypedIRValue> args;
-        args.push_back(self_arg);
+        std::string lowered_name;
+        bool is_mutating = false;
+        if (const auto* object_var = dynamic_cast<const VariableExpr*>(node->object.get())) {
+            const Type object_type = variable_types_.at(object_var->name);
+            lowered_name = object_type.name + "__" + node->method;
+            is_mutating = mutating_methods_.at(lowered_name);
+        } else {
+            const TypedIRValue object_value = emit_expr(*node->object);
+            lowered_name = object_value.type.name + "__" + node->method;
+            is_mutating = mutating_methods_.at(lowered_name);
+            args.push_back(object_value);
+        }
+
+        if (is_mutating) {
+            const AddressValue self_addr = emit_address(*node->object);
+            args.clear();
+            args.push_back({self_addr.address, self_addr.type});
+        } else if (args.empty()) {
+            args.push_back(emit_expr(*node->object));
+        }
         for (const auto& arg : node->args) {
             args.push_back(emit_expr(*arg));
         }
 
-        const std::string lowered_name = self_arg.type.name + "__" + node->method;
         const Type return_type = function_return_types_.at(lowered_name);
         std::string call_args;
         for (std::size_t i = 0; i < args.size(); ++i) {
             if (i != 0) {
                 call_args += ", ";
             }
-            call_args += llvm_type(args[i].type) + " " + args[i].ir;
+            if (is_mutating && i == 0) {
+                call_args += "ptr " + args[i].ir;
+            } else {
+                call_args += llvm_type(args[i].type) + " " + args[i].ir;
+            }
         }
 
         if (return_type == Type::void_type()) {

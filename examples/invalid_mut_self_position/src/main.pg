@@ -1,0 +1,11 @@
+struct Counter {
+    value: int,
+}
+
+impl Counter {
+    func bad(amount: int, mut self) -> int {
+        return amount;
+    }
+}
+
+func main() {}

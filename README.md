@@ -22,6 +22,7 @@ Current features:
 - `+` for string concatenation
 - fixed-size arrays with `[T; N]`, `[a, b, c]`, and `array[index]`
 - struct methods with `impl Type { ... }` and `value.method(...)`
+- mutating struct methods with `mut self`
 - `let` and `let mut`
 - integers and strings
 - `==` and `!=` for `int` and `bool`
@@ -55,23 +56,26 @@ struct Counter {
 }
 
 impl Counter {
-    func bumped(self, amount: int) -> Counter {
+    func bumped_copy(self, amount: int) -> Counter {
+        let mut copy = self;
+        copy.value = copy.value + amount;
+        return copy;
+    }
+    func bump(mut self, amount: int) -> int {
         self.value = self.value + amount;
-        return self;
+        return self.value;
     }
     func total(self) -> int {
         return self.value;
     }
 }
 
-func show(counter: Counter) -> int {
-    return counter.total();
-}
-
 func main() {
-    let counter = Counter { value: 10 };
-    let next = counter.bumped(5);
-    io::println(show(next));
+    let mut counter = Counter { value: 10 };
+    let preview = counter.bumped_copy(2);
+    io::println(preview.total());
+    io::println(counter.total());
+    io::println(counter.bump(5));
     io::println(counter.total());
 }
 ```

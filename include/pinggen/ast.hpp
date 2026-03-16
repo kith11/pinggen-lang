@@ -63,6 +63,7 @@ struct Parameter {
     std::string name;
     Type type = Type::void_type();
     bool is_self = false;
+    bool is_mut_self = false;
 };
 
 struct Expr {
@@ -245,6 +246,7 @@ struct FunctionDecl {
     std::string impl_target;
 
     bool is_method() const { return !impl_target.empty(); }
+    bool is_mutating_method() const { return is_method() && !params.empty() && params[0].is_mut_self; }
 };
 
 struct Program {

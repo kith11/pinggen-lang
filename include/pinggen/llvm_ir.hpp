@@ -47,6 +47,7 @@ class LLVMIRGenerator {
     std::unordered_map<std::string, std::string> variables_;
     std::unordered_map<std::string, Type> variable_types_;
     std::unordered_map<std::string, Type> function_return_types_;
+    std::unordered_map<std::string, bool> mutating_methods_;
     std::string current_function_name_;
     Type current_return_type_ = Type::void_type();
     std::vector<std::string> break_labels_;

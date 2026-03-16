@@ -11,6 +11,7 @@ namespace pinggen {
 struct Symbol {
     Type type = Type::void_type();
     bool is_mutable = false;
+    bool is_local = false;
 };
 
 struct StructInfo {
@@ -22,6 +23,7 @@ struct FunctionSignature {
     std::string lowered_name;
     std::vector<Type> params;
     Type return_type = Type::void_type();
+    bool is_mutating_receiver = false;
 };
 
 class SemanticAnalyzer {
@@ -32,6 +34,8 @@ class SemanticAnalyzer {
     void collect_structs(const Program& program);
     void collect_signatures(const Program& program);
     static std::string lowered_function_name(const FunctionDecl& function);
+    const FunctionSignature& require_method_signature(const Type& object_type, const std::string& method,
+                                                      const SourceLocation& location) const;
     Type analyze_expr(const Expr& expr);
     bool analyze_block(const std::vector<std::unique_ptr<Stmt>>& body);
     bool analyze_stmt(const Stmt& stmt);

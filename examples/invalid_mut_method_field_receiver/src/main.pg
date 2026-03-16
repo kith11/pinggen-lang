@@ -1,0 +1,15 @@
+struct Counter {
+    value: int,
+}
+
+impl Counter {
+    func bump(mut self, amount: int) -> int {
+        self.value = self.value + amount;
+        return self.value;
+    }
+}
+
+func main() {
+    let mut counters = [Counter { value: 1 }];
+    counters[0].bump(1);
+}

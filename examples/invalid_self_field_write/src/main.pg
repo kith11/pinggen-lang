@@ -1,0 +1,12 @@
+struct Counter {
+    value: int,
+}
+
+impl Counter {
+    func bump(self, amount: int) -> int {
+        self.value = self.value + amount;
+        return self.value;
+    }
+}
+
+func main() {}

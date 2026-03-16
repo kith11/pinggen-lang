@@ -59,7 +59,7 @@ void SemanticAnalyzer::analyze(const Program& program) {
             if (!param_names.insert(param.name).second) {
                 fail(param.location, "duplicate parameter '" + param.name + "'");
             }
-            symbols_[param.name] = Symbol{param.type, param.is_self};
+            symbols_[param.name] = Symbol{param.type, param.is_mut_self, false};
         }
 
         const bool has_terminal_return = analyze_block(function.body);
@@ -102,6 +102,7 @@ void SemanticAnalyzer::collect_signatures(const Program& program) {
         FunctionSignature signature;
         signature.lowered_name = lowered_function_name(function);
         signature.return_type = function.return_type;
+        signature.is_mutating_receiver = function.is_mutating_method();
         if (function.is_method() && function.params.empty()) {
             fail(function.location, "methods must declare 'self' as the first parameter");
         }
@@ -111,7 +112,7 @@ void SemanticAnalyzer::collect_signatures(const Program& program) {
                 if (!param.is_self || param.name != "self") {
                     fail(param.location, "methods must declare 'self' as the first parameter");
                 }
-            } else if (param.is_self || param.name == "self") {
+            } else if (param.is_self || param.is_mut_self || param.name == "self") {
                 fail(param.location, "'self' can only be used as the first parameter of a method");
             }
             signature.params.push_back(param.type);
@@ -139,6 +140,22 @@ std::string SemanticAnalyzer::lowered_function_name(const FunctionDecl& function
         return function.name;
     }
     return function.impl_target + "__" + function.name;
+}
+
+const FunctionSignature& SemanticAnalyzer::require_method_signature(const Type& object_type, const std::string& method,
+                                                                    const SourceLocation& location) const {
+    if (object_type.kind != TypeKind::Struct) {
+        fail(location, "methods can only be called on struct values");
+    }
+    const auto methods_it = methods_.find(object_type.name);
+    if (methods_it == methods_.end()) {
+        fail(location, "struct '" + object_type.name + "' has no methods");
+    }
+    const auto method_it = methods_it->second.find(method);
+    if (method_it == methods_it->second.end()) {
+        fail(location, "unknown method '" + method + "' on struct '" + object_type.name + "'");
+    }
+    return method_it->second;
 }
 
 const StructInfo& SemanticAnalyzer::require_struct(const Type& type, const SourceLocation& location) const {
@@ -242,6 +259,14 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         return Type::struct_type(node->struct_name);
     }
     if (const auto* node = dynamic_cast<const FieldAccessExpr*>(&expr)) {
+        if (const auto* method_call = dynamic_cast<const MethodCallExpr*>(node->object.get())) {
+            const Type method_object_type = analyze_expr(*method_call->object);
+            const auto& method_signature =
+                require_method_signature(method_object_type, method_call->method, method_call->location);
+            if (method_signature.is_mutating_receiver) {
+                fail(node->location, "mutating method calls cannot be chained");
+            }
+        }
         const Type object_type = analyze_expr(*node->object);
         const StructInfo& info = require_struct(object_type, node->location);
         const auto field_it = info.field_indices.find(node->field);
@@ -251,6 +276,14 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         return info.fields[field_it->second].type;
     }
     if (const auto* node = dynamic_cast<const IndexExpr*>(&expr)) {
+        if (const auto* method_call = dynamic_cast<const MethodCallExpr*>(node->object.get())) {
+            const Type method_object_type = analyze_expr(*method_call->object);
+            const auto& method_signature =
+                require_method_signature(method_object_type, method_call->method, method_call->location);
+            if (method_signature.is_mutating_receiver) {
+                fail(node->location, "mutating method calls cannot be chained");
+            }
+        }
         const Type object_type = analyze_expr(*node->object);
         const Type& array_type = require_array(object_type, node->location);
         const Type index_type = analyze_expr(*node->index);
@@ -260,19 +293,26 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         return *array_type.element_type;
     }
     if (const auto* node = dynamic_cast<const MethodCallExpr*>(&expr)) {
+        if (const auto* prior_call = dynamic_cast<const MethodCallExpr*>(node->object.get())) {
+            const Type prior_object_type = analyze_expr(*prior_call->object);
+            const auto& prior_signature =
+                require_method_signature(prior_object_type, prior_call->method, prior_call->location);
+            if (prior_signature.is_mutating_receiver) {
+                fail(node->location, "mutating method calls cannot be chained");
+            }
+        }
         const Type object_type = analyze_expr(*node->object);
-        if (object_type.kind != TypeKind::Struct) {
-            fail(node->location, "methods can only be called on struct values");
+        const auto& signature = require_method_signature(object_type, node->method, node->location);
+        if (signature.is_mutating_receiver) {
+            const auto* receiver_var = dynamic_cast<const VariableExpr*>(node->object.get());
+            if (!receiver_var) {
+                fail(node->location, "mutating methods can only be called on mutable local struct variables");
+            }
+            const auto symbol_it = symbols_.find(receiver_var->name);
+            if (symbol_it == symbols_.end() || !symbol_it->second.is_mutable || !symbol_it->second.is_local) {
+                fail(node->location, "mutating methods can only be called on mutable local struct variables");
+            }
         }
-        const auto methods_it = methods_.find(object_type.name);
-        if (methods_it == methods_.end()) {
-            fail(node->location, "struct '" + object_type.name + "' has no methods");
-        }
-        const auto method_it = methods_it->second.find(node->method);
-        if (method_it == methods_it->second.end()) {
-            fail(node->location, "unknown method '" + node->method + "' on struct '" + object_type.name + "'");
-        }
-        const auto& signature = method_it->second;
         if (node->args.size() + 1 != signature.params.size()) {
             fail(node->location, "method '" + node->method + "' expects " +
                                      std::to_string(signature.params.size() - 1) + " argument(s)");
@@ -395,7 +435,7 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
             }
             type = *node->declared_type;
         }
-        symbols_[node->name] = Symbol{type, node->is_mutable};
+        symbols_[node->name] = Symbol{type, node->is_mutable, true};
         return false;
     }
     if (const auto* node = dynamic_cast<const AssignStmt*>(&stmt)) {

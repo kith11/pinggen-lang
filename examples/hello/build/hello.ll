@@ -30,19 +30,36 @@ define void @pinggen_bounds_abort() {
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
 
-define %struct.Counter @Counter__bumped(%struct.Counter %arg0, i64 %arg1) {
+define %struct.Counter @Counter__bumped_copy(%struct.Counter %arg0, i64 %arg1) {
   %1 = alloca %struct.Counter
   store %struct.Counter %arg0, ptr %1
   %2 = alloca i64
   store i64 %arg1, ptr %2
-  %3 = getelementptr inbounds %struct.Counter, ptr %1, i32 0, i32 0
-  %4 = load i64, ptr %3
-  %5 = load i64, ptr %2
-  %6 = add i64 %4, %5
-  %7 = getelementptr inbounds %struct.Counter, ptr %1, i32 0, i32 0
-  store i64 %6, ptr %7
-  %8 = load %struct.Counter, ptr %1
-  ret %struct.Counter %8
+  %3 = load %struct.Counter, ptr %1
+  %4 = alloca %struct.Counter
+  store %struct.Counter %3, ptr %4
+  %5 = getelementptr inbounds %struct.Counter, ptr %4, i32 0, i32 0
+  %6 = load i64, ptr %5
+  %7 = load i64, ptr %2
+  %8 = add i64 %6, %7
+  %9 = getelementptr inbounds %struct.Counter, ptr %4, i32 0, i32 0
+  store i64 %8, ptr %9
+  %10 = load %struct.Counter, ptr %4
+  ret %struct.Counter %10
+}
+
+define i64 @Counter__bump(ptr %arg0, i64 %arg1) {
+  %1 = alloca i64
+  store i64 %arg1, ptr %1
+  %2 = getelementptr inbounds %struct.Counter, ptr %arg0, i32 0, i32 0
+  %3 = load i64, ptr %2
+  %4 = load i64, ptr %1
+  %5 = add i64 %3, %4
+  %6 = getelementptr inbounds %struct.Counter, ptr %arg0, i32 0, i32 0
+  store i64 %5, ptr %6
+  %7 = getelementptr inbounds %struct.Counter, ptr %arg0, i32 0, i32 0
+  %8 = load i64, ptr %7
+  ret i64 %8
 }
 
 define i64 @Counter__total(%struct.Counter %arg0) {
@@ -50,14 +67,6 @@ define i64 @Counter__total(%struct.Counter %arg0) {
   store %struct.Counter %arg0, ptr %1
   %2 = getelementptr inbounds %struct.Counter, ptr %1, i32 0, i32 0
   %3 = load i64, ptr %2
-  ret i64 %3
-}
-
-define i64 @show(%struct.Counter %arg0) {
-  %1 = alloca %struct.Counter
-  store %struct.Counter %arg0, ptr %1
-  %2 = load %struct.Counter, ptr %1
-  %3 = call i64 @Counter__total(%struct.Counter %2)
   ret i64 %3
 }
 
@@ -69,17 +78,24 @@ define i32 @main() {
   %4 = alloca %struct.Counter
   store %struct.Counter %3, ptr %4
   %5 = load %struct.Counter, ptr %4
-  %6 = call %struct.Counter @Counter__bumped(%struct.Counter %5, i64 5)
+  %6 = call %struct.Counter @Counter__bumped_copy(%struct.Counter %5, i64 2)
   %7 = alloca %struct.Counter
   store %struct.Counter %6, ptr %7
   %8 = load %struct.Counter, ptr %7
-  %9 = call i64 @show(%struct.Counter %8)
+  %9 = call i64 @Counter__total(%struct.Counter %8)
   %10 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
   %11 = call i32 (ptr, ...) @printf(ptr %10, i64 %9)
   %12 = load %struct.Counter, ptr %4
   %13 = call i64 @Counter__total(%struct.Counter %12)
   %14 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
   %15 = call i32 (ptr, ...) @printf(ptr %14, i64 %13)
+  %16 = call i64 @Counter__bump(ptr %4, i64 5)
+  %17 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %18 = call i32 (ptr, ...) @printf(ptr %17, i64 %16)
+  %19 = load %struct.Counter, ptr %4
+  %20 = call i64 @Counter__total(%struct.Counter %19)
+  %21 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %22 = call i32 (ptr, ...) @printf(ptr %21, i64 %20)
   ret i32 0
 }
 
