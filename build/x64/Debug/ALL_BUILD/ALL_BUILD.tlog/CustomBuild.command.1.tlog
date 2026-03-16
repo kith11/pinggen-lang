@@ -1,0 +1,10 @@
+^C:\USERS\KEITH\DOCUMENTS\PROJECTS\PINGGEN-PROGRAMMING-LANGUAGE\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/keith/Documents/projects/pinggen-programming-language -BC:/Users/keith/Documents/projects/pinggen-programming-language/build --check-stamp-file C:/Users/keith/Documents/projects/pinggen-programming-language/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

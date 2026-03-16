@@ -1,0 +1,10 @@
+^C:\USERS\KEITH\DOCUMENTS\PROJECTS\PINGGEN-PROGRAMMING-LANGUAGE\BUILD\CMAKEFILES\C0A3154E76642E6399245360D2D83789\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/keith/Documents/projects/pinggen-programming-language -BC:/Users/keith/Documents/projects/pinggen-programming-language/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/keith/Documents/projects/pinggen-programming-language/build/pinggen.slnx
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

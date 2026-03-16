@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\keith\Documents\projects\pinggen-programming-language\build\CMakeFiles\c0a3154e76642e6399245360d2d83789\Nightly.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\keith\Documents\projects\pinggen-programming-language\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\keith\Documents\projects\pinggen-programming-language\build\CMakeFiles\Nightly" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{1D09D669-E74F-33E3-B122-7DE621C9D96C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

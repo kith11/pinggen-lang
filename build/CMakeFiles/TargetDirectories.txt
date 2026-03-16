@@ -1,0 +1,8 @@
+C:/Users/keith/Documents/projects/pinggen-programming-language/build/CMakeFiles/pinggen.dir
+C:/Users/keith/Documents/projects/pinggen-programming-language/build/CMakeFiles/Experimental.dir
+C:/Users/keith/Documents/projects/pinggen-programming-language/build/CMakeFiles/Nightly.dir
+C:/Users/keith/Documents/projects/pinggen-programming-language/build/CMakeFiles/Continuous.dir
+C:/Users/keith/Documents/projects/pinggen-programming-language/build/CMakeFiles/NightlyMemoryCheck.dir
+C:/Users/keith/Documents/projects/pinggen-programming-language/build/CMakeFiles/RUN_TESTS.dir
+C:/Users/keith/Documents/projects/pinggen-programming-language/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/keith/Documents/projects/pinggen-programming-language/build/CMakeFiles/ZERO_CHECK.dir
