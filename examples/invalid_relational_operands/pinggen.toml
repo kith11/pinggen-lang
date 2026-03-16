@@ -1,0 +1,7 @@
+[package]
+name = "invalid_relational_operands"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_relational_operands"

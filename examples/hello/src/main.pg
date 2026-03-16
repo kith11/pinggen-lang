@@ -1,19 +1,20 @@
 import std::{ io }
 
-func keep_value(value: int) -> bool {
-    return value == 3 || value == 1;
+func should_print(value: int) -> bool {
+    return value <= 2 || value == 4;
 }
 
 func main() {
     let mut count = 4;
-    while count != 0 {
-        count = count - 1;
-        if !keep_value(count) && count != 0 {
+    while count > 0 {
+        if !should_print(count) {
+            count = count - 1;
             continue;
         }
         io::println(count);
-        if count == 1 || count == 0 {
+        if count <= 2 {
             break;
         }
+        count = count - 1;
     }
 }

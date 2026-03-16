@@ -4,13 +4,13 @@ declare i32 @printf(ptr, ...)
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
 
-define i1 @keep_value(i64 %arg0) {
+define i1 @should_print(i64 %arg0) {
   %1 = alloca i64
   store i64 %arg0, ptr %1
   %2 = load i64, ptr %1
-  %3 = icmp eq i64 %2, 3
+  %3 = icmp sle i64 %2, 2
   %4 = load i64, ptr %1
-  %5 = icmp eq i64 %4, 1
+  %5 = icmp eq i64 %4, 4
   %6 = or i1 %3, %5
   ret i1 %6
 }
@@ -21,38 +21,35 @@ define i32 @main() {
   br label %while_cond.1
 while_cond.1:
   %2 = load i64, ptr %1
-  %3 = icmp ne i64 %2, 0
+  %3 = icmp sgt i64 %2, 0
   br i1 %3, label %while_body.2, label %while_end.3
 while_body.2:
   %4 = load i64, ptr %1
-  %5 = sub i64 %4, 1
-  store i64 %5, ptr %1
-  %6 = load i64, ptr %1
-  %7 = call i1 @keep_value(i64 %6)
-  %8 = xor i1 %7, true
-  %9 = load i64, ptr %1
-  %10 = icmp ne i64 %9, 0
-  %11 = and i1 %8, %10
-  br i1 %11, label %if_then.4, label %if_else.5
+  %5 = call i1 @should_print(i64 %4)
+  %6 = xor i1 %5, true
+  br i1 %6, label %if_then.4, label %if_else.5
 if_then.4:
+  %7 = load i64, ptr %1
+  %8 = sub i64 %7, 1
+  store i64 %8, ptr %1
   br label %while_cond.1
 if_else.5:
   br label %if_end.6
 if_end.6:
+  %9 = load i64, ptr %1
+  %10 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %11 = call i32 (ptr, ...) @printf(ptr %10, i64 %9)
   %12 = load i64, ptr %1
-  %13 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %14 = call i32 (ptr, ...) @printf(ptr %13, i64 %12)
-  %15 = load i64, ptr %1
-  %16 = icmp eq i64 %15, 1
-  %17 = load i64, ptr %1
-  %18 = icmp eq i64 %17, 0
-  %19 = or i1 %16, %18
-  br i1 %19, label %if_then.7, label %if_else.8
+  %13 = icmp sle i64 %12, 2
+  br i1 %13, label %if_then.7, label %if_else.8
 if_then.7:
   br label %while_end.3
 if_else.8:
   br label %if_end.9
 if_end.9:
+  %14 = load i64, ptr %1
+  %15 = sub i64 %14, 1
+  store i64 %15, ptr %1
   br label %while_cond.1
 while_end.3:
   ret i32 0
