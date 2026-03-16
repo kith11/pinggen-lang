@@ -94,6 +94,41 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-for-missing-in PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-enum-duplicate
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_enum_duplicate
+    )
+    set_tests_properties(pinggen-check-invalid-enum-duplicate PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-enum-duplicate-variant
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_enum_duplicate_variant
+    )
+    set_tests_properties(pinggen-check-invalid-enum-duplicate-variant PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-enum-unknown-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_enum_unknown_type
+    )
+    set_tests_properties(pinggen-check-invalid-enum-unknown-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-enum-unknown-variant
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_enum_unknown_variant
+    )
+    set_tests_properties(pinggen-check-invalid-enum-unknown-variant PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-enum-compare-mismatch
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_enum_compare_mismatch
+    )
+    set_tests_properties(pinggen-check-invalid-enum-compare-mismatch PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-enum-operator
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_enum_operator
+    )
+    set_tests_properties(pinggen-check-invalid-enum-operator PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-enum-impl
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_enum_impl
+    )
+    set_tests_properties(pinggen-check-invalid-enum-impl PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-struct-duplicate-field
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_struct_duplicate_field
     )

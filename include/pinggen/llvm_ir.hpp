@@ -24,6 +24,7 @@ class LLVMIRGenerator {
 
   private:
     static std::string lowered_function_name(const FunctionDecl& function);
+    Type normalize_type(const Type& type) const;
     std::string emit_concat_helper() const;
     std::string emit_bounds_abort_helper() const;
     void emit_bounds_check(const std::string& index_ir, std::size_t size);
@@ -42,6 +43,8 @@ class LLVMIRGenerator {
     std::string globals_;
     std::string functions_;
     std::string body_;
+    std::unordered_map<std::string, EnumDecl> enums_;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::size_t>> enum_variant_indices_;
     std::unordered_map<std::string, StructDecl> structs_;
     std::unordered_map<std::string, std::unordered_map<std::string, std::size_t>> struct_field_indices_;
     std::unordered_map<std::string, std::string> variables_;

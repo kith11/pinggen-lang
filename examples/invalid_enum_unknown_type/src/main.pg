@@ -1,0 +1,6 @@
+func pick(state: Missing) -> Missing {
+    return state;
+}
+
+func main() {
+}

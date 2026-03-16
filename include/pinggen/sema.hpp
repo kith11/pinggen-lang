@@ -19,6 +19,10 @@ struct StructInfo {
     std::unordered_map<std::string, std::size_t> field_indices;
 };
 
+struct EnumInfo {
+    std::unordered_map<std::string, std::size_t> variant_indices;
+};
+
 struct FunctionSignature {
     std::string lowered_name;
     std::vector<Type> params;
@@ -31,11 +35,13 @@ class SemanticAnalyzer {
     void analyze(const Program& program);
 
   private:
+    void collect_enums(const Program& program);
     void collect_structs(const Program& program);
     void collect_signatures(const Program& program);
     static std::string lowered_function_name(const FunctionDecl& function);
     const FunctionSignature& require_method_signature(const Type& object_type, const std::string& method,
                                                       const SourceLocation& location) const;
+    Type normalize_type(const Type& type) const;
     Type analyze_expr(const Expr& expr);
     bool analyze_block(const std::vector<std::unique_ptr<Stmt>>& body);
     bool analyze_stmt(const Stmt& stmt);
@@ -44,6 +50,7 @@ class SemanticAnalyzer {
     void validate_type(const Type& type, const SourceLocation& location, bool allow_struct);
 
     std::unordered_map<std::string, Symbol> symbols_;
+    std::unordered_map<std::string, EnumInfo> enums_;
     std::unordered_map<std::string, StructInfo> structs_;
     std::unordered_map<std::string, FunctionSignature> functions_;
     std::unordered_map<std::string, std::unordered_map<std::string, FunctionSignature>> methods_;

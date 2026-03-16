@@ -1,0 +1,11 @@
+enum State {
+    Idle,
+}
+
+enum Mode {
+    Idle,
+}
+
+func main() {
+    let bad = State::Idle == Mode::Idle;
+}

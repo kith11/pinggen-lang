@@ -29,6 +29,7 @@ std::string type_name(const Type& type) {
         case TypeKind::Bool: return "bool";
         case TypeKind::String: return "string";
         case TypeKind::Void: return "void";
+        case TypeKind::Enum: return type.name;
         case TypeKind::Struct: return type.name;
         case TypeKind::Array: return "[" + type_name(*type.element_type) + "; " + std::to_string(type.array_size) + "]";
     }
@@ -36,6 +37,7 @@ std::string type_name(const Type& type) {
 }
 
 void SemanticAnalyzer::analyze(const Program& program) {
+    collect_enums(program);
     collect_structs(program);
     collect_signatures(program);
 
@@ -48,18 +50,20 @@ void SemanticAnalyzer::analyze(const Program& program) {
         symbols_.clear();
         inside_main_ = function.name == "main";
         current_method_struct_ = function.impl_target;
-        current_return_type_ = inside_main_ && function.return_type == Type::void_type() ? Type::int_type() : function.return_type;
+        const Type normalized_return_type = normalize_type(function.return_type);
+        current_return_type_ = inside_main_ && normalized_return_type == Type::void_type() ? Type::int_type() : normalized_return_type;
 
         std::unordered_set<std::string> param_names;
         for (const auto& param : function.params) {
-            validate_type(param.type, param.location, true);
+            const Type normalized_param_type = normalize_type(param.type);
+            validate_type(normalized_param_type, param.location, true);
             if (!function.is_method() && param.name == "self") {
                 fail(param.location, "'self' can only be used inside a method");
             }
             if (!param_names.insert(param.name).second) {
                 fail(param.location, "duplicate parameter '" + param.name + "'");
             }
-            symbols_[param.name] = Symbol{param.type, param.is_mut_self, false};
+            symbols_[param.name] = Symbol{normalized_param_type, param.is_mut_self, false};
         }
 
         const bool has_terminal_return = analyze_block(function.body);
@@ -73,16 +77,36 @@ void SemanticAnalyzer::analyze(const Program& program) {
     }
 }
 
+void SemanticAnalyzer::collect_enums(const Program& program) {
+    enums_.clear();
+    for (const auto& decl : program.enums) {
+        if (enums_.contains(decl.name)) {
+            fail(decl.location, "duplicate enum '" + decl.name + "'");
+        }
+        EnumInfo info;
+        std::unordered_set<std::string> seen_variants;
+        for (std::size_t i = 0; i < decl.variants.size(); ++i) {
+            const auto& variant = decl.variants[i];
+            if (!seen_variants.insert(variant.name).second) {
+                fail(variant.location, "duplicate variant '" + variant.name + "' in enum '" + decl.name + "'");
+            }
+            info.variant_indices[variant.name] = i;
+        }
+        enums_[decl.name] = std::move(info);
+    }
+}
+
 void SemanticAnalyzer::collect_structs(const Program& program) {
     structs_.clear();
     for (const auto& decl : program.structs) {
-        if (structs_.contains(decl.name)) {
+        if (structs_.contains(decl.name) || enums_.contains(decl.name)) {
             fail(decl.location, "duplicate struct '" + decl.name + "'");
         }
         StructInfo info;
         std::unordered_set<std::string> seen_fields;
         for (std::size_t i = 0; i < decl.fields.size(); ++i) {
-            const auto& field = decl.fields[i];
+            auto field = decl.fields[i];
+            field.type = normalize_type(field.type);
             if (!seen_fields.insert(field.name).second) {
                 fail(field.location, "duplicate field '" + field.name + "' in struct '" + decl.name + "'");
             }
@@ -98,10 +122,11 @@ void SemanticAnalyzer::collect_signatures(const Program& program) {
     functions_.clear();
     methods_.clear();
     for (const auto& function : program.functions) {
-        validate_type(function.return_type, function.location, true);
+        const Type normalized_return_type = normalize_type(function.return_type);
+        validate_type(normalized_return_type, function.location, true);
         FunctionSignature signature;
         signature.lowered_name = lowered_function_name(function);
-        signature.return_type = function.return_type;
+        signature.return_type = normalized_return_type;
         signature.is_mutating_receiver = function.is_mutating_method();
         if (function.is_method() && function.params.empty()) {
             fail(function.location, "methods must declare 'self' as the first parameter");
@@ -115,9 +140,14 @@ void SemanticAnalyzer::collect_signatures(const Program& program) {
             } else if (param.is_self || param.is_mut_self || param.name == "self") {
                 fail(param.location, "'self' can only be used as the first parameter of a method");
             }
-            signature.params.push_back(param.type);
+            const Type normalized_param_type = normalize_type(param.type);
+            validate_type(normalized_param_type, param.location, true);
+            signature.params.push_back(normalized_param_type);
         }
         if (function.is_method()) {
+            if (enums_.contains(function.impl_target)) {
+                fail(function.location, "impl blocks only support structs in this milestone");
+            }
             if (!structs_.contains(function.impl_target)) {
                 fail(function.location, "unknown impl target '" + function.impl_target + "'");
             }
@@ -158,6 +188,19 @@ const FunctionSignature& SemanticAnalyzer::require_method_signature(const Type& 
     return method_it->second;
 }
 
+Type SemanticAnalyzer::normalize_type(const Type& type) const {
+    if (type.kind == TypeKind::Array) {
+        if (!type.element_type) {
+            return type;
+        }
+        return Type::array_type(normalize_type(*type.element_type), type.array_size);
+    }
+    if (type.kind == TypeKind::Struct && enums_.contains(type.name)) {
+        return Type::enum_type(type.name);
+    }
+    return type;
+}
+
 const StructInfo& SemanticAnalyzer::require_struct(const Type& type, const SourceLocation& location) const {
     if (type.kind != TypeKind::Struct) {
         fail(location, "expected struct value");
@@ -184,6 +227,12 @@ void SemanticAnalyzer::validate_type(const Type& type, const SourceLocation& loc
         validate_type(*type.element_type, location, allow_struct);
         return;
     }
+    if (type.kind == TypeKind::Enum) {
+        if (!enums_.contains(type.name)) {
+            fail(location, "unknown enum type '" + type.name + "'");
+        }
+        return;
+    }
     if (type.kind == TypeKind::Struct) {
         if (!allow_struct) {
             fail(location, "nested struct types are not supported in this milestone");
@@ -203,6 +252,16 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
     }
     if (dynamic_cast<const StringExpr*>(&expr)) {
         return Type::string_type();
+    }
+    if (const auto* node = dynamic_cast<const EnumValueExpr*>(&expr)) {
+        const auto enum_it = enums_.find(node->enum_name);
+        if (enum_it == enums_.end()) {
+            fail(node->location, "unknown enum '" + node->enum_name + "'");
+        }
+        if (!enum_it->second.variant_indices.contains(node->variant)) {
+            fail(node->location, "unknown variant '" + node->variant + "' for enum '" + node->enum_name + "'");
+        }
+        return Type::enum_type(node->enum_name);
     }
     if (const auto* node = dynamic_cast<const ArrayLiteralExpr*>(&expr)) {
         if (node->elements.empty()) {
@@ -350,8 +409,8 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
             if (left != right) {
                 fail(node->location, "comparison operands must have the same type");
             }
-            if (left != Type::int_type() && left != Type::bool_type()) {
-                fail(node->location, "operator '" + node->op + "' only supports int and bool operands");
+            if (left != Type::int_type() && left != Type::bool_type() && left.kind != TypeKind::Enum) {
+                fail(node->location, "operator '" + node->op + "' only supports int, bool, and enum operands");
             }
             return Type::bool_type();
         }
@@ -428,12 +487,13 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
         }
         Type type = initializer_type;
         if (node->declared_type.has_value()) {
-            validate_type(*node->declared_type, node->location, true);
-            if (*node->declared_type != initializer_type) {
-                fail(node->location, "cannot initialize " + type_name(*node->declared_type) + " with " +
+            const Type declared_type = normalize_type(*node->declared_type);
+            validate_type(declared_type, node->location, true);
+            if (declared_type != initializer_type) {
+                fail(node->location, "cannot initialize " + type_name(declared_type) + " with " +
                                          type_name(initializer_type));
             }
-            type = *node->declared_type;
+            type = declared_type;
         }
         symbols_[node->name] = Symbol{type, node->is_mutable, true};
         return false;

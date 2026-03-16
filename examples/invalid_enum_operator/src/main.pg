@@ -1,0 +1,8 @@
+enum State {
+    Idle,
+    Ready,
+}
+
+func main() {
+    let bad = State::Idle < State::Ready;
+}

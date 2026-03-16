@@ -1,22 +1,31 @@
 import std::{ io }
 
-func main() {
-    let mut sum = 0;
-    for i in 0..6 {
-        if i == 1 {
-            continue;
-        }
-        if i == 4 {
-            break;
-        }
-        io::println(i);
-        sum = sum + i;
-    }
-    io::println(sum);
+enum State {
+    Idle,
+    Ready,
+    Done,
+}
 
-    let start = 5;
-    let end = 3;
-    for j in start..end {
-        io::println(j);
+struct Job {
+    state: State,
+    label: string,
+}
+
+func is_ready(state: State) -> bool {
+    return state == State::Ready;
+}
+
+func main() {
+    let job = Job { state: State::Ready, label: "pinggen" };
+    let states: [State; 3] = [State::Idle, State::Ready, State::Done];
+
+    if is_ready(job.state) {
+        io::println(job.label);
+    } else {
+        io::println("not ready");
+    }
+
+    if states[2] == State::Done {
+        io::println("done");
     }
 }

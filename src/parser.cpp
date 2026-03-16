@@ -14,6 +14,10 @@ Program Parser::parse() {
         program.imports.push_back(parse_import());
     }
     while (!is_at_end()) {
+        if (check(TokenKind::KwEnum)) {
+            program.enums.push_back(parse_enum());
+            continue;
+        }
         if (check(TokenKind::KwStruct)) {
             program.structs.push_back(parse_struct());
             continue;
@@ -76,6 +80,23 @@ ImportDecl Parser::parse_import() {
         decl.items.push_back(consume(TokenKind::Identifier, "expected import item").lexeme);
     } while (match(TokenKind::Comma));
     consume(TokenKind::RBrace, "expected '}' after import list");
+    return decl;
+}
+
+EnumDecl Parser::parse_enum() {
+    const Token enum_token = consume(TokenKind::KwEnum, "expected 'enum'");
+    EnumDecl decl;
+    decl.location = enum_token.location;
+    decl.name = consume(TokenKind::Identifier, "expected enum name").lexeme;
+    consume(TokenKind::LBrace, "expected '{' after enum name");
+    while (!check(TokenKind::RBrace) && !is_at_end()) {
+        EnumVariant variant;
+        variant.location = current().location;
+        variant.name = consume(TokenKind::Identifier, "expected variant name").lexeme;
+        decl.variants.push_back(std::move(variant));
+        match(TokenKind::Comma);
+    }
+    consume(TokenKind::RBrace, "expected '}' after enum body");
     return decl;
 }
 
@@ -407,17 +428,28 @@ std::unique_ptr<Expr> Parser::parse_primary() {
             return parse_postfix(std::make_unique<StructLiteralExpr>(first.location, first.lexeme, std::move(fields)));
         }
         if (check(TokenKind::ColonColon)) {
-            --current_;
-            const std::string name = parse_qualified_name();
-            consume(TokenKind::LParen, "expected '(' after function name");
-            std::vector<std::unique_ptr<Expr>> args;
-            if (!check(TokenKind::RParen)) {
-                do {
-                    args.push_back(parse_expression());
-                } while (match(TokenKind::Comma));
+            consume(TokenKind::ColonColon, "expected '::'");
+            const Token second = consume(TokenKind::Identifier, "expected name after '::'");
+            std::string name = first.lexeme + "::" + second.lexeme;
+            while (check(TokenKind::ColonColon) && check_next(TokenKind::Identifier)) {
+                consume(TokenKind::ColonColon, "expected '::'");
+                name += "::";
+                name += consume(TokenKind::Identifier, "expected name after '::'").lexeme;
             }
-            consume(TokenKind::RParen, "expected ')' after arguments");
-            return parse_postfix(std::make_unique<CallExpr>(first.location, name, std::move(args)));
+            if (match(TokenKind::LParen)) {
+                std::vector<std::unique_ptr<Expr>> args;
+                if (!check(TokenKind::RParen)) {
+                    do {
+                        args.push_back(parse_expression());
+                    } while (match(TokenKind::Comma));
+                }
+                consume(TokenKind::RParen, "expected ')' after arguments");
+                return parse_postfix(std::make_unique<CallExpr>(first.location, name, std::move(args)));
+            }
+            if (name.find("::", name.find("::") + 2) != std::string::npos) {
+                fail(first.location, "qualified values only support 'Type::Variant'");
+            }
+            return parse_postfix(std::make_unique<EnumValueExpr>(first.location, first.lexeme, second.lexeme));
         }
         if (match(TokenKind::LParen)) {
             std::vector<std::unique_ptr<Expr>> args;

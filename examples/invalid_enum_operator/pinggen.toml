@@ -1,0 +1,7 @@
+[package]
+name = "invalid_enum_operator"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_enum_operator"

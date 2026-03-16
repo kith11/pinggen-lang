@@ -1,0 +1,7 @@
+enum State {
+    Idle,
+    Idle,
+}
+
+func main() {
+}

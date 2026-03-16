@@ -25,77 +25,78 @@ define void @pinggen_bounds_abort() {
   unreachable
 }
 
+%struct.Job = type { i64, ptr }
+
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
+@.str.1 = private unnamed_addr constant [8 x i8] c"pinggen\00"
+@.str.2 = private unnamed_addr constant [10 x i8] c"not ready\00"
+@.str.3 = private unnamed_addr constant [5 x i8] c"done\00"
+
+define i1 @is_ready(i64 %arg0) {
+  %1 = alloca i64
+  store i64 %arg0, ptr %1
+  %2 = load i64, ptr %1
+  %3 = icmp eq i64 %2, 1
+  ret i1 %3
+}
 
 define i32 @main() {
-  %1 = alloca i64
-  store i64 0, ptr %1
-  %2 = alloca i64
-  store i64 0, ptr %2
-  br label %for_cond.1
-for_cond.1:
-  %3 = load i64, ptr %2
-  %4 = icmp slt i64 %3, 6
-  br i1 %4, label %for_body.2, label %for_end.4
-for_body.2:
-  %5 = load i64, ptr %2
-  %6 = icmp eq i64 %5, 1
-  br i1 %6, label %if_then.5, label %if_else.6
-if_then.5:
-  br label %for_step.3
-if_else.6:
-  br label %if_end.7
-if_end.7:
-  %7 = load i64, ptr %2
-  %8 = icmp eq i64 %7, 4
-  br i1 %8, label %if_then.8, label %if_else.9
-if_then.8:
-  br label %for_end.4
-if_else.9:
-  br label %if_end.10
-if_end.10:
-  %9 = load i64, ptr %2
-  %10 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %11 = call i32 (ptr, ...) @printf(ptr %10, i64 %9)
-  %12 = load i64, ptr %1
-  %13 = load i64, ptr %2
-  %14 = add i64 %12, %13
-  store i64 %14, ptr %1
-  br label %for_step.3
-for_step.3:
-  %15 = load i64, ptr %2
-  %16 = add i64 %15, 1
-  store i64 %16, ptr %2
-  br label %for_cond.1
-for_end.4:
-  %17 = load i64, ptr %1
-  %18 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %19 = call i32 (ptr, ...) @printf(ptr %18, i64 %17)
-  %20 = alloca i64
-  store i64 5, ptr %20
-  %21 = alloca i64
-  store i64 3, ptr %21
-  %22 = load i64, ptr %20
-  %23 = load i64, ptr %21
-  %24 = alloca i64
-  store i64 %22, ptr %24
-  br label %for_cond.11
-for_cond.11:
-  %25 = load i64, ptr %24
-  %26 = icmp slt i64 %25, %23
-  br i1 %26, label %for_body.12, label %for_end.14
-for_body.12:
-  %27 = load i64, ptr %24
-  %28 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %29 = call i32 (ptr, ...) @printf(ptr %28, i64 %27)
-  br label %for_step.13
-for_step.13:
-  %30 = load i64, ptr %24
-  %31 = add i64 %30, 1
-  store i64 %31, ptr %24
-  br label %for_cond.11
-for_end.14:
+  %1 = alloca %struct.Job
+  %2 = getelementptr inbounds %struct.Job, ptr %1, i32 0, i32 0
+  store i64 1, ptr %2
+  %3 = getelementptr inbounds [8 x i8], ptr @.str.1, i64 0, i64 0
+  %4 = getelementptr inbounds %struct.Job, ptr %1, i32 0, i32 1
+  store ptr %3, ptr %4
+  %5 = load %struct.Job, ptr %1
+  %6 = alloca %struct.Job
+  store %struct.Job %5, ptr %6
+  %7 = alloca [3 x i64]
+  %8 = getelementptr inbounds [3 x i64], ptr %7, i32 0, i64 0
+  store i64 0, ptr %8
+  %9 = getelementptr inbounds [3 x i64], ptr %7, i32 0, i64 1
+  store i64 1, ptr %9
+  %10 = getelementptr inbounds [3 x i64], ptr %7, i32 0, i64 2
+  store i64 2, ptr %10
+  %11 = load [3 x i64], ptr %7
+  %12 = alloca [3 x i64]
+  store [3 x i64] %11, ptr %12
+  %13 = getelementptr inbounds %struct.Job, ptr %6, i32 0, i32 0
+  %14 = load i64, ptr %13
+  %15 = call i1 @is_ready(i64 %14)
+  br i1 %15, label %if_then.1, label %if_else.2
+if_then.1:
+  %16 = getelementptr inbounds %struct.Job, ptr %6, i32 0, i32 1
+  %17 = load ptr, ptr %16
+  %18 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %19 = call i32 (ptr, ...) @printf(ptr %18, ptr %17)
+  br label %if_end.3
+if_else.2:
+  %20 = getelementptr inbounds [10 x i8], ptr @.str.2, i64 0, i64 0
+  %21 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %22 = call i32 (ptr, ...) @printf(ptr %21, ptr %20)
+  br label %if_end.3
+if_end.3:
+  %23 = icmp sge i64 2, 0
+  %24 = icmp slt i64 2, 3
+  %25 = and i1 %23, %24
+  br i1 %25, label %bounds_ok.5, label %bounds_fail.4
+bounds_fail.4:
+  call void @pinggen_bounds_abort()
+  unreachable
+bounds_ok.5:
+  %26 = getelementptr inbounds [3 x i64], ptr %12, i32 0, i64 2
+  %27 = load i64, ptr %26
+  %28 = icmp eq i64 %27, 2
+  br i1 %28, label %if_then.6, label %if_else.7
+if_then.6:
+  %29 = getelementptr inbounds [5 x i8], ptr @.str.3, i64 0, i64 0
+  %30 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %31 = call i32 (ptr, ...) @printf(ptr %30, ptr %29)
+  br label %if_end.8
+if_else.7:
+  br label %if_end.8
+if_end.8:
   ret i32 0
 }
 

@@ -1,0 +1,10 @@
+enum State {
+    Idle,
+}
+
+enum State {
+    Ready,
+}
+
+func main() {
+}

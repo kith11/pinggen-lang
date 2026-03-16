@@ -89,19 +89,29 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
 
     std::ofstream source(target_dir / "src" / "main.pg");
     source << "import std::{ io }\n\n";
+    source << "enum State {\n";
+    source << "    Idle,\n";
+    source << "    Ready,\n";
+    source << "    Done,\n";
+    source << "}\n\n";
+    source << "struct Job {\n";
+    source << "    state: State,\n";
+    source << "    label: string,\n";
+    source << "}\n\n";
+    source << "func is_ready(state: State) -> bool {\n";
+    source << "    return state == State::Ready;\n";
+    source << "}\n\n";
     source << "func main() {\n";
-    source << "    let mut sum = 0;\n";
-    source << "    for i in 0..6 {\n";
-    source << "        if i == 1 {\n";
-    source << "            continue;\n";
-    source << "        }\n";
-    source << "        if i == 4 {\n";
-    source << "            break;\n";
-    source << "        }\n";
-    source << "        io::println(i);\n";
-    source << "        sum = sum + i;\n";
+    source << "    let job = Job { state: State::Ready, label: \"pinggen\" };\n";
+    source << "    let states: [State; 3] = [State::Idle, State::Ready, State::Done];\n";
+    source << "    if is_ready(job.state) {\n";
+    source << "        io::println(job.label);\n";
+    source << "    } else {\n";
+    source << "        io::println(\"not ready\");\n";
     source << "    }\n";
-    source << "    io::println(sum);\n";
+    source << "    if states[2] == State::Done {\n";
+    source << "        io::println(\"done\");\n";
+    source << "    }\n";
     source << "}\n";
 }
 

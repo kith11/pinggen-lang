@@ -172,6 +172,7 @@ Token Lexer::lex_identifier(std::size_t start_line, std::size_t start_column) {
 
     static const std::unordered_map<std::string, TokenKind> keywords = {
         {"import", TokenKind::KwImport},
+        {"enum", TokenKind::KwEnum},
         {"func", TokenKind::KwFunc},
         {"impl", TokenKind::KwImpl},
         {"let", TokenKind::KwLet},

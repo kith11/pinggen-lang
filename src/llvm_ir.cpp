@@ -11,10 +11,25 @@ std::string LLVMIRGenerator::lowered_function_name(const FunctionDecl& function)
     return function.impl_target + "__" + function.name;
 }
 
+Type LLVMIRGenerator::normalize_type(const Type& type) const {
+    if (type.kind == TypeKind::Array) {
+        if (!type.element_type) {
+            return type;
+        }
+        return Type::array_type(normalize_type(*type.element_type), type.array_size);
+    }
+    if (type.kind == TypeKind::Struct && enums_.contains(type.name)) {
+        return Type::enum_type(type.name);
+    }
+    return type;
+}
+
 std::string LLVMIRGenerator::generate(const Program& program) {
     globals_.clear();
     functions_.clear();
     body_.clear();
+    enums_.clear();
+    enum_variant_indices_.clear();
     structs_.clear();
     struct_field_indices_.clear();
     variables_.clear();
@@ -32,6 +47,13 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     globals_ += "@.fmt.int = private unnamed_addr constant [6 x i8] c\"%lld\\0A\\00\"\n";
     globals_ += "@.fmt.str = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"\n";
 
+    for (const auto& decl : program.enums) {
+        enums_[decl.name] = decl;
+        for (std::size_t i = 0; i < decl.variants.size(); ++i) {
+            enum_variant_indices_[decl.name][decl.variants[i].name] = i;
+        }
+    }
+
     std::ostringstream type_defs;
     for (const auto& decl : program.structs) {
         structs_[decl.name] = decl;
@@ -43,14 +65,15 @@ std::string LLVMIRGenerator::generate(const Program& program) {
             if (i != 0) {
                 type_defs << ", ";
             }
-            type_defs << llvm_type(decl.fields[i].type);
+            type_defs << llvm_type(normalize_type(decl.fields[i].type));
         }
         type_defs << " }\n";
     }
 
     for (const auto& function : program.functions) {
         function_return_types_[lowered_function_name(function)] =
-            function.return_type == Type::void_type() && function.name == "main" ? Type::int_type() : function.return_type;
+            normalize_type(function.return_type) == Type::void_type() && function.name == "main" ? Type::int_type()
+                                                                                                 : normalize_type(function.return_type);
         mutating_methods_[lowered_function_name(function)] = function.is_mutating_method();
     }
 
@@ -79,26 +102,28 @@ std::string LLVMIRGenerator::generate(const Program& program) {
             if (i != 0) {
                 signature << ", ";
             }
+            const Type param_type = normalize_type(function.params[i].type);
             if (function.is_mutating_method() && i == 0) {
                 signature << "ptr %arg" << i;
             } else {
-                signature << llvm_type(function.params[i].type) << " %arg" << i;
+                signature << llvm_type(param_type) << " %arg" << i;
             }
         }
         signature << ") {\n";
 
         for (std::size_t i = 0; i < function.params.size(); ++i) {
             const auto& param = function.params[i];
+            const Type param_type = normalize_type(param.type);
             if (function.is_mutating_method() && i == 0) {
                 variables_[param.name] = "%arg" + std::to_string(i);
-                variable_types_[param.name] = param.type;
+                variable_types_[param.name] = param_type;
                 continue;
             }
             const std::string storage = next_register();
-            body_ += "  " + storage + " = alloca " + llvm_type(param.type) + "\n";
-            body_ += "  store " + llvm_type(param.type) + " %arg" + std::to_string(i) + ", ptr " + storage + "\n";
+            body_ += "  " + storage + " = alloca " + llvm_type(param_type) + "\n";
+            body_ += "  store " + llvm_type(param_type) + " %arg" + std::to_string(i) + ", ptr " + storage + "\n";
             variables_[param.name] = storage;
-            variable_types_[param.name] = param.type;
+            variable_types_[param.name] = param_type;
         }
 
         const bool has_return = emit_block(function.body);
@@ -178,7 +203,7 @@ AddressValue LLVMIRGenerator::emit_address(const Expr& expr) {
     if (const auto* node = dynamic_cast<const FieldAccessExpr*>(&expr)) {
         const AddressValue base = emit_address(*node->object);
         const auto field_index = struct_field_indices_.at(base.type.name).at(node->field);
-        const Type field_type = structs_.at(base.type.name).fields[field_index].type;
+        const Type field_type = normalize_type(structs_.at(base.type.name).fields[field_index].type);
         const std::string reg = next_register();
         body_ += "  " + reg + " = getelementptr inbounds " + llvm_type(base.type) + ", ptr " + base.address + ", i32 0, i32 " +
                  std::to_string(field_index) + "\n";
@@ -217,6 +242,10 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
                  ", i64 0, i64 0\n";
         return {reg, Type::string_type()};
     }
+    if (const auto* node = dynamic_cast<const EnumValueExpr*>(&expr)) {
+        const std::size_t ordinal = enum_variant_indices_.at(node->enum_name).at(node->variant);
+        return {std::to_string(ordinal), Type::enum_type(node->enum_name)};
+    }
     if (const auto* node = dynamic_cast<const ArrayLiteralExpr*>(&expr)) {
         const TypedIRValue first = emit_expr(*node->elements[0]);
         const Type array_type = Type::array_type(first.type, node->elements.size());
@@ -243,7 +272,7 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
         body_ += "  " + storage + " = alloca " + llvm_type(struct_type) + "\n";
         for (const auto& field : node->fields) {
             const std::size_t index = struct_field_indices_.at(node->struct_name).at(field.name);
-            const Type field_type = structs_.at(node->struct_name).fields[index].type;
+            const Type field_type = normalize_type(structs_.at(node->struct_name).fields[index].type);
             const TypedIRValue value = emit_expr(*field.value);
             const std::string field_ptr = next_register();
             body_ += "  " + field_ptr + " = getelementptr inbounds " + llvm_type(struct_type) + ", ptr " + storage +
@@ -430,7 +459,7 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
     if (const auto* node = dynamic_cast<const FieldAssignStmt*>(&stmt)) {
         const auto object_address = emit_address(*node->object);
         const std::size_t index = struct_field_indices_.at(object_address.type.name).at(node->field);
-        const Type field_type = structs_.at(object_address.type.name).fields[index].type;
+        const Type field_type = normalize_type(structs_.at(object_address.type.name).fields[index].type);
         const TypedIRValue value = emit_expr(*node->value);
         const std::string field_ptr = next_register();
         body_ += "  " + field_ptr + " = getelementptr inbounds " + llvm_type(object_address.type) + ", ptr " +
@@ -577,7 +606,7 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
                 body_ += "  ret void\n";
             } else if (current_return_type_ == Type::bool_type()) {
                 body_ += "  ret i1 0\n";
-            } else if (current_return_type_ == Type::int_type()) {
+            } else if (current_return_type_ == Type::int_type() || current_return_type_.kind == TypeKind::Enum) {
                 body_ += "  ret i64 0\n";
             }
             return true;
@@ -602,6 +631,7 @@ std::string LLVMIRGenerator::llvm_type(const Type& type) const {
         case TypeKind::Bool: return "i1";
         case TypeKind::String: return "ptr";
         case TypeKind::Void: return "void";
+        case TypeKind::Enum: return "i64";
         case TypeKind::Struct: return "%struct." + type.name;
         case TypeKind::Array: return "[" + std::to_string(type.array_size) + " x " + llvm_type(*type.element_type) + "]";
     }

@@ -21,6 +21,7 @@ class Parser {
     const Token& consume(TokenKind kind, const std::string& message);
 
     ImportDecl parse_import();
+    EnumDecl parse_enum();
     StructDecl parse_struct();
     FunctionDecl parse_function(const std::string& impl_target = "");
     std::vector<std::unique_ptr<Stmt>> parse_block();

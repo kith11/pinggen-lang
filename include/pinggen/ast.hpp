@@ -15,6 +15,7 @@ enum class TypeKind {
     Bool,
     String,
     Void,
+    Enum,
     Struct,
     Array
 };
@@ -29,6 +30,7 @@ struct Type {
     static Type bool_type() { return {TypeKind::Bool, "", nullptr, 0}; }
     static Type string_type() { return {TypeKind::String, "", nullptr, 0}; }
     static Type void_type() { return {TypeKind::Void, "", nullptr, 0}; }
+    static Type enum_type(std::string enum_name) { return {TypeKind::Enum, std::move(enum_name), nullptr, 0}; }
     static Type struct_type(std::string struct_name) { return {TypeKind::Struct, std::move(struct_name), nullptr, 0}; }
     static Type array_type(Type element, std::size_t size) {
         return {TypeKind::Array, "", std::make_shared<Type>(std::move(element)), size};
@@ -38,7 +40,7 @@ struct Type {
         if (kind != other.kind) {
             return false;
         }
-        if (kind == TypeKind::Struct) {
+        if (kind == TypeKind::Enum || kind == TypeKind::Struct) {
             return name == other.name;
         }
         if (kind == TypeKind::Array) {
@@ -56,6 +58,11 @@ struct StructField {
     SourceLocation location;
     std::string name;
     Type type = Type::void_type();
+};
+
+struct EnumVariant {
+    SourceLocation location;
+    std::string name;
 };
 
 struct Parameter {
@@ -101,6 +108,13 @@ struct ArrayLiteralExpr final : Expr {
 struct VariableExpr final : Expr {
     VariableExpr(SourceLocation loc, std::string n) : Expr(loc), name(std::move(n)) {}
     std::string name;
+};
+
+struct EnumValueExpr final : Expr {
+    EnumValueExpr(SourceLocation loc, std::string e, std::string v)
+        : Expr(loc), enum_name(std::move(e)), variant(std::move(v)) {}
+    std::string enum_name;
+    std::string variant;
 };
 
 struct StructLiteralExpr final : Expr {
@@ -247,6 +261,12 @@ struct StructDecl {
     std::vector<StructField> fields;
 };
 
+struct EnumDecl {
+    SourceLocation location;
+    std::string name;
+    std::vector<EnumVariant> variants;
+};
+
 struct FunctionDecl {
     SourceLocation location;
     std::string name;
@@ -261,6 +281,7 @@ struct FunctionDecl {
 
 struct Program {
     std::vector<ImportDecl> imports;
+    std::vector<EnumDecl> enums;
     std::vector<StructDecl> structs;
     std::vector<FunctionDecl> functions;
 };

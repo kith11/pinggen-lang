@@ -10,6 +10,7 @@ Current features:
 
 - `import std::{ io }`
 - typed top-level functions with `func name(arg: type) -> type`
+- top-level `enum` declarations with qualified variants like `State::Ready`
 - plain `struct` declarations with named fields
 - named-field struct literals and `value.field` access
 - `bool`, `true`, `false`
@@ -52,18 +53,33 @@ Example:
 ```pinggen
 import std::{ io }
 
+enum State {
+    Idle,
+    Ready,
+    Done,
+}
+
+struct Job {
+    state: State,
+    label: string,
+}
+
+func is_ready(state: State) -> bool {
+    return state == State::Ready;
+}
+
 func main() {
-    let mut sum = 0;
-    for i in 0..6 {
-        if i == 1 {
-            continue;
-        }
-        if i == 4 {
-            break;
-        }
-        io::println(i);
-        sum = sum + i;
+    let job = Job { state: State::Ready, label: "pinggen" };
+    let states: [State; 3] = [State::Idle, State::Ready, State::Done];
+
+    if is_ready(job.state) {
+        io::println(job.label);
+    } else {
+        io::println("not ready");
     }
-    io::println(sum);
+
+    if states[2] == State::Done {
+        io::println("done");
+    }
 }
 ```
