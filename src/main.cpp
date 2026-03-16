@@ -50,15 +50,22 @@ static int command_build(const fs::path& project_dir) {
 
     fs::create_directories(project.output.parent_path());
     const std::string ll_path = project.output.string() + ".ll";
+    const std::string obj_path = project.output.string() + ".obj";
     const std::string exe_path = project.output.string() + ".exe";
 
-    std::ofstream ll_output(ll_path);
-    ll_output << llvm;
+    {
+        std::ofstream ll_output(ll_path);
+        ll_output << llvm;
+    }
 
-    const std::string command = "clang \"" + ll_path + "\" -o \"" + exe_path + "\"";
-    const int result = std::system(command.c_str());
-    if (result != 0) {
-        throw std::runtime_error("clang failed while building " + project.name);
+    const std::string compile_command = "clang -c \"" + ll_path + "\" -o \"" + obj_path + "\"";
+    if (std::system(compile_command.c_str()) != 0) {
+        throw std::runtime_error("clang failed while compiling " + project.name);
+    }
+
+    const std::string link_command = "clang \"" + obj_path + "\" -o \"" + exe_path + "\"";
+    if (std::system(link_command.c_str()) != 0) {
+        throw std::runtime_error("clang failed while linking " + project.name);
     }
 
     std::cout << "built " << exe_path << '\n';

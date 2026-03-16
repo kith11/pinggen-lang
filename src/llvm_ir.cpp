@@ -12,7 +12,7 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     register_counter_ = 0;
     string_counter_ = 0;
 
-    globals_ += "@.fmt.int = private unnamed_addr constant [5 x i8] c\"%lld\\0A\\00\"\n";
+    globals_ += "@.fmt.int = private unnamed_addr constant [6 x i8] c\"%lld\\0A\\00\"\n";
     globals_ += "@.fmt.str = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"\n";
 
     const FunctionDecl* main = nullptr;
@@ -53,7 +53,13 @@ std::string LLVMIRGenerator::emit_expr(const Expr& expr) {
         return std::to_string(node->value) + "|int";
     }
     if (const auto* node = dynamic_cast<const StringExpr*>(&expr)) {
-        return emit_string_constant(node->value) + "|string";
+        const std::string constant = emit_string_constant(node->value);
+        const auto sep = constant.find('|');
+        const std::string global_name = constant.substr(0, sep);
+        const std::size_t len = static_cast<std::size_t>(std::stoull(constant.substr(sep + 1)));
+        const std::string reg = next_register();
+        body_ += "  " + reg + " = getelementptr inbounds [" + std::to_string(len) + " x i8], ptr @" + global_name + ", i64 0, i64 0\n";
+        return reg + "|string";
     }
     if (const auto* node = dynamic_cast<const VariableExpr*>(&expr)) {
         const std::string addr = variables_.at(node->name);
@@ -88,23 +94,14 @@ std::string LLVMIRGenerator::emit_expr(const Expr& expr) {
             const std::string arg_type = arg.substr(sep + 1);
             if (arg_type == "int") {
                 const std::string fmt_reg = next_register();
-                body_ += "  " + fmt_reg + " = getelementptr inbounds [5 x i8], ptr @.fmt.int, i64 0, i64 0\n";
-                body_ += "  call i32 (ptr, ...) @printf(ptr " + fmt_reg + ", i64 " + arg_ir + ")\n";
+                const std::string call_reg = next_register();
+                body_ += "  " + fmt_reg + " = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0\n";
+                body_ += "  " + call_reg + " = call i32 (ptr, ...) @printf(ptr " + fmt_reg + ", i64 " + arg_ir + ")\n";
             } else {
-                const auto name_sep = arg_ir.find('|');
-                if (name_sep != std::string::npos) {
-                    const std::string global_name = arg_ir.substr(0, name_sep);
-                    const std::size_t len = static_cast<std::size_t>(std::stoull(arg_ir.substr(name_sep + 1)));
-                    const std::string str_reg = next_register();
-                    const std::string fmt_reg = next_register();
-                    body_ += "  " + str_reg + " = getelementptr inbounds [" + std::to_string(len) + " x i8], ptr @" + global_name + ", i64 0, i64 0\n";
-                    body_ += "  " + fmt_reg + " = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0\n";
-                    body_ += "  call i32 (ptr, ...) @printf(ptr " + fmt_reg + ", ptr " + str_reg + ")\n";
-                } else {
-                    const std::string fmt_reg = next_register();
-                    body_ += "  " + fmt_reg + " = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0\n";
-                    body_ += "  call i32 (ptr, ...) @printf(ptr " + fmt_reg + ", ptr " + arg_ir + ")\n";
-                }
+                const std::string fmt_reg = next_register();
+                const std::string call_reg = next_register();
+                body_ += "  " + fmt_reg + " = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0\n";
+                body_ += "  " + call_reg + " = call i32 (ptr, ...) @printf(ptr " + fmt_reg + ", ptr " + arg_ir + ")\n";
             }
             return "0|void";
         }
@@ -123,17 +120,8 @@ void LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
             body_ += "  " + storage + " = alloca i64\n";
             body_ += "  store i64 " + value_ir + ", ptr " + storage + "\n";
         } else {
-            std::string pointer_ir = value_ir;
-            const auto name_sep = value_ir.find('|');
-            if (name_sep != std::string::npos) {
-                const std::string global_name = value_ir.substr(0, name_sep);
-                const std::size_t len = static_cast<std::size_t>(std::stoull(value_ir.substr(name_sep + 1)));
-                const std::string str_reg = next_register();
-                body_ += "  " + str_reg + " = getelementptr inbounds [" + std::to_string(len) + " x i8], ptr @" + global_name + ", i64 0, i64 0\n";
-                pointer_ir = str_reg;
-            }
             body_ += "  " + storage + " = alloca ptr\n";
-            body_ += "  store ptr " + pointer_ir + ", ptr " + storage + "\n";
+            body_ += "  store ptr " + value_ir + ", ptr " + storage + "\n";
         }
         variables_[node->name] = storage;
         variable_types_[node->name] = type;

@@ -1,0 +1,37 @@
+Start testing: Mar 16 22:40 Malay Peninsula Standard Time
+----------------------------------------------------------
+1/2 Testing: pinggen-check-example
+1/2 Test: pinggen-check-example
+Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/hello"
+Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
+"pinggen-check-example" start time: Mar 16 22:40 Malay Peninsula Standard Time
+Output:
+----------------------------------------------------------
+checked hello
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"pinggen-check-example" end time: Mar 16 22:40 Malay Peninsula Standard Time
+"pinggen-check-example" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/2 Testing: pinggen-build-example
+2/2 Test: pinggen-build-example
+Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "build" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/hello"
+Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
+"pinggen-build-example" start time: Mar 16 22:40 Malay Peninsula Standard Time
+Output:
+----------------------------------------------------------
+warning: overriding the module target triple with x86_64-pc-windows-msvc19.50.35723 [-Woverride-module]
+1 warning generated.
+built C:\Users\keith\Documents\projects\pinggen-programming-language\examples\hello\build/hello.exe
+<end of output>
+Test time =   0.17 sec
+----------------------------------------------------------
+Test Passed.
+"pinggen-build-example" end time: Mar 16 22:40 Malay Peninsula Standard Time
+"pinggen-build-example" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Mar 16 22:40 Malay Peninsula Standard Time

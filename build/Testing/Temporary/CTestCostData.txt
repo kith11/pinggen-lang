@@ -1,0 +1,3 @@
+pinggen-check-example 1 0.0838249
+pinggen-build-example 1 0.17367
+---
