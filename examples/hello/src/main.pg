@@ -1,0 +1,8 @@
+import std::{ io }
+
+func main() {
+    let mut hp = 100;
+    hp = hp - 20;
+    io::println("pinggen online");
+    io::println(hp);
+}
