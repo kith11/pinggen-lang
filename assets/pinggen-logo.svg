@@ -1,0 +1,16 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="48" fill="#050505"/>
+  <defs>
+    <linearGradient id="pinggenGradient" x1="154" y1="170" x2="356" y2="302" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6DA62"/>
+      <stop offset="0.55" stop-color="#F4A33A"/>
+      <stop offset="1" stop-color="#E47F36"/>
+    </linearGradient>
+  </defs>
+  <path d="M171 176C166 172 159 178 162 184L197 243C201 250 211 252 217 246L239 224C243 220 245 214 245 208V121C245 111 233 108 228 117L211 151C208 156 204 161 200 165L171 176Z" fill="url(#pinggenGradient)"/>
+  <path d="M255 96C250 96 246 100 246 105V232C246 242 258 246 264 239L291 207C294 204 296 200 296 196V123C296 119 295 115 292 111L263 99C261 97 258 96 255 96Z" fill="url(#pinggenGradient)"/>
+  <path d="M298 125C293 116 280 119 279 129L271 205C270 212 272 220 277 225L300 249C305 254 314 255 320 251L349 229C355 224 356 215 352 209L314 145C308 137 303 131 298 125Z" fill="url(#pinggenGradient)"/>
+  <path d="M181 188L218 245" stroke="#101010" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M248 110L247 229" stroke="#101010" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M295 122L275 221" stroke="#101010" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

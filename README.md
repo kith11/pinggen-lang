@@ -1,6 +1,10 @@
+![pinggen logo](./assets/pinggen-logo.svg)
+
 # pinggen
 
 `pinggen` is a small compiled programming language MVP built in C++.
+
+Source files use the `.pg` extension.
 
 Current features:
 
