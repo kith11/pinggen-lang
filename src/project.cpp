@@ -89,15 +89,19 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
 
     std::ofstream source(target_dir / "src" / "main.pg");
     source << "import std::{ io }\n\n";
-    source << "func is_even(value: int) -> bool {\n";
-    source << "    return value % 2 == 0;\n";
+    source << "func classify(value: int) -> string {\n";
+    source << "    if value % 2 == 0 {\n";
+    source << "        return \"even\";\n";
+    source << "    } else if value > 3 {\n";
+    source << "        return \"large\";\n";
+    source << "    } else {\n";
+    source << "        return \"small\";\n";
+    source << "    }\n";
     source << "}\n\n";
     source << "func main() {\n";
     source << "    let mut count = 6;\n";
     source << "    while count > 0 {\n";
-    source << "        if is_even(count) {\n";
-    source << "            io::println(count);\n";
-    source << "        }\n";
+    source << "        io::println(classify(count));\n";
     source << "        if count <= 2 {\n";
     source << "            break;\n";
     source << "        }\n";

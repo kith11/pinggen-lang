@@ -172,8 +172,12 @@ std::unique_ptr<Stmt> Parser::parse_if_statement() {
 
     std::vector<std::unique_ptr<Stmt>> else_body;
     if (match(TokenKind::KwElse)) {
-        consume(TokenKind::LBrace, "expected '{' before else block");
-        else_body = parse_block();
+        if (check(TokenKind::LBrace)) {
+            consume(TokenKind::LBrace, "expected '{' before else block");
+            else_body = parse_block();
+        } else {
+            else_body.push_back(parse_statement());
+        }
     }
 
     return std::make_unique<IfStmt>(if_token.location, std::move(condition), std::move(then_body), std::move(else_body));

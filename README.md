@@ -13,7 +13,7 @@ Current features:
 - plain `struct` declarations with named fields
 - named-field struct literals and `value.field` access
 - `bool`, `true`, `false`
-- `if condition { ... } else { ... }`
+- `if`, `else if`, and `else`
 - `while condition { ... }`
 - `break` and `continue` inside `while`
 - `!`, `&&`, and `||` for boolean logic
@@ -47,16 +47,20 @@ Example:
 ```pinggen
 import std::{ io }
 
-func is_even(value: int) -> bool {
-    return value % 2 == 0;
+func classify(value: int) -> string {
+    if value % 2 == 0 {
+        return "even";
+    } else if value > 3 {
+        return "large";
+    } else {
+        return "small";
+    }
 }
 
 func main() {
     let mut count = 6;
     while count > 0 {
-        if is_even(count) {
-            io::println(count);
-        }
+        io::println(classify(count));
         if count <= 2 {
             break;
         }

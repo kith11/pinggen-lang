@@ -3,49 +3,58 @@ declare i32 @printf(ptr, ...)
 
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
+@.str.1 = private unnamed_addr constant [5 x i8] c"even\00"
+@.str.2 = private unnamed_addr constant [6 x i8] c"large\00"
+@.str.3 = private unnamed_addr constant [6 x i8] c"small\00"
 
-define i1 @is_even(i64 %arg0) {
+define ptr @classify(i64 %arg0) {
   %1 = alloca i64
   store i64 %arg0, ptr %1
   %2 = load i64, ptr %1
   %3 = srem i64 %2, 2
   %4 = icmp eq i64 %3, 0
-  ret i1 %4
+  br i1 %4, label %if_then.1, label %if_else.2
+if_then.1:
+  %5 = getelementptr inbounds [5 x i8], ptr @.str.1, i64 0, i64 0
+  ret ptr %5
+if_else.2:
+  %6 = load i64, ptr %1
+  %7 = icmp sgt i64 %6, 3
+  br i1 %7, label %if_then.4, label %if_else.5
+if_then.4:
+  %8 = getelementptr inbounds [6 x i8], ptr @.str.2, i64 0, i64 0
+  ret ptr %8
+if_else.5:
+  %9 = getelementptr inbounds [6 x i8], ptr @.str.3, i64 0, i64 0
+  ret ptr %9
 }
 
 define i32 @main() {
   %1 = alloca i64
   store i64 6, ptr %1
-  br label %while_cond.1
-while_cond.1:
+  br label %while_cond.7
+while_cond.7:
   %2 = load i64, ptr %1
   %3 = icmp sgt i64 %2, 0
-  br i1 %3, label %while_body.2, label %while_end.3
-while_body.2:
+  br i1 %3, label %while_body.8, label %while_end.9
+while_body.8:
   %4 = load i64, ptr %1
-  %5 = call i1 @is_even(i64 %4)
-  br i1 %5, label %if_then.4, label %if_else.5
-if_then.4:
-  %6 = load i64, ptr %1
-  %7 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %8 = call i32 (ptr, ...) @printf(ptr %7, i64 %6)
-  br label %if_end.6
-if_else.5:
-  br label %if_end.6
-if_end.6:
-  %9 = load i64, ptr %1
-  %10 = icmp sle i64 %9, 2
-  br i1 %10, label %if_then.7, label %if_else.8
-if_then.7:
-  br label %while_end.3
-if_else.8:
-  br label %if_end.9
-if_end.9:
-  %11 = load i64, ptr %1
-  %12 = sub i64 %11, 1
-  store i64 %12, ptr %1
-  br label %while_cond.1
-while_end.3:
+  %5 = call ptr @classify(i64 %4)
+  %6 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %7 = call i32 (ptr, ...) @printf(ptr %6, ptr %5)
+  %8 = load i64, ptr %1
+  %9 = icmp sle i64 %8, 2
+  br i1 %9, label %if_then.10, label %if_else.11
+if_then.10:
+  br label %while_end.9
+if_else.11:
+  br label %if_end.12
+if_end.12:
+  %10 = load i64, ptr %1
+  %11 = sub i64 %10, 1
+  store i64 %11, ptr %1
+  br label %while_cond.7
+while_end.9:
   ret i32 0
 }
 
