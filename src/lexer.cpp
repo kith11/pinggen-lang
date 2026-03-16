@@ -145,6 +145,8 @@ Token Lexer::lex_identifier(std::size_t start_line, std::size_t start_column) {
         {"if", TokenKind::KwIf},
         {"else", TokenKind::KwElse},
         {"while", TokenKind::KwWhile},
+        {"break", TokenKind::KwBreak},
+        {"continue", TokenKind::KwContinue},
         {"struct", TokenKind::KwStruct},
     };
 

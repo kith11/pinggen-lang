@@ -41,6 +41,7 @@ class SemanticAnalyzer {
     std::unordered_map<std::string, FunctionSignature> functions_;
     Type current_return_type_ = Type::void_type();
     bool inside_main_ = false;
+    std::size_t loop_depth_ = 0;
 };
 
 std::string type_name(const Type& type);

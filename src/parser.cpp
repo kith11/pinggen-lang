@@ -135,6 +135,12 @@ std::unique_ptr<Stmt> Parser::parse_statement() {
     if (check(TokenKind::KwWhile)) {
         return parse_while_statement();
     }
+    if (check(TokenKind::KwBreak)) {
+        return parse_break_statement();
+    }
+    if (check(TokenKind::KwContinue)) {
+        return parse_continue_statement();
+    }
     return parse_assignment_or_expression_statement();
 }
 
@@ -179,6 +185,18 @@ std::unique_ptr<Stmt> Parser::parse_while_statement() {
     consume(TokenKind::LBrace, "expected '{' before while block");
     auto loop_body = parse_block();
     return std::make_unique<WhileStmt>(while_token.location, std::move(condition), std::move(loop_body));
+}
+
+std::unique_ptr<Stmt> Parser::parse_break_statement() {
+    const Token break_token = consume(TokenKind::KwBreak, "expected 'break'");
+    consume(TokenKind::Semicolon, "expected ';' after break");
+    return std::make_unique<BreakStmt>(break_token.location);
+}
+
+std::unique_ptr<Stmt> Parser::parse_continue_statement() {
+    const Token continue_token = consume(TokenKind::KwContinue, "expected 'continue'");
+    consume(TokenKind::Semicolon, "expected ';' after continue");
+    return std::make_unique<ContinueStmt>(continue_token.location);
 }
 
 std::unique_ptr<Stmt> Parser::parse_assignment_or_expression_statement() {

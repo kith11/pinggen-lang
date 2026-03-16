@@ -20,6 +20,8 @@ enum class TokenKind {
     KwIf,
     KwElse,
     KwWhile,
+    KwBreak,
+    KwContinue,
     LBrace,
     RBrace,
     LParen,

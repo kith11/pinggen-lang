@@ -159,6 +159,14 @@ struct WhileStmt final : Stmt {
     std::vector<std::unique_ptr<Stmt>> body;
 };
 
+struct BreakStmt final : Stmt {
+    explicit BreakStmt(SourceLocation loc) : Stmt(loc) {}
+};
+
+struct ContinueStmt final : Stmt {
+    explicit ContinueStmt(SourceLocation loc) : Stmt(loc) {}
+};
+
 struct ImportDecl {
     SourceLocation location;
     std::vector<std::string> items;

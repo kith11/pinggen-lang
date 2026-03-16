@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "pinggen/ast.hpp"
 
@@ -44,6 +45,8 @@ class LLVMIRGenerator {
     std::unordered_map<std::string, Type> function_return_types_;
     std::string current_function_name_;
     Type current_return_type_ = Type::void_type();
+    std::vector<std::string> break_labels_;
+    std::vector<std::string> continue_labels_;
     std::size_t register_counter_ = 0;
     std::size_t string_counter_ = 0;
     std::size_t label_counter_ = 0;
