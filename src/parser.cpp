@@ -14,6 +14,10 @@ Program Parser::parse() {
         program.imports.push_back(parse_import());
     }
     while (!is_at_end()) {
+        if (check(TokenKind::KwStruct)) {
+            program.structs.push_back(parse_struct());
+            continue;
+        }
         program.functions.push_back(parse_function());
     }
     return program;
@@ -62,6 +66,25 @@ ImportDecl Parser::parse_import() {
         decl.items.push_back(consume(TokenKind::Identifier, "expected import item").lexeme);
     } while (match(TokenKind::Comma));
     consume(TokenKind::RBrace, "expected '}' after import list");
+    return decl;
+}
+
+StructDecl Parser::parse_struct() {
+    const Token struct_token = consume(TokenKind::KwStruct, "expected 'struct'");
+    StructDecl decl;
+    decl.location = struct_token.location;
+    decl.name = consume(TokenKind::Identifier, "expected struct name").lexeme;
+    consume(TokenKind::LBrace, "expected '{' after struct name");
+    while (!check(TokenKind::RBrace) && !is_at_end()) {
+        StructField field;
+        field.location = current().location;
+        field.name = consume(TokenKind::Identifier, "expected field name").lexeme;
+        consume(TokenKind::Colon, "expected ':' after field name");
+        field.type = parse_type();
+        decl.fields.push_back(std::move(field));
+        match(TokenKind::Comma);
+    }
+    consume(TokenKind::RBrace, "expected '}' after struct body");
     return decl;
 }
 
@@ -159,6 +182,16 @@ std::unique_ptr<Stmt> Parser::parse_while_statement() {
 }
 
 std::unique_ptr<Stmt> Parser::parse_assignment_or_expression_statement() {
+    if (check(TokenKind::Identifier) && check_next(TokenKind::Dot)) {
+        const Token base = consume(TokenKind::Identifier, "expected variable name");
+        consume(TokenKind::Dot, "expected '.' after variable name");
+        const Token field = consume(TokenKind::Identifier, "expected field name");
+        consume(TokenKind::Equal, "expected '=' in field assignment");
+        auto value = parse_expression();
+        consume(TokenKind::Semicolon, "expected ';' after field assignment");
+        return std::make_unique<FieldAssignStmt>(
+            base.location, std::make_unique<VariableExpr>(base.location, base.lexeme), field.lexeme, std::move(value));
+    }
     if (check(TokenKind::Identifier) && check_next(TokenKind::Equal)) {
         const Token name = consume(TokenKind::Identifier, "expected variable name");
         consume(TokenKind::Equal, "expected '=' in assignment");
@@ -221,6 +254,22 @@ std::unique_ptr<Expr> Parser::parse_primary() {
     }
     if (match(TokenKind::Identifier)) {
         const Token first = previous();
+        if (check(TokenKind::LBrace)) {
+            ++current_;
+            std::vector<StructLiteralField> fields;
+            if (!check(TokenKind::RBrace)) {
+                do {
+                    StructLiteralField field;
+                    field.location = current().location;
+                    field.name = consume(TokenKind::Identifier, "expected field name").lexeme;
+                    consume(TokenKind::Colon, "expected ':' after field name");
+                    field.value = parse_expression();
+                    fields.push_back(std::move(field));
+                } while (match(TokenKind::Comma));
+            }
+            consume(TokenKind::RBrace, "expected '}' after struct literal");
+            return parse_postfix(std::make_unique<StructLiteralExpr>(first.location, first.lexeme, std::move(fields)));
+        }
         if (check(TokenKind::ColonColon)) {
             --current_;
             const std::string name = parse_qualified_name();
@@ -232,7 +281,7 @@ std::unique_ptr<Expr> Parser::parse_primary() {
                 } while (match(TokenKind::Comma));
             }
             consume(TokenKind::RParen, "expected ')' after arguments");
-            return std::make_unique<CallExpr>(first.location, name, std::move(args));
+            return parse_postfix(std::make_unique<CallExpr>(first.location, name, std::move(args)));
         }
         if (match(TokenKind::LParen)) {
             std::vector<std::unique_ptr<Expr>> args;
@@ -242,16 +291,24 @@ std::unique_ptr<Expr> Parser::parse_primary() {
                 } while (match(TokenKind::Comma));
             }
             consume(TokenKind::RParen, "expected ')' after arguments");
-            return std::make_unique<CallExpr>(first.location, first.lexeme, std::move(args));
+            return parse_postfix(std::make_unique<CallExpr>(first.location, first.lexeme, std::move(args)));
         }
-        return std::make_unique<VariableExpr>(first.location, first.lexeme);
+        return parse_postfix(std::make_unique<VariableExpr>(first.location, first.lexeme));
     }
     if (match(TokenKind::LParen)) {
         auto expr = parse_expression();
         consume(TokenKind::RParen, "expected ')' after expression");
-        return expr;
+        return parse_postfix(std::move(expr));
     }
     fail(current().location, "expected expression");
+}
+
+std::unique_ptr<Expr> Parser::parse_postfix(std::unique_ptr<Expr> expr) {
+    while (match(TokenKind::Dot)) {
+        const Token field = consume(TokenKind::Identifier, "expected field name after '.'");
+        expr = std::make_unique<FieldAccessExpr>(field.location, std::move(expr), field.lexeme);
+    }
+    return expr;
 }
 
 std::string Parser::parse_qualified_name() {
@@ -263,21 +320,21 @@ std::string Parser::parse_qualified_name() {
     return name;
 }
 
-ValueType Parser::parse_type() {
+Type Parser::parse_type() {
     const Token token = consume(TokenKind::Identifier, "expected type name");
     if (token.lexeme == "int") {
-        return ValueType::Int;
+        return Type::int_type();
     }
     if (token.lexeme == "bool") {
-        return ValueType::Bool;
+        return Type::bool_type();
     }
     if (token.lexeme == "string") {
-        return ValueType::String;
+        return Type::string_type();
     }
     if (token.lexeme == "void") {
-        return ValueType::Void;
+        return Type::void_type();
     }
-    fail(token.location, "unknown type '" + token.lexeme + "'");
+    return Type::struct_type(token.lexeme);
 }
 
 }  // namespace pinggen

@@ -68,4 +68,19 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_while_missing_return
     )
     set_tests_properties(pinggen-check-invalid-while-return PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-struct-duplicate-field
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_struct_duplicate_field
+    )
+    set_tests_properties(pinggen-check-invalid-struct-duplicate-field PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-struct-field-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_struct_field_type
+    )
+    set_tests_properties(pinggen-check-invalid-struct-field-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-field-assign-immutable
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_field_assign_immutable
+    )
+    set_tests_properties(pinggen-check-invalid-field-assign-immutable PROPERTIES WILL_FAIL TRUE)
 endif()

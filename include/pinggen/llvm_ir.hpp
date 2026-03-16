@@ -9,7 +9,12 @@ namespace pinggen {
 
 struct TypedIRValue {
     std::string ir;
-    ValueType type = ValueType::Void;
+    Type type = Type::void_type();
+};
+
+struct AddressValue {
+    std::string address;
+    Type type = Type::void_type();
 };
 
 class LLVMIRGenerator {
@@ -19,9 +24,10 @@ class LLVMIRGenerator {
   private:
     std::string emit_string_constant(const std::string& value);
     TypedIRValue emit_expr(const Expr& expr);
+    AddressValue emit_address(const Expr& expr);
     bool emit_block(const std::vector<std::unique_ptr<Stmt>>& body);
     bool emit_stmt(const Stmt& stmt);
-    std::string llvm_type(ValueType type) const;
+    std::string llvm_type(const Type& type) const;
     std::string next_label(const std::string& prefix);
     void reset_function_state();
     std::string next_register();
@@ -31,11 +37,13 @@ class LLVMIRGenerator {
     std::string globals_;
     std::string functions_;
     std::string body_;
+    std::unordered_map<std::string, StructDecl> structs_;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::size_t>> struct_field_indices_;
     std::unordered_map<std::string, std::string> variables_;
-    std::unordered_map<std::string, ValueType> variable_types_;
-    std::unordered_map<std::string, ValueType> function_return_types_;
+    std::unordered_map<std::string, Type> variable_types_;
+    std::unordered_map<std::string, Type> function_return_types_;
     std::string current_function_name_;
-    ValueType current_return_type_ = ValueType::Void;
+    Type current_return_type_ = Type::void_type();
     std::size_t register_counter_ = 0;
     std::size_t string_counter_ = 0;
     std::size_t label_counter_ = 0;

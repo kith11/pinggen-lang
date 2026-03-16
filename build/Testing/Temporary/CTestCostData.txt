@@ -1,11 +1,14 @@
-pinggen-check-example 4 0.00262398
-pinggen-build-example 4 0.0433589
-pinggen-check-invalid-arity 3 0.0042658
-pinggen-check-invalid-return 3 0.00308493
-pinggen-check-invalid-duplicate-param 3 0.00331407
-pinggen-check-invalid-if-condition 2 0.0046367
-pinggen-check-invalid-string-compare 2 0.0074832
-pinggen-check-invalid-bool-assign 2 0.00521115
-pinggen-check-invalid-while-condition 1 0.0104151
-pinggen-check-invalid-while-return 1 0.009762
+pinggen-check-example 5 0.00499126
+pinggen-build-example 5 0.0427124
+pinggen-check-invalid-arity 4 0.0029602
+pinggen-check-invalid-return 4 0.00299018
+pinggen-check-invalid-duplicate-param 4 0.00292135
+pinggen-check-invalid-if-condition 3 0.00406657
+pinggen-check-invalid-string-compare 3 0.00380767
+pinggen-check-invalid-bool-assign 3 0.00420937
+pinggen-check-invalid-while-condition 2 0.0064226
+pinggen-check-invalid-while-return 2 0.00647305
+pinggen-check-invalid-struct-duplicate-field 1 0.0126005
+pinggen-check-invalid-struct-field-type 1 0.0119975
+pinggen-check-invalid-field-assign-immutable 1 0.0147194
 ---

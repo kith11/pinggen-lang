@@ -1,14 +1,21 @@
 import std::{ io }
 
-func keep_looping(value: int) -> bool {
-    return value != 0;
+struct Hero {
+    hp: int
+    alive: bool
+    name: string
+}
+
+func revive(hero: Hero) -> Hero {
+    return Hero { hp: hero.hp + 50, alive: true, name: hero.name };
 }
 
 func main() {
-    let mut count = 3;
-    while keep_looping(count) {
-        io::println(count);
-        count = count - 1;
+    let mut hero = Hero { hp: 10, alive: false, name: "pinggen" };
+    hero.hp = 25;
+    let upgraded = revive(hero);
+    if upgraded.alive {
+        io::println(upgraded.name);
+        io::println(upgraded.hp);
     }
-    io::println("pinggen online");
 }

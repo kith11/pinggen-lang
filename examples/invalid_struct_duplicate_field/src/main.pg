@@ -1,0 +1,8 @@
+struct Hero {
+    hp: int
+    hp: int
+}
+
+func main() {
+    let hero = Hero { hp: 10 };
+}

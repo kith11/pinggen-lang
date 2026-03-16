@@ -11,6 +11,7 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::KwTrue: return "true";
         case TokenKind::KwFalse: return "false";
         case TokenKind::KwImport: return "import";
+        case TokenKind::KwStruct: return "struct";
         case TokenKind::KwFunc: return "func";
         case TokenKind::KwLet: return "let";
         case TokenKind::KwMut: return "mut";
@@ -31,6 +32,7 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::Equal: return "=";
         case TokenKind::EqualEqual: return "==";
         case TokenKind::BangEqual: return "!=";
+        case TokenKind::Dot: return ".";
         case TokenKind::Colon: return ":";
         case TokenKind::ColonColon: return "::";
         case TokenKind::Arrow: return "->";

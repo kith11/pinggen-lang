@@ -10,6 +10,8 @@ Current features:
 
 - `import std::{ io }`
 - typed top-level functions with `func name(arg: type) -> type`
+- plain `struct` declarations with named fields
+- named-field struct literals and `value.field` access
 - `bool`, `true`, `false`
 - `if condition { ... } else { ... }`
 - `while condition { ... }`
@@ -41,21 +43,23 @@ Example:
 ```pinggen
 import std::{ io }
 
-func add(a: int, b: int) -> int {
-    return a + b;
+struct Hero {
+    hp: int
+    alive: bool
+    name: string
 }
 
-func is_answer(value: int) -> bool {
-    return value == 42;
+func heal(hero: Hero) -> Hero {
+    return Hero { hp: hero.hp + 10, alive: true, name: hero.name };
 }
 
 func main() {
-    let mut total = add(20, 22);
-    while total != 0 {
-        total = total - 21;
-    }
-    if is_answer(total + 42) {
-        io::println("pinggen online");
+    let mut hero = Hero { hp: 20, alive: false, name: "pinggen" };
+    hero.hp = 40;
+    let healed = heal(hero);
+    if healed.alive {
+        io::println(healed.name);
+        io::println(healed.hp);
     }
 }
 ```

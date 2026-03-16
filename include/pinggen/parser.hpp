@@ -21,6 +21,7 @@ class Parser {
     const Token& consume(TokenKind kind, const std::string& message);
 
     ImportDecl parse_import();
+    StructDecl parse_struct();
     FunctionDecl parse_function();
     std::vector<std::unique_ptr<Stmt>> parse_block();
     std::unique_ptr<Stmt> parse_statement();
@@ -34,7 +35,8 @@ class Parser {
     std::unique_ptr<Expr> parse_term();
     std::unique_ptr<Expr> parse_factor();
     std::unique_ptr<Expr> parse_primary();
-    ValueType parse_type();
+    std::unique_ptr<Expr> parse_postfix(std::unique_ptr<Expr> expr);
+    Type parse_type();
     std::string parse_qualified_name();
 
     std::vector<Token> tokens_;

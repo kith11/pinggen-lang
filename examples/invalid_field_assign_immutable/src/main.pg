@@ -1,0 +1,10 @@
+struct Hero {
+    hp: int
+    alive: bool
+    name: string
+}
+
+func main() {
+    let hero = Hero { hp: 10, alive: true, name: "ping" };
+    hero.hp = 20;
+}

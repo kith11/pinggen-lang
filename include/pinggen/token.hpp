@@ -12,6 +12,7 @@ enum class TokenKind {
     KwTrue,
     KwFalse,
     KwImport,
+    KwStruct,
     KwFunc,
     KwLet,
     KwMut,
@@ -32,6 +33,7 @@ enum class TokenKind {
     Equal,
     EqualEqual,
     BangEqual,
+    Dot,
     Colon,
     ColonColon,
     Arrow
