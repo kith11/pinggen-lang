@@ -58,4 +58,14 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_bool_assign
     )
     set_tests_properties(pinggen-check-invalid-bool-assign PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-while-condition
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_while_condition
+    )
+    set_tests_properties(pinggen-check-invalid-while-condition PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-while-return
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_while_missing_return
+    )
+    set_tests_properties(pinggen-check-invalid-while-return PROPERTIES WILL_FAIL TRUE)
 endif()

@@ -180,6 +180,14 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
         }
         return then_returns && else_returns;
     }
+    if (const auto* node = dynamic_cast<const WhileStmt*>(&stmt)) {
+        const ValueType condition_type = analyze_expr(*node->condition);
+        if (condition_type != ValueType::Bool) {
+            fail(node->condition->location, "while condition must be bool");
+        }
+        analyze_block(node->body);
+        return false;
+    }
     if (const auto* node = dynamic_cast<const ReturnStmt*>(&stmt)) {
         if (!node->value) {
             if (current_return_type_ != ValueType::Void && !inside_main_) {

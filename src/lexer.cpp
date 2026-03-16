@@ -143,6 +143,7 @@ Token Lexer::lex_identifier(std::size_t start_line, std::size_t start_column) {
         {"false", TokenKind::KwFalse},
         {"if", TokenKind::KwIf},
         {"else", TokenKind::KwElse},
+        {"while", TokenKind::KwWhile},
     };
 
     const auto it = keywords.find(value);

@@ -103,6 +103,13 @@ struct IfStmt final : Stmt {
     std::vector<std::unique_ptr<Stmt>> else_body;
 };
 
+struct WhileStmt final : Stmt {
+    WhileStmt(SourceLocation loc, std::unique_ptr<Expr> c, std::vector<std::unique_ptr<Stmt>> b)
+        : Stmt(loc), condition(std::move(c)), body(std::move(b)) {}
+    std::unique_ptr<Expr> condition;
+    std::vector<std::unique_ptr<Stmt>> body;
+};
+
 struct ImportDecl {
     SourceLocation location;
     std::vector<std::string> items;

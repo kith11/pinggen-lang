@@ -1,24 +1,14 @@
 import std::{ io }
 
-func is_zero(value: int) -> bool {
-    return value == 0;
-}
-
-func describe_zero(flag: bool) {
-    if flag {
-        io::println("value is zero");
-    } else {
-        io::println("value is not zero");
-    }
+func keep_looping(value: int) -> bool {
+    return value != 0;
 }
 
 func main() {
-    let number = 0;
-    let zero = is_zero(number);
-    describe_zero(zero);
-    if zero != false {
-        io::println("pinggen online");
-    } else {
-        io::println("unexpected branch");
+    let mut count = 3;
+    while keep_looping(count) {
+        io::println(count);
+        count = count - 1;
     }
+    io::println("pinggen online");
 }

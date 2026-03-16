@@ -18,6 +18,7 @@ enum class TokenKind {
     KwReturn,
     KwIf,
     KwElse,
+    KwWhile,
     LBrace,
     RBrace,
     LParen,

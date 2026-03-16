@@ -1,0 +1,7 @@
+[package]
+name = "invalid_while_condition"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_while_condition"

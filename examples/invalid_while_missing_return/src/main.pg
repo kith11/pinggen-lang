@@ -1,0 +1,12 @@
+import std::{ io }
+
+func value(flag: bool) -> int {
+    while flag {
+        return 1;
+    }
+}
+
+func main() {
+    let result = value(false);
+    io::println(result);
+}

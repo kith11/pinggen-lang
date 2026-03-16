@@ -3,61 +3,36 @@ declare i32 @printf(ptr, ...)
 
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
-@.str.1 = private unnamed_addr constant [14 x i8] c"value is zero\00"
-@.str.2 = private unnamed_addr constant [18 x i8] c"value is not zero\00"
-@.str.3 = private unnamed_addr constant [15 x i8] c"pinggen online\00"
-@.str.4 = private unnamed_addr constant [18 x i8] c"unexpected branch\00"
+@.str.1 = private unnamed_addr constant [15 x i8] c"pinggen online\00"
 
-define i1 @is_zero(i64 %arg0) {
+define i1 @keep_looping(i64 %arg0) {
   %1 = alloca i64
   store i64 %arg0, ptr %1
   %2 = load i64, ptr %1
-  %3 = icmp eq i64 %2, 0
+  %3 = icmp ne i64 %2, 0
   ret i1 %3
-}
-
-define void @describe_zero(i1 %arg0) {
-  %1 = alloca i1
-  store i1 %arg0, ptr %1
-  %2 = load i1, ptr %1
-  br i1 %2, label %if_then.1, label %if_else.2
-if_then.1:
-  %3 = getelementptr inbounds [14 x i8], ptr @.str.1, i64 0, i64 0
-  %4 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %5 = call i32 (ptr, ...) @printf(ptr %4, ptr %3)
-  br label %if_end.3
-if_else.2:
-  %6 = getelementptr inbounds [18 x i8], ptr @.str.2, i64 0, i64 0
-  %7 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %8 = call i32 (ptr, ...) @printf(ptr %7, ptr %6)
-  br label %if_end.3
-if_end.3:
-  ret void
 }
 
 define i32 @main() {
   %1 = alloca i64
-  store i64 0, ptr %1
+  store i64 3, ptr %1
+  br label %while_cond.1
+while_cond.1:
   %2 = load i64, ptr %1
-  %3 = call i1 @is_zero(i64 %2)
-  %4 = alloca i1
-  store i1 %3, ptr %4
-  %5 = load i1, ptr %4
-  call void @describe_zero(i1 %5)
-  %6 = load i1, ptr %4
-  %7 = icmp ne i1 %6, 0
-  br i1 %7, label %if_then.4, label %if_else.5
-if_then.4:
-  %8 = getelementptr inbounds [15 x i8], ptr @.str.3, i64 0, i64 0
-  %9 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %10 = call i32 (ptr, ...) @printf(ptr %9, ptr %8)
-  br label %if_end.6
-if_else.5:
-  %11 = getelementptr inbounds [18 x i8], ptr @.str.4, i64 0, i64 0
-  %12 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %13 = call i32 (ptr, ...) @printf(ptr %12, ptr %11)
-  br label %if_end.6
-if_end.6:
+  %3 = call i1 @keep_looping(i64 %2)
+  br i1 %3, label %while_body.2, label %while_end.3
+while_body.2:
+  %4 = load i64, ptr %1
+  %5 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %6 = call i32 (ptr, ...) @printf(ptr %5, i64 %4)
+  %7 = load i64, ptr %1
+  %8 = sub i64 %7, 1
+  store i64 %8, ptr %1
+  br label %while_cond.1
+while_end.3:
+  %9 = getelementptr inbounds [15 x i8], ptr @.str.1, i64 0, i64 0
+  %10 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %11 = call i32 (ptr, ...) @printf(ptr %10, ptr %9)
   ret i32 0
 }
 

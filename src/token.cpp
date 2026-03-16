@@ -17,6 +17,7 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::KwReturn: return "return";
         case TokenKind::KwIf: return "if";
         case TokenKind::KwElse: return "else";
+        case TokenKind::KwWhile: return "while";
         case TokenKind::LBrace: return "{";
         case TokenKind::RBrace: return "}";
         case TokenKind::LParen: return "(";

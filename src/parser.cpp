@@ -109,6 +109,9 @@ std::unique_ptr<Stmt> Parser::parse_statement() {
     if (check(TokenKind::KwIf)) {
         return parse_if_statement();
     }
+    if (check(TokenKind::KwWhile)) {
+        return parse_while_statement();
+    }
     return parse_assignment_or_expression_statement();
 }
 
@@ -145,6 +148,14 @@ std::unique_ptr<Stmt> Parser::parse_if_statement() {
     }
 
     return std::make_unique<IfStmt>(if_token.location, std::move(condition), std::move(then_body), std::move(else_body));
+}
+
+std::unique_ptr<Stmt> Parser::parse_while_statement() {
+    const Token while_token = consume(TokenKind::KwWhile, "expected 'while'");
+    auto condition = parse_expression();
+    consume(TokenKind::LBrace, "expected '{' before while block");
+    auto loop_body = parse_block();
+    return std::make_unique<WhileStmt>(while_token.location, std::move(condition), std::move(loop_body));
 }
 
 std::unique_ptr<Stmt> Parser::parse_assignment_or_expression_statement() {

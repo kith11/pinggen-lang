@@ -229,6 +229,27 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
         }
         return then_returns && has_else && else_returns;
     }
+    if (const auto* node = dynamic_cast<const WhileStmt*>(&stmt)) {
+        const std::string cond_label = next_label("while_cond");
+        const std::string body_label = next_label("while_body");
+        const std::string end_label = next_label("while_end");
+
+        body_ += "  br label %" + cond_label + "\n";
+        body_ += cond_label + ":\n";
+        const TypedIRValue condition = emit_expr(*node->condition);
+        body_ += "  br i1 " + condition.ir + ", label %" + body_label + ", label %" + end_label + "\n";
+
+        body_ += body_label + ":\n";
+        const bool body_returns = emit_block(node->body);
+        if (!body_returns) {
+            body_ += "  br label %" + cond_label + "\n";
+            body_ += end_label + ":\n";
+            return false;
+        }
+
+        body_ += end_label + ":\n";
+        return false;
+    }
     if (const auto* node = dynamic_cast<const ReturnStmt*>(&stmt)) {
         if (!node->value) {
             if (current_function_name_ == "main") {

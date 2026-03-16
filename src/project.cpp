@@ -89,16 +89,16 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
 
     std::ofstream source(target_dir / "src" / "main.pg");
     source << "import std::{ io }\n\n";
-    source << "func is_strong(score: int) -> bool {\n";
-    source << "    return score == 100;\n";
+    source << "func keep_counting(value: int) -> bool {\n";
+    source << "    return value != 0;\n";
     source << "}\n\n";
     source << "func main() {\n";
-    source << "    let score = 100;\n";
-    source << "    if is_strong(score) {\n";
-    source << "        io::println(\"hello from pinggen\");\n";
-    source << "    } else {\n";
-    source << "        io::println(\"keep training\");\n";
+    source << "    let mut count = 3;\n";
+    source << "    while keep_counting(count) {\n";
+    source << "        io::println(count);\n";
+    source << "        count = count - 1;\n";
     source << "    }\n";
+    source << "    io::println(\"hello from pinggen\");\n";
     source << "}\n";
 }
 

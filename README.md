@@ -12,6 +12,7 @@ Current features:
 - typed top-level functions with `func name(arg: type) -> type`
 - `bool`, `true`, `false`
 - `if condition { ... } else { ... }`
+- `while condition { ... }`
 - `let` and `let mut`
 - integers and strings
 - `==` and `!=` for `int` and `bool`
@@ -49,11 +50,12 @@ func is_answer(value: int) -> bool {
 }
 
 func main() {
-    let total = add(20, 22);
-    if is_answer(total) {
+    let mut total = add(20, 22);
+    while total != 0 {
+        total = total - 21;
+    }
+    if is_answer(total + 42) {
         io::println("pinggen online");
-    } else {
-        io::println("wrong answer");
     }
 }
 ```
