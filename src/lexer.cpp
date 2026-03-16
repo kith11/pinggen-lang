@@ -46,6 +46,7 @@ std::vector<Token> Lexer::tokenize() {
                 break;
             case '*': tokens.push_back(make_token(TokenKind::Star, start_line, start_column, "*")); break;
             case '/': tokens.push_back(make_token(TokenKind::Slash, start_line, start_column, "/")); break;
+            case '%': tokens.push_back(make_token(TokenKind::Percent, start_line, start_column, "%")); break;
             case '&':
                 if (!match('&')) {
                     fail({start_line, start_column}, "unexpected character");

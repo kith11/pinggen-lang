@@ -282,7 +282,7 @@ std::unique_ptr<Expr> Parser::parse_term() {
 
 std::unique_ptr<Expr> Parser::parse_factor() {
     auto expr = parse_unary();
-    while (check(TokenKind::Star) || check(TokenKind::Slash)) {
+    while (check(TokenKind::Star) || check(TokenKind::Slash) || check(TokenKind::Percent)) {
         const Token op = current();
         ++current_;
         auto right = parse_unary();

@@ -208,6 +208,7 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
         if (node->op == "-") op = "sub";
         if (node->op == "*") op = "mul";
         if (node->op == "/") op = "sdiv";
+        if (node->op == "%") op = "srem";
         body_ += "  " + reg + " = " + op + " i64 " + left.ir + ", " + right.ir + "\n";
         return {reg, Type::int_type()};
     }

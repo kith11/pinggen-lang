@@ -4,20 +4,18 @@ declare i32 @printf(ptr, ...)
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
 
-define i1 @should_print(i64 %arg0) {
+define i1 @is_even(i64 %arg0) {
   %1 = alloca i64
   store i64 %arg0, ptr %1
   %2 = load i64, ptr %1
-  %3 = icmp sle i64 %2, 2
-  %4 = load i64, ptr %1
-  %5 = icmp eq i64 %4, 4
-  %6 = or i1 %3, %5
-  ret i1 %6
+  %3 = srem i64 %2, 2
+  %4 = icmp eq i64 %3, 0
+  ret i1 %4
 }
 
 define i32 @main() {
   %1 = alloca i64
-  store i64 4, ptr %1
+  store i64 6, ptr %1
   br label %while_cond.1
 while_cond.1:
   %2 = load i64, ptr %1
@@ -25,31 +23,27 @@ while_cond.1:
   br i1 %3, label %while_body.2, label %while_end.3
 while_body.2:
   %4 = load i64, ptr %1
-  %5 = call i1 @should_print(i64 %4)
-  %6 = xor i1 %5, true
-  br i1 %6, label %if_then.4, label %if_else.5
+  %5 = call i1 @is_even(i64 %4)
+  br i1 %5, label %if_then.4, label %if_else.5
 if_then.4:
-  %7 = load i64, ptr %1
-  %8 = sub i64 %7, 1
-  store i64 %8, ptr %1
-  br label %while_cond.1
+  %6 = load i64, ptr %1
+  %7 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %8 = call i32 (ptr, ...) @printf(ptr %7, i64 %6)
+  br label %if_end.6
 if_else.5:
   br label %if_end.6
 if_end.6:
   %9 = load i64, ptr %1
-  %10 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %11 = call i32 (ptr, ...) @printf(ptr %10, i64 %9)
-  %12 = load i64, ptr %1
-  %13 = icmp sle i64 %12, 2
-  br i1 %13, label %if_then.7, label %if_else.8
+  %10 = icmp sle i64 %9, 2
+  br i1 %10, label %if_then.7, label %if_else.8
 if_then.7:
   br label %while_end.3
 if_else.8:
   br label %if_end.9
 if_end.9:
-  %14 = load i64, ptr %1
-  %15 = sub i64 %14, 1
-  store i64 %15, ptr %1
+  %11 = load i64, ptr %1
+  %12 = sub i64 %11, 1
+  store i64 %12, ptr %1
   br label %while_cond.1
 while_end.3:
   ret i32 0

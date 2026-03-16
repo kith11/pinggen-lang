@@ -31,6 +31,7 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::Minus: return "-";
         case TokenKind::Star: return "*";
         case TokenKind::Slash: return "/";
+        case TokenKind::Percent: return "%";
         case TokenKind::Equal: return "=";
         case TokenKind::Bang: return "!";
         case TokenKind::Less: return "<";

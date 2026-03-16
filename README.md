@@ -18,6 +18,7 @@ Current features:
 - `break` and `continue` inside `while`
 - `!`, `&&`, and `||` for boolean logic
 - `<`, `<=`, `>`, and `>=` for integer comparisons
+- `%` for integer modulo
 - `let` and `let mut`
 - integers and strings
 - `==` and `!=` for `int` and `bool`
@@ -46,18 +47,16 @@ Example:
 ```pinggen
 import std::{ io }
 
-func should_print(value: int) -> bool {
-    return value <= 2 || value == 4;
+func is_even(value: int) -> bool {
+    return value % 2 == 0;
 }
 
 func main() {
-    let mut count = 4;
+    let mut count = 6;
     while count > 0 {
-        if !should_print(count) {
-            count = count - 1;
-            continue;
+        if is_even(count) {
+            io::println(count);
         }
-        io::println(count);
         if count <= 2 {
             break;
         }

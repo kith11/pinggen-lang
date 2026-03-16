@@ -103,4 +103,9 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_relational_operands
     )
     set_tests_properties(pinggen-check-invalid-relational-operands PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-modulo-operands
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_modulo_operands
+    )
+    set_tests_properties(pinggen-check-invalid-modulo-operands PROPERTIES WILL_FAIL TRUE)
 endif()

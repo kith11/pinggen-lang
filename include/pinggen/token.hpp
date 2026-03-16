@@ -32,6 +32,7 @@ enum class TokenKind {
     Minus,
     Star,
     Slash,
+    Percent,
     Equal,
     Bang,
     Less,
