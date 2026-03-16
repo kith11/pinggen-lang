@@ -1,0 +1,5 @@
+func main() {
+    let left = "a";
+    let right = "b";
+    let same = left == right;
+}

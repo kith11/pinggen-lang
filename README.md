@@ -10,8 +10,11 @@ Current features:
 
 - `import std::{ io }`
 - typed top-level functions with `func name(arg: type) -> type`
+- `bool`, `true`, `false`
+- `if condition { ... } else { ... }`
 - `let` and `let mut`
 - integers and strings
+- `==` and `!=` for `int` and `bool`
 - integer arithmetic
 - assignment to mutable variables
 - `io::println(...)`
@@ -41,13 +44,16 @@ func add(a: int, b: int) -> int {
     return a + b;
 }
 
-func greet(name: string) {
-    io::println(name);
+func is_answer(value: int) -> bool {
+    return value == 42;
 }
 
 func main() {
     let total = add(20, 22);
-    greet("pinggen online");
-    io::println(total);
+    if is_answer(total) {
+        io::println("pinggen online");
+    } else {
+        io::println("wrong answer");
+    }
 }
 ```

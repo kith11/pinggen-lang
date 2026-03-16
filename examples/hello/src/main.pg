@@ -1,19 +1,24 @@
 import std::{ io }
 
-func greet(name: string) {
-    io::println(name);
+func is_zero(value: int) -> bool {
+    return value == 0;
 }
 
-func compute_damage(base: int, bonus: int) -> int {
-    return scale_damage(base + bonus);
-}
-
-func scale_damage(value: int) -> int {
-    return value * 2;
+func describe_zero(flag: bool) {
+    if flag {
+        io::println("value is zero");
+    } else {
+        io::println("value is not zero");
+    }
 }
 
 func main() {
-    let damage = compute_damage(30, 10);
-    greet("pinggen online");
-    io::println(damage);
+    let number = 0;
+    let zero = is_zero(number);
+    describe_zero(zero);
+    if zero != false {
+        io::println("pinggen online");
+    } else {
+        io::println("unexpected branch");
+    }
 }

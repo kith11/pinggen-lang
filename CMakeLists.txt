@@ -43,4 +43,19 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_duplicate_param
     )
     set_tests_properties(pinggen-check-invalid-duplicate-param PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-if-condition
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_if_condition
+    )
+    set_tests_properties(pinggen-check-invalid-if-condition PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-string-compare
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_string_compare
+    )
+    set_tests_properties(pinggen-check-invalid-string-compare PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-bool-assign
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_bool_assign
+    )
+    set_tests_properties(pinggen-check-invalid-bool-assign PROPERTIES WILL_FAIL TRUE)
 endif()
