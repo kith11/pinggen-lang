@@ -167,6 +167,9 @@ std::unique_ptr<Stmt> Parser::parse_statement() {
     if (check(TokenKind::KwWhile)) {
         return parse_while_statement();
     }
+    if (check(TokenKind::KwFor)) {
+        return parse_for_statement();
+    }
     if (check(TokenKind::KwBreak)) {
         return parse_break_statement();
     }
@@ -227,6 +230,18 @@ std::unique_ptr<Stmt> Parser::parse_while_statement() {
     return std::make_unique<WhileStmt>(while_token.location, std::move(condition), std::move(loop_body));
 }
 
+std::unique_ptr<Stmt> Parser::parse_for_statement() {
+    const Token for_token = consume(TokenKind::KwFor, "expected 'for'");
+    const std::string name = consume(TokenKind::Identifier, "expected loop variable name").lexeme;
+    consume(TokenKind::KwIn, "expected 'in' after loop variable");
+    auto start = parse_for_bound_expression();
+    consume(TokenKind::DotDot, "expected '..' in for range");
+    auto end = parse_for_bound_expression();
+    consume(TokenKind::LBrace, "expected '{' before for block");
+    auto loop_body = parse_block();
+    return std::make_unique<ForStmt>(for_token.location, name, std::move(start), std::move(end), std::move(loop_body));
+}
+
 std::unique_ptr<Stmt> Parser::parse_break_statement() {
     const Token break_token = consume(TokenKind::KwBreak, "expected 'break'");
     consume(TokenKind::Semicolon, "expected ';' after break");
@@ -265,6 +280,14 @@ std::unique_ptr<Stmt> Parser::parse_assignment_or_expression_statement() {
 }
 
 std::unique_ptr<Expr> Parser::parse_expression() { return parse_or(); }
+
+std::unique_ptr<Expr> Parser::parse_for_bound_expression() {
+    const bool previous = parsing_for_bound_;
+    parsing_for_bound_ = true;
+    auto expr = parse_expression();
+    parsing_for_bound_ = previous;
+    return expr;
+}
 
 std::unique_ptr<Expr> Parser::parse_or() {
     auto expr = parse_and();
@@ -367,7 +390,7 @@ std::unique_ptr<Expr> Parser::parse_primary() {
     }
     if (match(TokenKind::Identifier)) {
         const Token first = previous();
-        if (check(TokenKind::LBrace)) {
+        if (!parsing_for_bound_ && check(TokenKind::LBrace)) {
             ++current_;
             std::vector<StructLiteralField> fields;
             if (!check(TokenKind::RBrace)) {

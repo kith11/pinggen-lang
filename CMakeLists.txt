@@ -69,6 +69,31 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-while-return PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-for-bound-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_for_bound_type
+    )
+    set_tests_properties(pinggen-check-invalid-for-bound-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-for-assign-loop-var
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_for_assign_loop_var
+    )
+    set_tests_properties(pinggen-check-invalid-for-assign-loop-var PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-for-scope
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_for_scope
+    )
+    set_tests_properties(pinggen-check-invalid-for-scope PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-for-return
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_for_missing_return
+    )
+    set_tests_properties(pinggen-check-invalid-for-return PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-for-missing-in
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_for_missing_in
+    )
+    set_tests_properties(pinggen-check-invalid-for-missing-in PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-struct-duplicate-field
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_struct_duplicate_field
     )

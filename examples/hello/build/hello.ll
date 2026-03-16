@@ -25,77 +25,77 @@ define void @pinggen_bounds_abort() {
   unreachable
 }
 
-%struct.Counter = type { i64 }
-
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
 
-define %struct.Counter @Counter__bumped_copy(%struct.Counter %arg0, i64 %arg1) {
-  %1 = alloca %struct.Counter
-  store %struct.Counter %arg0, ptr %1
-  %2 = alloca i64
-  store i64 %arg1, ptr %2
-  %3 = load %struct.Counter, ptr %1
-  %4 = alloca %struct.Counter
-  store %struct.Counter %3, ptr %4
-  %5 = getelementptr inbounds %struct.Counter, ptr %4, i32 0, i32 0
-  %6 = load i64, ptr %5
-  %7 = load i64, ptr %2
-  %8 = add i64 %6, %7
-  %9 = getelementptr inbounds %struct.Counter, ptr %4, i32 0, i32 0
-  store i64 %8, ptr %9
-  %10 = load %struct.Counter, ptr %4
-  ret %struct.Counter %10
-}
-
-define i64 @Counter__bump(ptr %arg0, i64 %arg1) {
-  %1 = alloca i64
-  store i64 %arg1, ptr %1
-  %2 = getelementptr inbounds %struct.Counter, ptr %arg0, i32 0, i32 0
-  %3 = load i64, ptr %2
-  %4 = load i64, ptr %1
-  %5 = add i64 %3, %4
-  %6 = getelementptr inbounds %struct.Counter, ptr %arg0, i32 0, i32 0
-  store i64 %5, ptr %6
-  %7 = getelementptr inbounds %struct.Counter, ptr %arg0, i32 0, i32 0
-  %8 = load i64, ptr %7
-  ret i64 %8
-}
-
-define i64 @Counter__total(%struct.Counter %arg0) {
-  %1 = alloca %struct.Counter
-  store %struct.Counter %arg0, ptr %1
-  %2 = getelementptr inbounds %struct.Counter, ptr %1, i32 0, i32 0
-  %3 = load i64, ptr %2
-  ret i64 %3
-}
-
 define i32 @main() {
-  %1 = alloca %struct.Counter
-  %2 = getelementptr inbounds %struct.Counter, ptr %1, i32 0, i32 0
-  store i64 10, ptr %2
-  %3 = load %struct.Counter, ptr %1
-  %4 = alloca %struct.Counter
-  store %struct.Counter %3, ptr %4
-  %5 = load %struct.Counter, ptr %4
-  %6 = call %struct.Counter @Counter__bumped_copy(%struct.Counter %5, i64 2)
-  %7 = alloca %struct.Counter
-  store %struct.Counter %6, ptr %7
-  %8 = load %struct.Counter, ptr %7
-  %9 = call i64 @Counter__total(%struct.Counter %8)
+  %1 = alloca i64
+  store i64 0, ptr %1
+  %2 = alloca i64
+  store i64 0, ptr %2
+  br label %for_cond.1
+for_cond.1:
+  %3 = load i64, ptr %2
+  %4 = icmp slt i64 %3, 6
+  br i1 %4, label %for_body.2, label %for_end.4
+for_body.2:
+  %5 = load i64, ptr %2
+  %6 = icmp eq i64 %5, 1
+  br i1 %6, label %if_then.5, label %if_else.6
+if_then.5:
+  br label %for_step.3
+if_else.6:
+  br label %if_end.7
+if_end.7:
+  %7 = load i64, ptr %2
+  %8 = icmp eq i64 %7, 4
+  br i1 %8, label %if_then.8, label %if_else.9
+if_then.8:
+  br label %for_end.4
+if_else.9:
+  br label %if_end.10
+if_end.10:
+  %9 = load i64, ptr %2
   %10 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
   %11 = call i32 (ptr, ...) @printf(ptr %10, i64 %9)
-  %12 = load %struct.Counter, ptr %4
-  %13 = call i64 @Counter__total(%struct.Counter %12)
-  %14 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %15 = call i32 (ptr, ...) @printf(ptr %14, i64 %13)
-  %16 = call i64 @Counter__bump(ptr %4, i64 5)
-  %17 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %18 = call i32 (ptr, ...) @printf(ptr %17, i64 %16)
-  %19 = load %struct.Counter, ptr %4
-  %20 = call i64 @Counter__total(%struct.Counter %19)
-  %21 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %22 = call i32 (ptr, ...) @printf(ptr %21, i64 %20)
+  %12 = load i64, ptr %1
+  %13 = load i64, ptr %2
+  %14 = add i64 %12, %13
+  store i64 %14, ptr %1
+  br label %for_step.3
+for_step.3:
+  %15 = load i64, ptr %2
+  %16 = add i64 %15, 1
+  store i64 %16, ptr %2
+  br label %for_cond.1
+for_end.4:
+  %17 = load i64, ptr %1
+  %18 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %19 = call i32 (ptr, ...) @printf(ptr %18, i64 %17)
+  %20 = alloca i64
+  store i64 5, ptr %20
+  %21 = alloca i64
+  store i64 3, ptr %21
+  %22 = load i64, ptr %20
+  %23 = load i64, ptr %21
+  %24 = alloca i64
+  store i64 %22, ptr %24
+  br label %for_cond.11
+for_cond.11:
+  %25 = load i64, ptr %24
+  %26 = icmp slt i64 %25, %23
+  br i1 %26, label %for_body.12, label %for_end.14
+for_body.12:
+  %27 = load i64, ptr %24
+  %28 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %29 = call i32 (ptr, ...) @printf(ptr %28, i64 %27)
+  br label %for_step.13
+for_step.13:
+  %30 = load i64, ptr %24
+  %31 = add i64 %30, 1
+  store i64 %31, ptr %24
+  br label %for_cond.11
+for_end.14:
   ret i32 0
 }
 

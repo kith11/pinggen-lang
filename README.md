@@ -15,7 +15,8 @@ Current features:
 - `bool`, `true`, `false`
 - `if`, `else if`, and `else`
 - `while condition { ... }`
-- `break` and `continue` inside `while`
+- `for name in start..end { ... }`
+- `break` and `continue` inside loops
 - `!`, `&&`, and `||` for boolean logic
 - `<`, `<=`, `>`, and `>=` for integer comparisons
 - `%` for integer modulo
@@ -51,31 +52,18 @@ Example:
 ```pinggen
 import std::{ io }
 
-struct Counter {
-    value: int,
-}
-
-impl Counter {
-    func bumped_copy(self, amount: int) -> Counter {
-        let mut copy = self;
-        copy.value = copy.value + amount;
-        return copy;
-    }
-    func bump(mut self, amount: int) -> int {
-        self.value = self.value + amount;
-        return self.value;
-    }
-    func total(self) -> int {
-        return self.value;
-    }
-}
-
 func main() {
-    let mut counter = Counter { value: 10 };
-    let preview = counter.bumped_copy(2);
-    io::println(preview.total());
-    io::println(counter.total());
-    io::println(counter.bump(5));
-    io::println(counter.total());
+    let mut sum = 0;
+    for i in 0..6 {
+        if i == 1 {
+            continue;
+        }
+        if i == 4 {
+            break;
+        }
+        io::println(i);
+        sum = sum + i;
+    }
+    io::println(sum);
 }
 ```

@@ -502,6 +502,65 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
         body_ += end_label + ":\n";
         return false;
     }
+    if (const auto* node = dynamic_cast<const ForStmt*>(&stmt)) {
+        const TypedIRValue start = emit_expr(*node->start);
+        const TypedIRValue end = emit_expr(*node->end);
+        const std::string loop_storage = next_register();
+        body_ += "  " + loop_storage + " = alloca i64\n";
+        body_ += "  store i64 " + start.ir + ", ptr " + loop_storage + "\n";
+
+        const std::string cond_label = next_label("for_cond");
+        const std::string body_label = next_label("for_body");
+        const std::string step_label = next_label("for_step");
+        const std::string end_label = next_label("for_end");
+
+        body_ += "  br label %" + cond_label + "\n";
+        body_ += cond_label + ":\n";
+        const std::string current_reg = next_register();
+        const std::string cond_reg = next_register();
+        body_ += "  " + current_reg + " = load i64, ptr " + loop_storage + "\n";
+        body_ += "  " + cond_reg + " = icmp slt i64 " + current_reg + ", " + end.ir + "\n";
+        body_ += "  br i1 " + cond_reg + ", label %" + body_label + ", label %" + end_label + "\n";
+        body_ += body_label + ":\n";
+
+        const auto previous_var = variables_.find(node->name);
+        const auto previous_type = variable_types_.find(node->name);
+        const bool had_previous_var = previous_var != variables_.end();
+        const bool had_previous_type = previous_type != variable_types_.end();
+        const std::string previous_storage = had_previous_var ? previous_var->second : "";
+        const Type previous_type_value = had_previous_type ? previous_type->second : Type::void_type();
+
+        variables_[node->name] = loop_storage;
+        variable_types_[node->name] = Type::int_type();
+        continue_labels_.push_back(step_label);
+        break_labels_.push_back(end_label);
+        const bool body_returns = emit_block(node->body);
+        continue_labels_.pop_back();
+        break_labels_.pop_back();
+        if (had_previous_var) {
+            variables_[node->name] = previous_storage;
+        } else {
+            variables_.erase(node->name);
+        }
+        if (had_previous_type) {
+            variable_types_[node->name] = previous_type_value;
+        } else {
+            variable_types_.erase(node->name);
+        }
+
+        if (!body_returns) {
+            body_ += "  br label %" + step_label + "\n";
+        }
+        body_ += step_label + ":\n";
+        const std::string step_current = next_register();
+        const std::string next_value = next_register();
+        body_ += "  " + step_current + " = load i64, ptr " + loop_storage + "\n";
+        body_ += "  " + next_value + " = add i64 " + step_current + ", 1\n";
+        body_ += "  store i64 " + next_value + ", ptr " + loop_storage + "\n";
+        body_ += "  br label %" + cond_label + "\n";
+        body_ += end_label + ":\n";
+        return false;
+    }
     if (dynamic_cast<const BreakStmt*>(&stmt)) {
         body_ += "  br label %" + break_labels_.back() + "\n";
         return true;

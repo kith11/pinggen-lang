@@ -29,6 +29,7 @@ class Parser {
     std::unique_ptr<Stmt> parse_return_statement();
     std::unique_ptr<Stmt> parse_if_statement();
     std::unique_ptr<Stmt> parse_while_statement();
+    std::unique_ptr<Stmt> parse_for_statement();
     std::unique_ptr<Stmt> parse_break_statement();
     std::unique_ptr<Stmt> parse_continue_statement();
     std::unique_ptr<Stmt> parse_assignment_or_expression_statement();
@@ -42,11 +43,13 @@ class Parser {
     std::unique_ptr<Expr> parse_unary();
     std::unique_ptr<Expr> parse_primary();
     std::unique_ptr<Expr> parse_postfix(std::unique_ptr<Expr> expr);
+    std::unique_ptr<Expr> parse_for_bound_expression();
     Type parse_type();
     std::string parse_qualified_name();
 
     std::vector<Token> tokens_;
     std::size_t current_ = 0;
+    bool parsing_for_bound_ = false;
 };
 
 }  // namespace pinggen

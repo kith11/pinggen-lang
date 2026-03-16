@@ -1,0 +1,12 @@
+import std::{ io }
+
+func value(limit: int) -> int {
+    for i in 0..limit {
+        return i;
+    }
+}
+
+func main() {
+    let result = value(3);
+    io::println(result);
+}

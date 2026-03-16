@@ -89,30 +89,19 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
 
     std::ofstream source(target_dir / "src" / "main.pg");
     source << "import std::{ io }\n\n";
-    source << "struct Counter {\n";
-    source << "    value: int,\n";
-    source << "}\n\n";
-    source << "impl Counter {\n";
-    source << "    func bumped_copy(self, amount: int) -> Counter {\n";
-    source << "        let mut copy = self;\n";
-    source << "        copy.value = copy.value + amount;\n";
-    source << "        return copy;\n";
-    source << "    }\n";
-    source << "    func bump(mut self, amount: int) -> int {\n";
-    source << "        self.value = self.value + amount;\n";
-    source << "        return self.value;\n";
-    source << "    }\n";
-    source << "    func total(self) -> int {\n";
-    source << "        return self.value;\n";
-    source << "    }\n";
-    source << "}\n\n";
     source << "func main() {\n";
-    source << "    let mut counter = Counter { value: 10 };\n";
-    source << "    let preview = counter.bumped_copy(2);\n";
-    source << "    io::println(preview.total());\n";
-    source << "    io::println(counter.total());\n";
-    source << "    io::println(counter.bump(5));\n";
-    source << "    io::println(counter.total());\n";
+    source << "    let mut sum = 0;\n";
+    source << "    for i in 0..6 {\n";
+    source << "        if i == 1 {\n";
+    source << "            continue;\n";
+    source << "        }\n";
+    source << "        if i == 4 {\n";
+    source << "            break;\n";
+    source << "        }\n";
+    source << "        io::println(i);\n";
+    source << "        sum = sum + i;\n";
+    source << "    }\n";
+    source << "    io::println(sum);\n";
     source << "}\n";
 }
 

@@ -21,6 +21,8 @@ enum class TokenKind {
     KwIf,
     KwElse,
     KwWhile,
+    KwFor,
+    KwIn,
     KwBreak,
     KwContinue,
     LBrace,
@@ -47,6 +49,7 @@ enum class TokenKind {
     AndAnd,
     OrOr,
     Dot,
+    DotDot,
     Colon,
     ColonColon,
     Arrow

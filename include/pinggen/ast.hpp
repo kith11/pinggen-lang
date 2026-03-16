@@ -218,6 +218,16 @@ struct WhileStmt final : Stmt {
     std::vector<std::unique_ptr<Stmt>> body;
 };
 
+struct ForStmt final : Stmt {
+    ForStmt(SourceLocation loc, std::string n, std::unique_ptr<Expr> s, std::unique_ptr<Expr> e,
+            std::vector<std::unique_ptr<Stmt>> b)
+        : Stmt(loc), name(std::move(n)), start(std::move(s)), end(std::move(e)), body(std::move(b)) {}
+    std::string name;
+    std::unique_ptr<Expr> start;
+    std::unique_ptr<Expr> end;
+    std::vector<std::unique_ptr<Stmt>> body;
+};
+
 struct BreakStmt final : Stmt {
     explicit BreakStmt(SourceLocation loc) : Stmt(loc) {}
 };

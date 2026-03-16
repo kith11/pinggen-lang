@@ -1,0 +1,5 @@
+func main() {
+    for i 0..3 {
+        let value = i;
+    }
+}

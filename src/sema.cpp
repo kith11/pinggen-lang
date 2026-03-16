@@ -526,15 +526,47 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
         --loop_depth_;
         return false;
     }
+    if (const auto* node = dynamic_cast<const ForStmt*>(&stmt)) {
+        if (node->name == "self") {
+            fail(node->location, "'self' is reserved for method receivers");
+        }
+        const Type start_type = analyze_expr(*node->start);
+        const Type end_type = analyze_expr(*node->end);
+        if (start_type != Type::int_type()) {
+            fail(node->start->location, "for range start must be int");
+        }
+        if (end_type != Type::int_type()) {
+            fail(node->end->location, "for range end must be int");
+        }
+
+        const auto previous = symbols_.find(node->name);
+        const bool had_previous = previous != symbols_.end();
+        Symbol previous_symbol;
+        if (had_previous) {
+            previous_symbol = previous->second;
+        }
+
+        symbols_[node->name] = Symbol{Type::int_type(), false, true};
+        ++loop_depth_;
+        analyze_block(node->body);
+        --loop_depth_;
+
+        if (had_previous) {
+            symbols_[node->name] = previous_symbol;
+        } else {
+            symbols_.erase(node->name);
+        }
+        return false;
+    }
     if (dynamic_cast<const BreakStmt*>(&stmt)) {
         if (loop_depth_ == 0) {
-            fail(stmt.location, "'break' can only be used inside a while loop");
+            fail(stmt.location, "'break' can only be used inside a loop");
         }
         return false;
     }
     if (dynamic_cast<const ContinueStmt*>(&stmt)) {
         if (loop_depth_ == 0) {
-            fail(stmt.location, "'continue' can only be used inside a while loop");
+            fail(stmt.location, "'continue' can only be used inside a loop");
         }
         return false;
     }

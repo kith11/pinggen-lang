@@ -61,7 +61,13 @@ std::vector<Token> Lexer::tokenize() {
                 }
                 tokens.push_back(make_token(TokenKind::OrOr, start_line, start_column, "||"));
                 break;
-            case '.': tokens.push_back(make_token(TokenKind::Dot, start_line, start_column, ".")); break;
+            case '.':
+                if (match('.')) {
+                    tokens.push_back(make_token(TokenKind::DotDot, start_line, start_column, ".."));
+                } else {
+                    tokens.push_back(make_token(TokenKind::Dot, start_line, start_column, "."));
+                }
+                break;
             case '=':
                 if (match('=')) {
                     tokens.push_back(make_token(TokenKind::EqualEqual, start_line, start_column, "=="));
@@ -176,6 +182,8 @@ Token Lexer::lex_identifier(std::size_t start_line, std::size_t start_column) {
         {"if", TokenKind::KwIf},
         {"else", TokenKind::KwElse},
         {"while", TokenKind::KwWhile},
+        {"for", TokenKind::KwFor},
+        {"in", TokenKind::KwIn},
         {"break", TokenKind::KwBreak},
         {"continue", TokenKind::KwContinue},
         {"struct", TokenKind::KwStruct},

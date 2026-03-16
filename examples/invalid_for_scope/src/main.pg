@@ -1,0 +1,6 @@
+func main() {
+    for i in 0..2 {
+        let copy = i;
+    }
+    let after = i;
+}

@@ -1,0 +1,7 @@
+[package]
+name = "invalid_for_scope"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_for_scope"
