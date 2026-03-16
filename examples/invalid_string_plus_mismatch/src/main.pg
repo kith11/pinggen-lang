@@ -1,0 +1,3 @@
+func main() {
+    let bad = "ping" + 1;
+}

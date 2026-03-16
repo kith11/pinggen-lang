@@ -1,0 +1,6 @@
+import std::{ io }
+
+func main() {
+    let values = [1, 2, 3];
+    io::println(values[3]);
+}

@@ -1,22 +1,19 @@
 import std::{ io }
 
-func classify(value: int) -> string {
-    if value % 2 == 0 {
-        return "even";
-    } else if value > 3 {
-        return "large";
-    } else {
-        return "small";
-    }
+func swap_pair(values: [int; 2]) -> [int; 2] {
+    let mut result: [int; 2] = values;
+    let first = result[0];
+    result[0] = result[1];
+    result[1] = first;
+    return result;
 }
 
 func main() {
-    let mut count = 6;
-    while count > 0 {
-        io::println(classify(count));
-        if count <= 2 {
-            break;
-        }
-        count = count - 1;
-    }
+    let grid = [[1, 2], [3, 4]];
+    let mut pair: [int; 2] = [10, 20];
+    pair[0] = 99;
+    let swapped = swap_pair(pair);
+    io::println(swapped[0]);
+    io::println(swapped[1]);
+    io::println(grid[1][0]);
 }

@@ -23,6 +23,9 @@ class LLVMIRGenerator {
     std::string generate(const Program& program);
 
   private:
+    std::string emit_concat_helper() const;
+    std::string emit_bounds_abort_helper() const;
+    void emit_bounds_check(const std::string& index_ir, std::size_t size);
     std::string emit_string_constant(const std::string& value);
     TypedIRValue emit_expr(const Expr& expr);
     AddressValue emit_address(const Expr& expr);

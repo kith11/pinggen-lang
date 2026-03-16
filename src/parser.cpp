@@ -148,10 +148,14 @@ std::unique_ptr<Stmt> Parser::parse_let_statement() {
     const Token let_token = consume(TokenKind::KwLet, "expected 'let'");
     const bool is_mutable = match(TokenKind::KwMut);
     const std::string name = consume(TokenKind::Identifier, "expected variable name").lexeme;
+    std::optional<Type> declared_type;
+    if (match(TokenKind::Colon)) {
+        declared_type = parse_type();
+    }
     consume(TokenKind::Equal, "expected '=' after variable name");
     auto initializer = parse_expression();
     consume(TokenKind::Semicolon, "expected ';' after variable declaration");
-    return std::make_unique<LetStmt>(let_token.location, name, is_mutable, std::move(initializer));
+    return std::make_unique<LetStmt>(let_token.location, name, is_mutable, std::move(declared_type), std::move(initializer));
 }
 
 std::unique_ptr<Stmt> Parser::parse_return_statement() {
@@ -204,24 +208,26 @@ std::unique_ptr<Stmt> Parser::parse_continue_statement() {
 }
 
 std::unique_ptr<Stmt> Parser::parse_assignment_or_expression_statement() {
-    if (check(TokenKind::Identifier) && check_next(TokenKind::Dot)) {
-        const Token base = consume(TokenKind::Identifier, "expected variable name");
-        consume(TokenKind::Dot, "expected '.' after variable name");
-        const Token field = consume(TokenKind::Identifier, "expected field name");
-        consume(TokenKind::Equal, "expected '=' in field assignment");
-        auto value = parse_expression();
-        consume(TokenKind::Semicolon, "expected ';' after field assignment");
-        return std::make_unique<FieldAssignStmt>(
-            base.location, std::make_unique<VariableExpr>(base.location, base.lexeme), field.lexeme, std::move(value));
-    }
-    if (check(TokenKind::Identifier) && check_next(TokenKind::Equal)) {
-        const Token name = consume(TokenKind::Identifier, "expected variable name");
-        consume(TokenKind::Equal, "expected '=' in assignment");
-        auto value = parse_expression();
-        consume(TokenKind::Semicolon, "expected ';' after assignment");
-        return std::make_unique<AssignStmt>(name.location, name.lexeme, std::move(value));
-    }
     auto expr = parse_expression();
+    if (match(TokenKind::Equal)) {
+        auto value = parse_expression();
+        const SourceLocation location = expr->location;
+        consume(TokenKind::Semicolon, "expected ';' after assignment");
+
+        if (const auto* variable = dynamic_cast<const VariableExpr*>(expr.get())) {
+            return std::make_unique<AssignStmt>(location, variable->name, std::move(value));
+        }
+        if (auto* field = dynamic_cast<FieldAccessExpr*>(expr.get())) {
+            auto owned = std::unique_ptr<FieldAccessExpr>(static_cast<FieldAccessExpr*>(expr.release()));
+            return std::make_unique<FieldAssignStmt>(location, std::move(owned->object), owned->field, std::move(value));
+        }
+        if (auto* index = dynamic_cast<IndexExpr*>(expr.get())) {
+            auto owned = std::unique_ptr<IndexExpr>(static_cast<IndexExpr*>(expr.release()));
+            return std::make_unique<IndexAssignStmt>(
+                location, std::move(owned->object), std::move(owned->index), std::move(value));
+        }
+        fail(location, "invalid assignment target");
+    }
     consume(TokenKind::Semicolon, "expected ';' after expression");
     return std::make_unique<ExprStmt>(expr->location, std::move(expr));
 }
@@ -316,6 +322,17 @@ std::unique_ptr<Expr> Parser::parse_primary() {
     if (match(TokenKind::String)) {
         return std::make_unique<StringExpr>(previous().location, previous().lexeme);
     }
+    if (match(TokenKind::LBracket)) {
+        const SourceLocation location = previous().location;
+        std::vector<std::unique_ptr<Expr>> elements;
+        if (!check(TokenKind::RBracket)) {
+            do {
+                elements.push_back(parse_expression());
+            } while (match(TokenKind::Comma));
+        }
+        consume(TokenKind::RBracket, "expected ']' after array literal");
+        return parse_postfix(std::make_unique<ArrayLiteralExpr>(location, std::move(elements)));
+    }
     if (match(TokenKind::Identifier)) {
         const Token first = previous();
         if (check(TokenKind::LBrace)) {
@@ -368,9 +385,20 @@ std::unique_ptr<Expr> Parser::parse_primary() {
 }
 
 std::unique_ptr<Expr> Parser::parse_postfix(std::unique_ptr<Expr> expr) {
-    while (match(TokenKind::Dot)) {
-        const Token field = consume(TokenKind::Identifier, "expected field name after '.'");
-        expr = std::make_unique<FieldAccessExpr>(field.location, std::move(expr), field.lexeme);
+    while (true) {
+        if (match(TokenKind::Dot)) {
+            const Token field = consume(TokenKind::Identifier, "expected field name after '.'");
+            expr = std::make_unique<FieldAccessExpr>(field.location, std::move(expr), field.lexeme);
+            continue;
+        }
+        if (match(TokenKind::LBracket)) {
+            const SourceLocation location = previous().location;
+            auto index = parse_expression();
+            consume(TokenKind::RBracket, "expected ']' after index expression");
+            expr = std::make_unique<IndexExpr>(location, std::move(expr), std::move(index));
+            continue;
+        }
+        break;
     }
     return expr;
 }
@@ -385,6 +413,13 @@ std::string Parser::parse_qualified_name() {
 }
 
 Type Parser::parse_type() {
+    if (match(TokenKind::LBracket)) {
+        Type element_type = parse_type();
+        consume(TokenKind::Semicolon, "expected ';' in array type");
+        const Token size_token = consume(TokenKind::Integer, "expected array size");
+        consume(TokenKind::RBracket, "expected ']' after array type");
+        return Type::array_type(element_type, static_cast<std::size_t>(std::stoull(size_token.lexeme)));
+    }
     const Token token = consume(TokenKind::Identifier, "expected type name");
     if (token.lexeme == "int") {
         return Type::int_type();

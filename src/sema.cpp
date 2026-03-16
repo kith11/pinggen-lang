@@ -6,6 +6,23 @@
 
 namespace pinggen {
 
+namespace {
+
+const VariableExpr* root_variable_expr(const Expr& expr) {
+    if (const auto* variable = dynamic_cast<const VariableExpr*>(&expr)) {
+        return variable;
+    }
+    if (const auto* field = dynamic_cast<const FieldAccessExpr*>(&expr)) {
+        return root_variable_expr(*field->object);
+    }
+    if (const auto* index = dynamic_cast<const IndexExpr*>(&expr)) {
+        return root_variable_expr(*index->object);
+    }
+    return nullptr;
+}
+
+}  // namespace
+
 std::string type_name(const Type& type) {
     switch (type.kind) {
         case TypeKind::Int: return "int";
@@ -13,6 +30,7 @@ std::string type_name(const Type& type) {
         case TypeKind::String: return "string";
         case TypeKind::Void: return "void";
         case TypeKind::Struct: return type.name;
+        case TypeKind::Array: return "[" + type_name(*type.element_type) + "; " + std::to_string(type.array_size) + "]";
     }
     return "unknown";
 }
@@ -99,7 +117,21 @@ const StructInfo& SemanticAnalyzer::require_struct(const Type& type, const Sourc
     return it->second;
 }
 
+const Type& SemanticAnalyzer::require_array(const Type& type, const SourceLocation& location) const {
+    if (type.kind != TypeKind::Array || !type.element_type) {
+        fail(location, "expected array value");
+    }
+    return type;
+}
+
 void SemanticAnalyzer::validate_type(const Type& type, const SourceLocation& location, bool allow_struct) {
+    if (type.kind == TypeKind::Array) {
+        if (!type.element_type) {
+            fail(location, "invalid array element type");
+        }
+        validate_type(*type.element_type, location, allow_struct);
+        return;
+    }
     if (type.kind == TypeKind::Struct) {
         if (!allow_struct) {
             fail(location, "nested struct types are not supported in this milestone");
@@ -119,6 +151,23 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
     }
     if (dynamic_cast<const StringExpr*>(&expr)) {
         return Type::string_type();
+    }
+    if (const auto* node = dynamic_cast<const ArrayLiteralExpr*>(&expr)) {
+        if (node->elements.empty()) {
+            fail(node->location, "empty array literals are not supported");
+        }
+        const Type element_type = analyze_expr(*node->elements[0]);
+        if (element_type == Type::void_type()) {
+            fail(node->elements[0]->location, "array elements cannot be void");
+        }
+        for (std::size_t i = 1; i < node->elements.size(); ++i) {
+            const Type current_type = analyze_expr(*node->elements[i]);
+            if (current_type != element_type) {
+                fail(node->elements[i]->location,
+                     "array literal element expects " + type_name(element_type) + " but got " + type_name(current_type));
+            }
+        }
+        return Type::array_type(element_type, node->elements.size());
     }
     if (const auto* node = dynamic_cast<const VariableExpr*>(&expr)) {
         const auto it = symbols_.find(node->name);
@@ -163,6 +212,15 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         }
         return info.fields[field_it->second].type;
     }
+    if (const auto* node = dynamic_cast<const IndexExpr*>(&expr)) {
+        const Type object_type = analyze_expr(*node->object);
+        const Type& array_type = require_array(object_type, node->location);
+        const Type index_type = analyze_expr(*node->index);
+        if (index_type != Type::int_type()) {
+            fail(node->index->location, "array index must be int");
+        }
+        return *array_type.element_type;
+    }
     if (const auto* node = dynamic_cast<const UnaryExpr*>(&expr)) {
         const Type value = analyze_expr(*node->expr);
         if (node->op == "!") {
@@ -196,6 +254,15 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
                 fail(node->location, "operator '" + node->op + "' only supports int operands");
             }
             return Type::bool_type();
+        }
+        if (node->op == "+") {
+            if (left == Type::int_type() && right == Type::int_type()) {
+                return Type::int_type();
+            }
+            if (left == Type::string_type() && right == Type::string_type()) {
+                return Type::string_type();
+            }
+            fail(node->location, "operator '+' only supports int+int or string+string");
         }
         if (left != Type::int_type() || right != Type::int_type()) {
             fail(node->location, "binary operator '" + node->op + "' only supports int operands");
@@ -246,9 +313,18 @@ bool SemanticAnalyzer::analyze_block(const std::vector<std::unique_ptr<Stmt>>& b
 
 bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
     if (const auto* node = dynamic_cast<const LetStmt*>(&stmt)) {
-        const Type type = analyze_expr(*node->initializer);
-        if (type == Type::void_type()) {
+        const Type initializer_type = analyze_expr(*node->initializer);
+        if (initializer_type == Type::void_type()) {
             fail(node->location, "variables cannot be initialized with void values");
+        }
+        Type type = initializer_type;
+        if (node->declared_type.has_value()) {
+            validate_type(*node->declared_type, node->location, true);
+            if (*node->declared_type != initializer_type) {
+                fail(node->location, "cannot initialize " + type_name(*node->declared_type) + " with " +
+                                         type_name(initializer_type));
+            }
+            type = *node->declared_type;
         }
         symbols_[node->name] = Symbol{type, node->is_mutable};
         return false;
@@ -268,9 +344,9 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
         return false;
     }
     if (const auto* node = dynamic_cast<const FieldAssignStmt*>(&stmt)) {
-        const auto* object_var = dynamic_cast<const VariableExpr*>(node->object.get());
+        const auto* object_var = root_variable_expr(*node->object);
         if (!object_var) {
-            fail(node->location, "field assignment requires a variable owner");
+            fail(node->location, "field assignment requires a mutable variable owner");
         }
         const auto it = symbols_.find(object_var->name);
         if (it == symbols_.end()) {
@@ -279,16 +355,42 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
         if (!it->second.is_mutable) {
             fail(node->location, "cannot assign through immutable variable '" + object_var->name + "'");
         }
-        const StructInfo& info = require_struct(it->second.type, node->location);
+        const Type object_type = analyze_expr(*node->object);
+        const StructInfo& info = require_struct(object_type, node->location);
         const auto field_it = info.field_indices.find(node->field);
         if (field_it == info.field_indices.end()) {
-            fail(node->location, "unknown field '" + node->field + "' on struct '" + it->second.type.name + "'");
+            fail(node->location, "unknown field '" + node->field + "' on struct '" + object_type.name + "'");
         }
         const Type rhs = analyze_expr(*node->value);
         const Type expected = info.fields[field_it->second].type;
         if (rhs != expected) {
             fail(node->location, "cannot assign " + type_name(rhs) + " to field '" + node->field + "' of type " +
                                      type_name(expected));
+        }
+        return false;
+    }
+    if (const auto* node = dynamic_cast<const IndexAssignStmt*>(&stmt)) {
+        const auto* object_var = root_variable_expr(*node->object);
+        if (!object_var) {
+            fail(node->location, "index assignment requires a mutable variable owner");
+        }
+        const auto it = symbols_.find(object_var->name);
+        if (it == symbols_.end()) {
+            fail(node->location, "unknown variable '" + object_var->name + "'");
+        }
+        if (!it->second.is_mutable) {
+            fail(node->location, "cannot assign through immutable variable '" + object_var->name + "'");
+        }
+        const Type object_type = analyze_expr(*node->object);
+        const Type& array_type = require_array(object_type, node->location);
+        const Type index_type = analyze_expr(*node->index);
+        if (index_type != Type::int_type()) {
+            fail(node->index->location, "array index must be int");
+        }
+        const Type rhs = analyze_expr(*node->value);
+        if (rhs != *array_type.element_type) {
+            fail(node->location,
+                 "cannot assign " + type_name(rhs) + " to array element of type " + type_name(*array_type.element_type));
         }
         return false;
     }

@@ -89,24 +89,21 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
 
     std::ofstream source(target_dir / "src" / "main.pg");
     source << "import std::{ io }\n\n";
-    source << "func classify(value: int) -> string {\n";
-    source << "    if value % 2 == 0 {\n";
-    source << "        return \"even\";\n";
-    source << "    } else if value > 3 {\n";
-    source << "        return \"large\";\n";
-    source << "    } else {\n";
-    source << "        return \"small\";\n";
-    source << "    }\n";
+    source << "func swap_pair(values: [int; 2]) -> [int; 2] {\n";
+    source << "    let mut result: [int; 2] = values;\n";
+    source << "    let first = result[0];\n";
+    source << "    result[0] = result[1];\n";
+    source << "    result[1] = first;\n";
+    source << "    return result;\n";
     source << "}\n\n";
     source << "func main() {\n";
-    source << "    let mut count = 6;\n";
-    source << "    while count > 0 {\n";
-    source << "        io::println(classify(count));\n";
-    source << "        if count <= 2 {\n";
-    source << "            break;\n";
-    source << "        }\n";
-    source << "        count = count - 1;\n";
-    source << "    }\n";
+    source << "    let grid = [[1, 2], [3, 4]];\n";
+    source << "    let mut pair: [int; 2] = [10, 20];\n";
+    source << "    pair[0] = 99;\n";
+    source << "    let swapped = swap_pair(pair);\n";
+    source << "    io::println(swapped[0]);\n";
+    source << "    io::println(swapped[1]);\n";
+    source << "    io::println(grid[1][0]);\n";
     source << "}\n";
 }
 

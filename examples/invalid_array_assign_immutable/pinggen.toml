@@ -1,0 +1,7 @@
+[package]
+name = "invalid_array_assign_immutable"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_array_assign_immutable"

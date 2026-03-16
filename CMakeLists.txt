@@ -108,4 +108,39 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_modulo_operands
     )
     set_tests_properties(pinggen-check-invalid-modulo-operands PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-string-plus-mismatch
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_string_plus_mismatch
+    )
+    set_tests_properties(pinggen-check-invalid-string-plus-mismatch PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-array-mixed-literal
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_array_mixed_literal
+    )
+    set_tests_properties(pinggen-check-invalid-array-mixed-literal PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-array-size-mismatch
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_array_size_mismatch
+    )
+    set_tests_properties(pinggen-check-invalid-array-size-mismatch PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-array-index-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_array_index_type
+    )
+    set_tests_properties(pinggen-check-invalid-array-index-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-array-assign-immutable
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_array_assign_immutable
+    )
+    set_tests_properties(pinggen-check-invalid-array-assign-immutable PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-array-operator
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_array_operator
+    )
+    set_tests_properties(pinggen-check-invalid-array-operator PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-run-invalid-array-bounds
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_invalid_array_bounds
+    )
+    set_tests_properties(pinggen-run-invalid-array-bounds PROPERTIES WILL_FAIL TRUE)
 endif()

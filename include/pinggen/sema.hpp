@@ -34,6 +34,7 @@ class SemanticAnalyzer {
     bool analyze_block(const std::vector<std::unique_ptr<Stmt>>& body);
     bool analyze_stmt(const Stmt& stmt);
     const StructInfo& require_struct(const Type& type, const SourceLocation& location) const;
+    const Type& require_array(const Type& type, const SourceLocation& location) const;
     void validate_type(const Type& type, const SourceLocation& location, bool allow_struct);
 
     std::unordered_map<std::string, Symbol> symbols_;

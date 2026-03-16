@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -14,20 +15,40 @@ enum class TypeKind {
     Bool,
     String,
     Void,
-    Struct
+    Struct,
+    Array
 };
 
 struct Type {
     TypeKind kind = TypeKind::Void;
     std::string name;
+    std::shared_ptr<Type> element_type;
+    std::size_t array_size = 0;
 
-    static Type int_type() { return {TypeKind::Int, ""}; }
-    static Type bool_type() { return {TypeKind::Bool, ""}; }
-    static Type string_type() { return {TypeKind::String, ""}; }
-    static Type void_type() { return {TypeKind::Void, ""}; }
-    static Type struct_type(std::string struct_name) { return {TypeKind::Struct, std::move(struct_name)}; }
+    static Type int_type() { return {TypeKind::Int, "", nullptr, 0}; }
+    static Type bool_type() { return {TypeKind::Bool, "", nullptr, 0}; }
+    static Type string_type() { return {TypeKind::String, "", nullptr, 0}; }
+    static Type void_type() { return {TypeKind::Void, "", nullptr, 0}; }
+    static Type struct_type(std::string struct_name) { return {TypeKind::Struct, std::move(struct_name), nullptr, 0}; }
+    static Type array_type(Type element, std::size_t size) {
+        return {TypeKind::Array, "", std::make_shared<Type>(std::move(element)), size};
+    }
 
-    bool operator==(const Type& other) const { return kind == other.kind && name == other.name; }
+    bool operator==(const Type& other) const {
+        if (kind != other.kind) {
+            return false;
+        }
+        if (kind == TypeKind::Struct) {
+            return name == other.name;
+        }
+        if (kind == TypeKind::Array) {
+            if (array_size != other.array_size || !element_type || !other.element_type) {
+                return array_size == other.array_size && !element_type && !other.element_type;
+            }
+            return *element_type == *other.element_type;
+        }
+        return true;
+    }
     bool operator!=(const Type& other) const { return !(*this == other); }
 };
 
@@ -70,6 +91,11 @@ struct StructLiteralField {
     std::unique_ptr<Expr> value;
 };
 
+struct ArrayLiteralExpr final : Expr {
+    ArrayLiteralExpr(SourceLocation loc, std::vector<std::unique_ptr<Expr>> e) : Expr(loc), elements(std::move(e)) {}
+    std::vector<std::unique_ptr<Expr>> elements;
+};
+
 struct VariableExpr final : Expr {
     VariableExpr(SourceLocation loc, std::string n) : Expr(loc), name(std::move(n)) {}
     std::string name;
@@ -87,6 +113,13 @@ struct FieldAccessExpr final : Expr {
         : Expr(loc), object(std::move(o)), field(std::move(f)) {}
     std::unique_ptr<Expr> object;
     std::string field;
+};
+
+struct IndexExpr final : Expr {
+    IndexExpr(SourceLocation loc, std::unique_ptr<Expr> o, std::unique_ptr<Expr> i)
+        : Expr(loc), object(std::move(o)), index(std::move(i)) {}
+    std::unique_ptr<Expr> object;
+    std::unique_ptr<Expr> index;
 };
 
 struct UnaryExpr final : Expr {
@@ -118,10 +151,11 @@ struct Stmt {
 };
 
 struct LetStmt final : Stmt {
-    LetStmt(SourceLocation loc, std::string n, bool m, std::unique_ptr<Expr> i)
-        : Stmt(loc), name(std::move(n)), is_mutable(m), initializer(std::move(i)) {}
+    LetStmt(SourceLocation loc, std::string n, bool m, std::optional<Type> t, std::unique_ptr<Expr> i)
+        : Stmt(loc), name(std::move(n)), is_mutable(m), declared_type(std::move(t)), initializer(std::move(i)) {}
     std::string name;
     bool is_mutable;
+    std::optional<Type> declared_type;
     std::unique_ptr<Expr> initializer;
 };
 
@@ -137,6 +171,14 @@ struct FieldAssignStmt final : Stmt {
         : Stmt(loc), object(std::move(o)), field(std::move(f)), value(std::move(v)) {}
     std::unique_ptr<Expr> object;
     std::string field;
+    std::unique_ptr<Expr> value;
+};
+
+struct IndexAssignStmt final : Stmt {
+    IndexAssignStmt(SourceLocation loc, std::unique_ptr<Expr> o, std::unique_ptr<Expr> i, std::unique_ptr<Expr> v)
+        : Stmt(loc), object(std::move(o)), index(std::move(i)), value(std::move(v)) {}
+    std::unique_ptr<Expr> object;
+    std::unique_ptr<Expr> index;
     std::unique_ptr<Expr> value;
 };
 

@@ -25,6 +25,8 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::RBrace: return "}";
         case TokenKind::LParen: return "(";
         case TokenKind::RParen: return ")";
+        case TokenKind::LBracket: return "[";
+        case TokenKind::RBracket: return "]";
         case TokenKind::Comma: return ",";
         case TokenKind::Semicolon: return ";";
         case TokenKind::Plus: return "+";

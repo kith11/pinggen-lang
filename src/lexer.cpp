@@ -34,6 +34,8 @@ std::vector<Token> Lexer::tokenize() {
             case '}': tokens.push_back(make_token(TokenKind::RBrace, start_line, start_column, "}")); break;
             case '(': tokens.push_back(make_token(TokenKind::LParen, start_line, start_column, "(")); break;
             case ')': tokens.push_back(make_token(TokenKind::RParen, start_line, start_column, ")")); break;
+            case '[': tokens.push_back(make_token(TokenKind::LBracket, start_line, start_column, "[")); break;
+            case ']': tokens.push_back(make_token(TokenKind::RBracket, start_line, start_column, "]")); break;
             case ',': tokens.push_back(make_token(TokenKind::Comma, start_line, start_column, ",")); break;
             case ';': tokens.push_back(make_token(TokenKind::Semicolon, start_line, start_column, ";")); break;
             case '+': tokens.push_back(make_token(TokenKind::Plus, start_line, start_column, "+")); break;
