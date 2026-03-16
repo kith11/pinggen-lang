@@ -11,6 +11,7 @@ namespace pinggen {
 
 enum class ValueType {
     Int,
+    Bool,
     String,
     Void
 };
@@ -35,6 +36,11 @@ struct IntegerExpr final : Expr {
 struct StringExpr final : Expr {
     StringExpr(SourceLocation loc, std::string v) : Expr(loc), value(std::move(v)) {}
     std::string value;
+};
+
+struct BoolExpr final : Expr {
+    BoolExpr(SourceLocation loc, bool v) : Expr(loc), value(v) {}
+    bool value;
 };
 
 struct VariableExpr final : Expr {
@@ -86,6 +92,15 @@ struct ExprStmt final : Stmt {
 struct ReturnStmt final : Stmt {
     ReturnStmt(SourceLocation loc, std::unique_ptr<Expr> v) : Stmt(loc), value(std::move(v)) {}
     std::unique_ptr<Expr> value;
+};
+
+struct IfStmt final : Stmt {
+    IfStmt(SourceLocation loc, std::unique_ptr<Expr> c, std::vector<std::unique_ptr<Stmt>> t,
+           std::vector<std::unique_ptr<Stmt>> e)
+        : Stmt(loc), condition(std::move(c)), then_body(std::move(t)), else_body(std::move(e)) {}
+    std::unique_ptr<Expr> condition;
+    std::vector<std::unique_ptr<Stmt>> then_body;
+    std::vector<std::unique_ptr<Stmt>> else_body;
 };
 
 struct ImportDecl {

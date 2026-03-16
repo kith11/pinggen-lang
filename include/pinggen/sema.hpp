@@ -25,6 +25,7 @@ class SemanticAnalyzer {
   private:
     void collect_signatures(const Program& program);
     ValueType analyze_expr(const Expr& expr);
+    bool analyze_block(const std::vector<std::unique_ptr<Stmt>>& body);
     bool analyze_stmt(const Stmt& stmt);
 
     std::unordered_map<std::string, Symbol> symbols_;

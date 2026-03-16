@@ -8,11 +8,15 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::Identifier: return "identifier";
         case TokenKind::Integer: return "integer";
         case TokenKind::String: return "string";
+        case TokenKind::KwTrue: return "true";
+        case TokenKind::KwFalse: return "false";
         case TokenKind::KwImport: return "import";
         case TokenKind::KwFunc: return "func";
         case TokenKind::KwLet: return "let";
         case TokenKind::KwMut: return "mut";
         case TokenKind::KwReturn: return "return";
+        case TokenKind::KwIf: return "if";
+        case TokenKind::KwElse: return "else";
         case TokenKind::LBrace: return "{";
         case TokenKind::RBrace: return "}";
         case TokenKind::LParen: return "(";
@@ -24,6 +28,8 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::Star: return "*";
         case TokenKind::Slash: return "/";
         case TokenKind::Equal: return "=";
+        case TokenKind::EqualEqual: return "==";
+        case TokenKind::BangEqual: return "!=";
         case TokenKind::Colon: return ":";
         case TokenKind::ColonColon: return "::";
         case TokenKind::Arrow: return "->";

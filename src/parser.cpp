@@ -106,6 +106,9 @@ std::unique_ptr<Stmt> Parser::parse_statement() {
     if (check(TokenKind::KwReturn)) {
         return parse_return_statement();
     }
+    if (check(TokenKind::KwIf)) {
+        return parse_if_statement();
+    }
     return parse_assignment_or_expression_statement();
 }
 
@@ -129,6 +132,21 @@ std::unique_ptr<Stmt> Parser::parse_return_statement() {
     return std::make_unique<ReturnStmt>(return_token.location, std::move(value));
 }
 
+std::unique_ptr<Stmt> Parser::parse_if_statement() {
+    const Token if_token = consume(TokenKind::KwIf, "expected 'if'");
+    auto condition = parse_expression();
+    consume(TokenKind::LBrace, "expected '{' before if block");
+    auto then_body = parse_block();
+
+    std::vector<std::unique_ptr<Stmt>> else_body;
+    if (match(TokenKind::KwElse)) {
+        consume(TokenKind::LBrace, "expected '{' before else block");
+        else_body = parse_block();
+    }
+
+    return std::make_unique<IfStmt>(if_token.location, std::move(condition), std::move(then_body), std::move(else_body));
+}
+
 std::unique_ptr<Stmt> Parser::parse_assignment_or_expression_statement() {
     if (check(TokenKind::Identifier) && check_next(TokenKind::Equal)) {
         const Token name = consume(TokenKind::Identifier, "expected variable name");
@@ -142,7 +160,18 @@ std::unique_ptr<Stmt> Parser::parse_assignment_or_expression_statement() {
     return std::make_unique<ExprStmt>(expr->location, std::move(expr));
 }
 
-std::unique_ptr<Expr> Parser::parse_expression() { return parse_term(); }
+std::unique_ptr<Expr> Parser::parse_expression() { return parse_equality(); }
+
+std::unique_ptr<Expr> Parser::parse_equality() {
+    auto expr = parse_term();
+    while (check(TokenKind::EqualEqual) || check(TokenKind::BangEqual)) {
+        const Token op = current();
+        ++current_;
+        auto right = parse_term();
+        expr = std::make_unique<BinaryExpr>(op.location, op.lexeme, std::move(expr), std::move(right));
+    }
+    return expr;
+}
 
 std::unique_ptr<Expr> Parser::parse_term() {
     auto expr = parse_factor();
@@ -169,6 +198,12 @@ std::unique_ptr<Expr> Parser::parse_factor() {
 std::unique_ptr<Expr> Parser::parse_primary() {
     if (match(TokenKind::Integer)) {
         return std::make_unique<IntegerExpr>(previous().location, std::stoll(previous().lexeme));
+    }
+    if (match(TokenKind::KwTrue)) {
+        return std::make_unique<BoolExpr>(previous().location, true);
+    }
+    if (match(TokenKind::KwFalse)) {
+        return std::make_unique<BoolExpr>(previous().location, false);
     }
     if (match(TokenKind::String)) {
         return std::make_unique<StringExpr>(previous().location, previous().lexeme);
@@ -221,6 +256,9 @@ ValueType Parser::parse_type() {
     const Token token = consume(TokenKind::Identifier, "expected type name");
     if (token.lexeme == "int") {
         return ValueType::Int;
+    }
+    if (token.lexeme == "bool") {
+        return ValueType::Bool;
     }
     if (token.lexeme == "string") {
         return ValueType::String;

@@ -19,8 +19,10 @@ class LLVMIRGenerator {
   private:
     std::string emit_string_constant(const std::string& value);
     TypedIRValue emit_expr(const Expr& expr);
+    bool emit_block(const std::vector<std::unique_ptr<Stmt>>& body);
     bool emit_stmt(const Stmt& stmt);
     std::string llvm_type(ValueType type) const;
+    std::string next_label(const std::string& prefix);
     void reset_function_state();
     std::string next_register();
     std::string next_string_name();
@@ -36,6 +38,7 @@ class LLVMIRGenerator {
     ValueType current_return_type_ = ValueType::Void;
     std::size_t register_counter_ = 0;
     std::size_t string_counter_ = 0;
+    std::size_t label_counter_ = 0;
 };
 
 }  // namespace pinggen

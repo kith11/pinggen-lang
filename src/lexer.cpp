@@ -46,7 +46,19 @@ std::vector<Token> Lexer::tokenize() {
                 break;
             case '*': tokens.push_back(make_token(TokenKind::Star, start_line, start_column, "*")); break;
             case '/': tokens.push_back(make_token(TokenKind::Slash, start_line, start_column, "/")); break;
-            case '=': tokens.push_back(make_token(TokenKind::Equal, start_line, start_column, "=")); break;
+            case '=':
+                if (match('=')) {
+                    tokens.push_back(make_token(TokenKind::EqualEqual, start_line, start_column, "=="));
+                } else {
+                    tokens.push_back(make_token(TokenKind::Equal, start_line, start_column, "="));
+                }
+                break;
+            case '!':
+                if (!match('=')) {
+                    fail({start_line, start_column}, "unexpected character");
+                }
+                tokens.push_back(make_token(TokenKind::BangEqual, start_line, start_column, "!="));
+                break;
             case ':':
                 if (match(':')) {
                     tokens.push_back(make_token(TokenKind::ColonColon, start_line, start_column, "::"));
@@ -127,6 +139,10 @@ Token Lexer::lex_identifier(std::size_t start_line, std::size_t start_column) {
         {"let", TokenKind::KwLet},
         {"mut", TokenKind::KwMut},
         {"return", TokenKind::KwReturn},
+        {"true", TokenKind::KwTrue},
+        {"false", TokenKind::KwFalse},
+        {"if", TokenKind::KwIf},
+        {"else", TokenKind::KwElse},
     };
 
     const auto it = keywords.find(value);
