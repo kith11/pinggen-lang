@@ -9,17 +9,38 @@
 
 namespace pinggen {
 
-enum class ValueType {
+enum class TypeKind {
     Int,
     Bool,
     String,
-    Void
+    Void,
+    Struct
+};
+
+struct Type {
+    TypeKind kind = TypeKind::Void;
+    std::string name;
+
+    static Type int_type() { return {TypeKind::Int, ""}; }
+    static Type bool_type() { return {TypeKind::Bool, ""}; }
+    static Type string_type() { return {TypeKind::String, ""}; }
+    static Type void_type() { return {TypeKind::Void, ""}; }
+    static Type struct_type(std::string struct_name) { return {TypeKind::Struct, std::move(struct_name)}; }
+
+    bool operator==(const Type& other) const { return kind == other.kind && name == other.name; }
+    bool operator!=(const Type& other) const { return !(*this == other); }
+};
+
+struct StructField {
+    SourceLocation location;
+    std::string name;
+    Type type = Type::void_type();
 };
 
 struct Parameter {
     SourceLocation location;
     std::string name;
-    ValueType type = ValueType::Void;
+    Type type = Type::void_type();
 };
 
 struct Expr {
@@ -43,9 +64,29 @@ struct BoolExpr final : Expr {
     bool value;
 };
 
+struct StructLiteralField {
+    SourceLocation location;
+    std::string name;
+    std::unique_ptr<Expr> value;
+};
+
 struct VariableExpr final : Expr {
     VariableExpr(SourceLocation loc, std::string n) : Expr(loc), name(std::move(n)) {}
     std::string name;
+};
+
+struct StructLiteralExpr final : Expr {
+    StructLiteralExpr(SourceLocation loc, std::string n, std::vector<StructLiteralField> f)
+        : Expr(loc), struct_name(std::move(n)), fields(std::move(f)) {}
+    std::string struct_name;
+    std::vector<StructLiteralField> fields;
+};
+
+struct FieldAccessExpr final : Expr {
+    FieldAccessExpr(SourceLocation loc, std::unique_ptr<Expr> o, std::string f)
+        : Expr(loc), object(std::move(o)), field(std::move(f)) {}
+    std::unique_ptr<Expr> object;
+    std::string field;
 };
 
 struct CallExpr final : Expr {
@@ -84,6 +125,14 @@ struct AssignStmt final : Stmt {
     std::unique_ptr<Expr> value;
 };
 
+struct FieldAssignStmt final : Stmt {
+    FieldAssignStmt(SourceLocation loc, std::unique_ptr<Expr> o, std::string f, std::unique_ptr<Expr> v)
+        : Stmt(loc), object(std::move(o)), field(std::move(f)), value(std::move(v)) {}
+    std::unique_ptr<Expr> object;
+    std::string field;
+    std::unique_ptr<Expr> value;
+};
+
 struct ExprStmt final : Stmt {
     ExprStmt(SourceLocation loc, std::unique_ptr<Expr> e) : Stmt(loc), expr(std::move(e)) {}
     std::unique_ptr<Expr> expr;
@@ -115,16 +164,23 @@ struct ImportDecl {
     std::vector<std::string> items;
 };
 
+struct StructDecl {
+    SourceLocation location;
+    std::string name;
+    std::vector<StructField> fields;
+};
+
 struct FunctionDecl {
     SourceLocation location;
     std::string name;
     std::vector<Parameter> params;
-    ValueType return_type = ValueType::Void;
+    Type return_type = Type::void_type();
     std::vector<std::unique_ptr<Stmt>> body;
 };
 
 struct Program {
     std::vector<ImportDecl> imports;
+    std::vector<StructDecl> structs;
     std::vector<FunctionDecl> functions;
 };
 
