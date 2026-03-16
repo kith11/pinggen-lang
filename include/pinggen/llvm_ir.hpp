@@ -23,6 +23,7 @@ class LLVMIRGenerator {
     std::string generate(const Program& program);
 
   private:
+    static std::string lowered_function_name(const FunctionDecl& function);
     std::string emit_concat_helper() const;
     std::string emit_bounds_abort_helper() const;
     void emit_bounds_check(const std::string& index_ir, std::size_t size);

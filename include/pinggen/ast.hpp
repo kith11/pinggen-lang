@@ -62,6 +62,7 @@ struct Parameter {
     SourceLocation location;
     std::string name;
     Type type = Type::void_type();
+    bool is_self = false;
 };
 
 struct Expr {
@@ -113,6 +114,14 @@ struct FieldAccessExpr final : Expr {
         : Expr(loc), object(std::move(o)), field(std::move(f)) {}
     std::unique_ptr<Expr> object;
     std::string field;
+};
+
+struct MethodCallExpr final : Expr {
+    MethodCallExpr(SourceLocation loc, std::unique_ptr<Expr> o, std::string m, std::vector<std::unique_ptr<Expr>> a)
+        : Expr(loc), object(std::move(o)), method(std::move(m)), args(std::move(a)) {}
+    std::unique_ptr<Expr> object;
+    std::string method;
+    std::vector<std::unique_ptr<Expr>> args;
 };
 
 struct IndexExpr final : Expr {
@@ -233,6 +242,9 @@ struct FunctionDecl {
     std::vector<Parameter> params;
     Type return_type = Type::void_type();
     std::vector<std::unique_ptr<Stmt>> body;
+    std::string impl_target;
+
+    bool is_method() const { return !impl_target.empty(); }
 };
 
 struct Program {

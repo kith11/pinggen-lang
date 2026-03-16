@@ -1,60 +1,60 @@
-Start testing: Mar 16 23:44 Malay Peninsula Standard Time
+Start testing: Mar 16 23:53 Malay Peninsula Standard Time
 ----------------------------------------------------------
-1/25 Testing: pinggen-check-example
-1/25 Test: pinggen-check-example
+1/31 Testing: pinggen-check-example
+1/31 Test: pinggen-check-example
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/hello"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-example" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-example" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 checked hello
 <end of output>
-Test time =   0.02 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-example" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-example" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-example" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-2/25 Testing: pinggen-build-example
-2/25 Test: pinggen-build-example
+2/31 Testing: pinggen-build-example
+2/31 Test: pinggen-build-example
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "build" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/hello"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-build-example" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-build-example" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 warning: overriding the module target triple with x86_64-pc-windows-msvc19.50.35723 [-Woverride-module]
 1 warning generated.
 built C:\Users\keith\Documents\projects\pinggen-programming-language\examples\hello\build/hello.exe
 <end of output>
-Test time =   0.17 sec
+Test time =   0.18 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-build-example" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-build-example" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-build-example" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-3/25 Testing: pinggen-check-invalid-arity
-3/25 Test: pinggen-check-invalid-arity
+3/31 Testing: pinggen-check-invalid-arity
+3/31 Test: pinggen-check-invalid-arity
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_wrong_arity"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-arity" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-arity" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 8, column 17: function 'add' expects 2 argument(s)
 <end of output>
-Test time =   0.02 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-arity" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-arity" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-arity" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-4/25 Testing: pinggen-check-invalid-return
-4/25 Test: pinggen-check-invalid-return
+4/31 Testing: pinggen-check-invalid-return
+4/31 Test: pinggen-check-invalid-return
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_missing_return"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-return" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-return" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 1, column 1: non-void function 'value' must return a value
@@ -62,63 +62,63 @@ compile error: line 1, column 1: non-void function 'value' must return a value
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-return" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-return" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-return" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-5/25 Testing: pinggen-check-invalid-duplicate-param
-5/25 Test: pinggen-check-invalid-duplicate-param
+5/31 Testing: pinggen-check-invalid-duplicate-param
+5/31 Test: pinggen-check-invalid-duplicate-param
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_duplicate_param"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-duplicate-param" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-duplicate-param" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 1, column 22: duplicate parameter 'value'
 <end of output>
-Test time =   0.02 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-duplicate-param" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-duplicate-param" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-duplicate-param" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-6/25 Testing: pinggen-check-invalid-if-condition
-6/25 Test: pinggen-check-invalid-if-condition
+6/31 Testing: pinggen-check-invalid-if-condition
+6/31 Test: pinggen-check-invalid-if-condition
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_if_condition"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-if-condition" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-if-condition" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 8: if condition must be bool
 <end of output>
-Test time =   0.02 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-if-condition" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-if-condition" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-if-condition" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-7/25 Testing: pinggen-check-invalid-string-compare
-7/25 Test: pinggen-check-invalid-string-compare
+7/31 Testing: pinggen-check-invalid-string-compare
+7/31 Test: pinggen-check-invalid-string-compare
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_string_compare"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-string-compare" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-string-compare" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 4, column 21: operator '==' only supports int and bool operands
 <end of output>
-Test time =   0.02 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-string-compare" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-string-compare" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-string-compare" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-8/25 Testing: pinggen-check-invalid-bool-assign
-8/25 Test: pinggen-check-invalid-bool-assign
+8/31 Testing: pinggen-check-invalid-bool-assign
+8/31 Test: pinggen-check-invalid-bool-assign
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_bool_assign"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-bool-assign" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-bool-assign" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 7, column 5: cannot assign bool to int
@@ -126,15 +126,15 @@ compile error: line 7, column 5: cannot assign bool to int
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-bool-assign" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-bool-assign" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-bool-assign" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-9/25 Testing: pinggen-check-invalid-while-condition
-9/25 Test: pinggen-check-invalid-while-condition
+9/31 Testing: pinggen-check-invalid-while-condition
+9/31 Test: pinggen-check-invalid-while-condition
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_while_condition"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-while-condition" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-while-condition" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 11: while condition must be bool
@@ -142,15 +142,15 @@ compile error: line 2, column 11: while condition must be bool
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-while-condition" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-while-condition" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-while-condition" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-10/25 Testing: pinggen-check-invalid-while-return
-10/25 Test: pinggen-check-invalid-while-return
+10/31 Testing: pinggen-check-invalid-while-return
+10/31 Test: pinggen-check-invalid-while-return
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_while_missing_return"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-while-return" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-while-return" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 5, column 9: expected field name
@@ -158,15 +158,15 @@ compile error: line 5, column 9: expected field name
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-while-return" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-while-return" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-while-return" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-11/25 Testing: pinggen-check-invalid-struct-duplicate-field
-11/25 Test: pinggen-check-invalid-struct-duplicate-field
+11/31 Testing: pinggen-check-invalid-struct-duplicate-field
+11/31 Test: pinggen-check-invalid-struct-duplicate-field
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_struct_duplicate_field"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-struct-duplicate-field" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-struct-duplicate-field" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 3, column 5: duplicate field 'hp' in struct 'Hero'
@@ -174,15 +174,15 @@ compile error: line 3, column 5: duplicate field 'hp' in struct 'Hero'
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-struct-duplicate-field" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-struct-duplicate-field" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-struct-duplicate-field" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-12/25 Testing: pinggen-check-invalid-struct-field-type
-12/25 Test: pinggen-check-invalid-struct-field-type
+12/31 Testing: pinggen-check-invalid-struct-field-type
+12/31 Test: pinggen-check-invalid-struct-field-type
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_struct_field_type"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-struct-field-type" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-struct-field-type" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 8, column 23: field 'hp' expects int but got bool
@@ -190,15 +190,15 @@ compile error: line 8, column 23: field 'hp' expects int but got bool
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-struct-field-type" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-struct-field-type" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-struct-field-type" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-13/25 Testing: pinggen-check-invalid-field-assign-immutable
-13/25 Test: pinggen-check-invalid-field-assign-immutable
+13/31 Testing: pinggen-check-invalid-field-assign-immutable
+13/31 Test: pinggen-check-invalid-field-assign-immutable
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_field_assign_immutable"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-field-assign-immutable" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-field-assign-immutable" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 9, column 10: cannot assign through immutable variable 'hero'
@@ -206,15 +206,15 @@ compile error: line 9, column 10: cannot assign through immutable variable 'hero
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-field-assign-immutable" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-field-assign-immutable" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-field-assign-immutable" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-14/25 Testing: pinggen-check-invalid-break-outside-loop
-14/25 Test: pinggen-check-invalid-break-outside-loop
+14/31 Testing: pinggen-check-invalid-break-outside-loop
+14/31 Test: pinggen-check-invalid-break-outside-loop
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_break_outside_loop"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-break-outside-loop" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-break-outside-loop" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 5: 'break' can only be used inside a while loop
@@ -222,15 +222,15 @@ compile error: line 2, column 5: 'break' can only be used inside a while loop
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-break-outside-loop" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-break-outside-loop" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-break-outside-loop" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-15/25 Testing: pinggen-check-invalid-continue-outside-loop
-15/25 Test: pinggen-check-invalid-continue-outside-loop
+15/31 Testing: pinggen-check-invalid-continue-outside-loop
+15/31 Test: pinggen-check-invalid-continue-outside-loop
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_continue_outside_loop"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-continue-outside-loop" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-continue-outside-loop" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 5: 'continue' can only be used inside a while loop
@@ -238,15 +238,15 @@ compile error: line 2, column 5: 'continue' can only be used inside a while loop
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-continue-outside-loop" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-continue-outside-loop" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-continue-outside-loop" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-16/25 Testing: pinggen-check-invalid-logical-operands
-16/25 Test: pinggen-check-invalid-logical-operands
+16/31 Testing: pinggen-check-invalid-logical-operands
+16/31 Test: pinggen-check-invalid-logical-operands
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_logical_operands"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-logical-operands" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-logical-operands" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 17: operator '&&' only supports bool operands
@@ -254,15 +254,15 @@ compile error: line 2, column 17: operator '&&' only supports bool operands
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-logical-operands" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-logical-operands" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-logical-operands" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-17/25 Testing: pinggen-check-invalid-relational-operands
-17/25 Test: pinggen-check-invalid-relational-operands
+17/31 Testing: pinggen-check-invalid-relational-operands
+17/31 Test: pinggen-check-invalid-relational-operands
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_relational_operands"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-relational-operands" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-relational-operands" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 20: operator '<' only supports int operands
@@ -270,15 +270,15 @@ compile error: line 2, column 20: operator '<' only supports int operands
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-relational-operands" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-relational-operands" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-relational-operands" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-18/25 Testing: pinggen-check-invalid-modulo-operands
-18/25 Test: pinggen-check-invalid-modulo-operands
+18/31 Testing: pinggen-check-invalid-modulo-operands
+18/31 Test: pinggen-check-invalid-modulo-operands
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_modulo_operands"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-modulo-operands" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-modulo-operands" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 20: binary operator '%' only supports int operands
@@ -286,15 +286,15 @@ compile error: line 2, column 20: binary operator '%' only supports int operands
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-modulo-operands" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-modulo-operands" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-modulo-operands" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-19/25 Testing: pinggen-check-invalid-string-plus-mismatch
-19/25 Test: pinggen-check-invalid-string-plus-mismatch
+19/31 Testing: pinggen-check-invalid-string-plus-mismatch
+19/31 Test: pinggen-check-invalid-string-plus-mismatch
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_string_plus_mismatch"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-string-plus-mismatch" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-string-plus-mismatch" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 22: operator '+' only supports int+int or string+string
@@ -302,15 +302,15 @@ compile error: line 2, column 22: operator '+' only supports int+int or string+s
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-string-plus-mismatch" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-string-plus-mismatch" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-string-plus-mismatch" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-20/25 Testing: pinggen-check-invalid-array-mixed-literal
-20/25 Test: pinggen-check-invalid-array-mixed-literal
+20/31 Testing: pinggen-check-invalid-array-mixed-literal
+20/31 Test: pinggen-check-invalid-array-mixed-literal
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_array_mixed_literal"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-array-mixed-literal" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-array-mixed-literal" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 19: array literal element expects int but got bool
@@ -318,15 +318,15 @@ compile error: line 2, column 19: array literal element expects int but got bool
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-array-mixed-literal" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-array-mixed-literal" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-array-mixed-literal" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-21/25 Testing: pinggen-check-invalid-array-size-mismatch
-21/25 Test: pinggen-check-invalid-array-size-mismatch
+21/31 Testing: pinggen-check-invalid-array-size-mismatch
+21/31 Test: pinggen-check-invalid-array-size-mismatch
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_array_size_mismatch"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-array-size-mismatch" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-array-size-mismatch" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 5: cannot initialize [int; 3] with [int; 2]
@@ -334,15 +334,15 @@ compile error: line 2, column 5: cannot initialize [int; 3] with [int; 2]
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-array-size-mismatch" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-array-size-mismatch" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-array-size-mismatch" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-22/25 Testing: pinggen-check-invalid-array-index-type
-22/25 Test: pinggen-check-invalid-array-index-type
+22/31 Testing: pinggen-check-invalid-array-index-type
+22/31 Test: pinggen-check-invalid-array-index-type
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_array_index_type"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-array-index-type" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-array-index-type" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 3, column 22: array index must be int
@@ -350,31 +350,31 @@ compile error: line 3, column 22: array index must be int
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-array-index-type" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-array-index-type" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-array-index-type" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-23/25 Testing: pinggen-check-invalid-array-assign-immutable
-23/25 Test: pinggen-check-invalid-array-assign-immutable
+23/31 Testing: pinggen-check-invalid-array-assign-immutable
+23/31 Test: pinggen-check-invalid-array-assign-immutable
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_array_assign_immutable"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-array-assign-immutable" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-array-assign-immutable" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 3, column 11: cannot assign through immutable variable 'values'
 <end of output>
-Test time =   0.01 sec
+Test time =   0.02 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-array-assign-immutable" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-array-assign-immutable" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-array-assign-immutable" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-24/25 Testing: pinggen-check-invalid-array-operator
-24/25 Test: pinggen-check-invalid-array-operator
+24/31 Testing: pinggen-check-invalid-array-operator
+24/31 Test: pinggen-check-invalid-array-operator
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_array_operator"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-check-invalid-array-operator" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-array-operator" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 compile error: line 2, column 22: operator '+' only supports int+int or string+string
@@ -382,15 +382,15 @@ compile error: line 2, column 22: operator '+' only supports int+int or string+s
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-check-invalid-array-operator" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-check-invalid-array-operator" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-check-invalid-array-operator" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-25/25 Testing: pinggen-run-invalid-array-bounds
-25/25 Test: pinggen-run-invalid-array-bounds
+25/31 Testing: pinggen-run-invalid-array-bounds
+25/31 Test: pinggen-run-invalid-array-bounds
 Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "run" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/runtime_invalid_array_bounds"
 Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
-"pinggen-run-invalid-array-bounds" start time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-run-invalid-array-bounds" start time: Mar 16 23:53 Malay Peninsula Standard Time
 Output:
 ----------------------------------------------------------
 warning: overriding the module target triple with x86_64-pc-windows-msvc19.50.35723 [-Woverride-module]
@@ -400,8 +400,104 @@ built C:\Users\keith\Documents\projects\pinggen-programming-language\examples\ru
 Test time =   0.33 sec
 ----------------------------------------------------------
 Test Passed.
-"pinggen-run-invalid-array-bounds" end time: Mar 16 23:44 Malay Peninsula Standard Time
+"pinggen-run-invalid-array-bounds" end time: Mar 16 23:53 Malay Peninsula Standard Time
 "pinggen-run-invalid-array-bounds" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Mar 16 23:44 Malay Peninsula Standard Time
+26/31 Testing: pinggen-check-invalid-unknown-impl
+26/31 Test: pinggen-check-invalid-unknown-impl
+Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_unknown_impl"
+Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
+"pinggen-check-invalid-unknown-impl" start time: Mar 16 23:53 Malay Peninsula Standard Time
+Output:
+----------------------------------------------------------
+compile error: line 2, column 5: unknown impl target 'Missing'
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"pinggen-check-invalid-unknown-impl" end time: Mar 16 23:53 Malay Peninsula Standard Time
+"pinggen-check-invalid-unknown-impl" time elapsed: 00:00:00
+----------------------------------------------------------
+
+27/31 Testing: pinggen-check-invalid-duplicate-method
+27/31 Test: pinggen-check-invalid-duplicate-method
+Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_duplicate_method"
+Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
+"pinggen-check-invalid-duplicate-method" start time: Mar 16 23:53 Malay Peninsula Standard Time
+Output:
+----------------------------------------------------------
+compile error: line 9, column 5: duplicate method 'total' on struct 'Counter'
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"pinggen-check-invalid-duplicate-method" end time: Mar 16 23:53 Malay Peninsula Standard Time
+"pinggen-check-invalid-duplicate-method" time elapsed: 00:00:00
+----------------------------------------------------------
+
+28/31 Testing: pinggen-check-invalid-missing-self
+28/31 Test: pinggen-check-invalid-missing-self
+Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_missing_self"
+Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
+"pinggen-check-invalid-missing-self" start time: Mar 16 23:53 Malay Peninsula Standard Time
+Output:
+----------------------------------------------------------
+compile error: line 6, column 16: methods must declare 'self' as the first parameter
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"pinggen-check-invalid-missing-self" end time: Mar 16 23:53 Malay Peninsula Standard Time
+"pinggen-check-invalid-missing-self" time elapsed: 00:00:00
+----------------------------------------------------------
+
+29/31 Testing: pinggen-check-invalid-self-outside-method
+29/31 Test: pinggen-check-invalid-self-outside-method
+Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_self_outside_method"
+Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
+"pinggen-check-invalid-self-outside-method" start time: Mar 16 23:53 Malay Peninsula Standard Time
+Output:
+----------------------------------------------------------
+compile error: line 2, column 17: 'self' can only be used inside a method
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"pinggen-check-invalid-self-outside-method" end time: Mar 16 23:53 Malay Peninsula Standard Time
+"pinggen-check-invalid-self-outside-method" time elapsed: 00:00:00
+----------------------------------------------------------
+
+30/31 Testing: pinggen-check-invalid-method-on-non-struct
+30/31 Test: pinggen-check-invalid-method-on-non-struct
+Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_method_on_non_struct"
+Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
+"pinggen-check-invalid-method-on-non-struct" start time: Mar 16 23:53 Malay Peninsula Standard Time
+Output:
+----------------------------------------------------------
+compile error: line 3, column 11: methods can only be called on struct values
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"pinggen-check-invalid-method-on-non-struct" end time: Mar 16 23:53 Malay Peninsula Standard Time
+"pinggen-check-invalid-method-on-non-struct" time elapsed: 00:00:00
+----------------------------------------------------------
+
+31/31 Testing: pinggen-check-invalid-unknown-method
+31/31 Test: pinggen-check-invalid-unknown-method
+Command: "C:/Users/keith/Documents/projects/pinggen-programming-language/build/Debug/pinggen.exe" "check" "C:/Users/keith/Documents/projects/pinggen-programming-language/examples/invalid_unknown_method"
+Directory: C:/Users/keith/Documents/projects/pinggen-programming-language/build
+"pinggen-check-invalid-unknown-method" start time: Mar 16 23:53 Malay Peninsula Standard Time
+Output:
+----------------------------------------------------------
+compile error: line 13, column 13: unknown method 'bumped' on struct 'Counter'
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"pinggen-check-invalid-unknown-method" end time: Mar 16 23:53 Malay Peninsula Standard Time
+"pinggen-check-invalid-unknown-method" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Mar 16 23:53 Malay Peninsula Standard Time

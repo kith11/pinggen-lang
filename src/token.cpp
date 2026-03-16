@@ -12,6 +12,7 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::KwFalse: return "false";
         case TokenKind::KwImport: return "import";
         case TokenKind::KwStruct: return "struct";
+        case TokenKind::KwImpl: return "impl";
         case TokenKind::KwFunc: return "func";
         case TokenKind::KwLet: return "let";
         case TokenKind::KwMut: return "mut";

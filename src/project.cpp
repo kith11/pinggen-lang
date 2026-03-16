@@ -89,21 +89,26 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
 
     std::ofstream source(target_dir / "src" / "main.pg");
     source << "import std::{ io }\n\n";
-    source << "func swap_pair(values: [int; 2]) -> [int; 2] {\n";
-    source << "    let mut result: [int; 2] = values;\n";
-    source << "    let first = result[0];\n";
-    source << "    result[0] = result[1];\n";
-    source << "    result[1] = first;\n";
-    source << "    return result;\n";
+    source << "struct Counter {\n";
+    source << "    value: int,\n";
+    source << "}\n\n";
+    source << "impl Counter {\n";
+    source << "    func bumped(self, amount: int) -> Counter {\n";
+    source << "        self.value = self.value + amount;\n";
+    source << "        return self;\n";
+    source << "    }\n";
+    source << "    func total(self) -> int {\n";
+    source << "        return self.value;\n";
+    source << "    }\n";
+    source << "}\n\n";
+    source << "func show(counter: Counter) -> int {\n";
+    source << "    return counter.total();\n";
     source << "}\n\n";
     source << "func main() {\n";
-    source << "    let grid = [[1, 2], [3, 4]];\n";
-    source << "    let mut pair: [int; 2] = [10, 20];\n";
-    source << "    pair[0] = 99;\n";
-    source << "    let swapped = swap_pair(pair);\n";
-    source << "    io::println(swapped[0]);\n";
-    source << "    io::println(swapped[1]);\n";
-    source << "    io::println(grid[1][0]);\n";
+    source << "    let counter = Counter { value: 10 };\n";
+    source << "    let next = counter.bumped(5);\n";
+    source << "    io::println(show(next));\n";
+    source << "    io::println(counter.total());\n";
     source << "}\n";
 }
 

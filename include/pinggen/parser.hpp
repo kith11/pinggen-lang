@@ -22,7 +22,7 @@ class Parser {
 
     ImportDecl parse_import();
     StructDecl parse_struct();
-    FunctionDecl parse_function();
+    FunctionDecl parse_function(const std::string& impl_target = "");
     std::vector<std::unique_ptr<Stmt>> parse_block();
     std::unique_ptr<Stmt> parse_statement();
     std::unique_ptr<Stmt> parse_let_statement();

@@ -19,6 +19,7 @@ struct StructInfo {
 };
 
 struct FunctionSignature {
+    std::string lowered_name;
     std::vector<Type> params;
     Type return_type = Type::void_type();
 };
@@ -30,6 +31,7 @@ class SemanticAnalyzer {
   private:
     void collect_structs(const Program& program);
     void collect_signatures(const Program& program);
+    static std::string lowered_function_name(const FunctionDecl& function);
     Type analyze_expr(const Expr& expr);
     bool analyze_block(const std::vector<std::unique_ptr<Stmt>>& body);
     bool analyze_stmt(const Stmt& stmt);
@@ -40,8 +42,10 @@ class SemanticAnalyzer {
     std::unordered_map<std::string, Symbol> symbols_;
     std::unordered_map<std::string, StructInfo> structs_;
     std::unordered_map<std::string, FunctionSignature> functions_;
+    std::unordered_map<std::string, std::unordered_map<std::string, FunctionSignature>> methods_;
     Type current_return_type_ = Type::void_type();
     bool inside_main_ = false;
+    std::string current_method_struct_;
     std::size_t loop_depth_ = 0;
 };
 

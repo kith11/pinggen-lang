@@ -143,4 +143,34 @@ if(BUILD_TESTING)
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_invalid_array_bounds
     )
     set_tests_properties(pinggen-run-invalid-array-bounds PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-unknown-impl
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_unknown_impl
+    )
+    set_tests_properties(pinggen-check-invalid-unknown-impl PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-duplicate-method
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_duplicate_method
+    )
+    set_tests_properties(pinggen-check-invalid-duplicate-method PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-missing-self
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_missing_self
+    )
+    set_tests_properties(pinggen-check-invalid-missing-self PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-self-outside-method
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_self_outside_method
+    )
+    set_tests_properties(pinggen-check-invalid-self-outside-method PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-method-on-non-struct
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_method_on_non_struct
+    )
+    set_tests_properties(pinggen-check-invalid-method-on-non-struct PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-unknown-method
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_unknown_method
+    )
+    set_tests_properties(pinggen-check-invalid-unknown-method PROPERTIES WILL_FAIL TRUE)
 endif()

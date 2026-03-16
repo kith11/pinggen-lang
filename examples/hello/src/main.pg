@@ -1,19 +1,26 @@
 import std::{ io }
 
-func swap_pair(values: [int; 2]) -> [int; 2] {
-    let mut result: [int; 2] = values;
-    let first = result[0];
-    result[0] = result[1];
-    result[1] = first;
-    return result;
+struct Counter {
+    value: int,
+}
+
+impl Counter {
+    func bumped(self, amount: int) -> Counter {
+        self.value = self.value + amount;
+        return self;
+    }
+    func total(self) -> int {
+        return self.value;
+    }
+}
+
+func show(counter: Counter) -> int {
+    return counter.total();
 }
 
 func main() {
-    let grid = [[1, 2], [3, 4]];
-    let mut pair: [int; 2] = [10, 20];
-    pair[0] = 99;
-    let swapped = swap_pair(pair);
-    io::println(swapped[0]);
-    io::println(swapped[1]);
-    io::println(grid[1][0]);
+    let counter = Counter { value: 10 };
+    let next = counter.bumped(5);
+    io::println(show(next));
+    io::println(counter.total());
 }

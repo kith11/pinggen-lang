@@ -47,15 +47,19 @@ void SemanticAnalyzer::analyze(const Program& program) {
 
         symbols_.clear();
         inside_main_ = function.name == "main";
+        current_method_struct_ = function.impl_target;
         current_return_type_ = inside_main_ && function.return_type == Type::void_type() ? Type::int_type() : function.return_type;
 
         std::unordered_set<std::string> param_names;
         for (const auto& param : function.params) {
             validate_type(param.type, param.location, true);
+            if (!function.is_method() && param.name == "self") {
+                fail(param.location, "'self' can only be used inside a method");
+            }
             if (!param_names.insert(param.name).second) {
                 fail(param.location, "duplicate parameter '" + param.name + "'");
             }
-            symbols_[param.name] = Symbol{param.type, false};
+            symbols_[param.name] = Symbol{param.type, param.is_self};
         }
 
         const bool has_terminal_return = analyze_block(function.body);
@@ -92,18 +96,49 @@ void SemanticAnalyzer::collect_structs(const Program& program) {
 
 void SemanticAnalyzer::collect_signatures(const Program& program) {
     functions_.clear();
+    methods_.clear();
     for (const auto& function : program.functions) {
-        if (functions_.contains(function.name)) {
-            fail(function.location, "duplicate function '" + function.name + "'");
-        }
         validate_type(function.return_type, function.location, true);
         FunctionSignature signature;
+        signature.lowered_name = lowered_function_name(function);
         signature.return_type = function.return_type;
-        for (const auto& param : function.params) {
+        if (function.is_method() && function.params.empty()) {
+            fail(function.location, "methods must declare 'self' as the first parameter");
+        }
+        for (std::size_t i = 0; i < function.params.size(); ++i) {
+            const auto& param = function.params[i];
+            if (function.is_method() && i == 0) {
+                if (!param.is_self || param.name != "self") {
+                    fail(param.location, "methods must declare 'self' as the first parameter");
+                }
+            } else if (param.is_self || param.name == "self") {
+                fail(param.location, "'self' can only be used as the first parameter of a method");
+            }
             signature.params.push_back(param.type);
         }
-        functions_[function.name] = std::move(signature);
+        if (function.is_method()) {
+            if (!structs_.contains(function.impl_target)) {
+                fail(function.location, "unknown impl target '" + function.impl_target + "'");
+            }
+            auto& method_table = methods_[function.impl_target];
+            if (method_table.contains(function.name)) {
+                fail(function.location, "duplicate method '" + function.name + "' on struct '" + function.impl_target + "'");
+            }
+            method_table[function.name] = std::move(signature);
+        } else {
+            if (functions_.contains(function.name)) {
+                fail(function.location, "duplicate function '" + function.name + "'");
+            }
+            functions_[function.name] = std::move(signature);
+        }
     }
+}
+
+std::string SemanticAnalyzer::lowered_function_name(const FunctionDecl& function) {
+    if (!function.is_method()) {
+        return function.name;
+    }
+    return function.impl_target + "__" + function.name;
 }
 
 const StructInfo& SemanticAnalyzer::require_struct(const Type& type, const SourceLocation& location) const {
@@ -170,6 +205,9 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         return Type::array_type(element_type, node->elements.size());
     }
     if (const auto* node = dynamic_cast<const VariableExpr*>(&expr)) {
+        if (node->name == "self" && current_method_struct_.empty()) {
+            fail(node->location, "'self' can only be used inside a method");
+        }
         const auto it = symbols_.find(node->name);
         if (it == symbols_.end()) {
             fail(node->location, "unknown variable '" + node->name + "'");
@@ -220,6 +258,34 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
             fail(node->index->location, "array index must be int");
         }
         return *array_type.element_type;
+    }
+    if (const auto* node = dynamic_cast<const MethodCallExpr*>(&expr)) {
+        const Type object_type = analyze_expr(*node->object);
+        if (object_type.kind != TypeKind::Struct) {
+            fail(node->location, "methods can only be called on struct values");
+        }
+        const auto methods_it = methods_.find(object_type.name);
+        if (methods_it == methods_.end()) {
+            fail(node->location, "struct '" + object_type.name + "' has no methods");
+        }
+        const auto method_it = methods_it->second.find(node->method);
+        if (method_it == methods_it->second.end()) {
+            fail(node->location, "unknown method '" + node->method + "' on struct '" + object_type.name + "'");
+        }
+        const auto& signature = method_it->second;
+        if (node->args.size() + 1 != signature.params.size()) {
+            fail(node->location, "method '" + node->method + "' expects " +
+                                     std::to_string(signature.params.size() - 1) + " argument(s)");
+        }
+        for (std::size_t i = 0; i < node->args.size(); ++i) {
+            const Type arg_type = analyze_expr(*node->args[i]);
+            if (arg_type != signature.params[i + 1]) {
+                fail(node->args[i]->location,
+                     "argument " + std::to_string(i + 1) + " of method '" + node->method + "' expects " +
+                         type_name(signature.params[i + 1]) + " but got " + type_name(arg_type));
+            }
+        }
+        return signature.return_type;
     }
     if (const auto* node = dynamic_cast<const UnaryExpr*>(&expr)) {
         const Type value = analyze_expr(*node->expr);
@@ -313,6 +379,9 @@ bool SemanticAnalyzer::analyze_block(const std::vector<std::unique_ptr<Stmt>>& b
 
 bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
     if (const auto* node = dynamic_cast<const LetStmt*>(&stmt)) {
+        if (node->name == "self") {
+            fail(node->location, "'self' is reserved for method receivers");
+        }
         const Type initializer_type = analyze_expr(*node->initializer);
         if (initializer_type == Type::void_type()) {
             fail(node->location, "variables cannot be initialized with void values");

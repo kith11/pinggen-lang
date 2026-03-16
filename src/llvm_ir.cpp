@@ -4,6 +4,13 @@
 
 namespace pinggen {
 
+std::string LLVMIRGenerator::lowered_function_name(const FunctionDecl& function) {
+    if (!function.is_method()) {
+        return function.name;
+    }
+    return function.impl_target + "__" + function.name;
+}
+
 std::string LLVMIRGenerator::generate(const Program& program) {
     globals_.clear();
     functions_.clear();
@@ -41,9 +48,8 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     }
 
     for (const auto& function : program.functions) {
-        function_return_types_[function.name] = function.return_type == Type::void_type() && function.name == "main"
-                                                    ? Type::int_type()
-                                                    : function.return_type;
+        function_return_types_[lowered_function_name(function)] =
+            function.return_type == Type::void_type() && function.name == "main" ? Type::int_type() : function.return_type;
     }
 
     std::ostringstream out;
@@ -61,11 +67,11 @@ std::string LLVMIRGenerator::generate(const Program& program) {
 
     for (const auto& function : program.functions) {
         reset_function_state();
-        current_function_name_ = function.name;
-        current_return_type_ = function_return_types_.at(function.name);
+        current_function_name_ = lowered_function_name(function);
+        current_return_type_ = function_return_types_.at(current_function_name_);
 
         std::ostringstream signature;
-        signature << "define " << (function.name == "main" ? "i32" : llvm_type(current_return_type_)) << " @" << function.name
+        signature << "define " << (function.name == "main" ? "i32" : llvm_type(current_return_type_)) << " @" << current_function_name_
                   << "(";
         for (std::size_t i = 0; i < function.params.size(); ++i) {
             if (i != 0) {
@@ -331,6 +337,33 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
 
         const std::string reg = next_register();
         body_ += "  " + reg + " = call " + llvm_type(return_type) + " @" + node->callee + "(" + call_args + ")\n";
+        return {reg, return_type};
+    }
+    if (const auto* node = dynamic_cast<const MethodCallExpr*>(&expr)) {
+        const TypedIRValue self_arg = emit_expr(*node->object);
+        std::vector<TypedIRValue> args;
+        args.push_back(self_arg);
+        for (const auto& arg : node->args) {
+            args.push_back(emit_expr(*arg));
+        }
+
+        const std::string lowered_name = self_arg.type.name + "__" + node->method;
+        const Type return_type = function_return_types_.at(lowered_name);
+        std::string call_args;
+        for (std::size_t i = 0; i < args.size(); ++i) {
+            if (i != 0) {
+                call_args += ", ";
+            }
+            call_args += llvm_type(args[i].type) + " " + args[i].ir;
+        }
+
+        if (return_type == Type::void_type()) {
+            body_ += "  call void @" + lowered_name + "(" + call_args + ")\n";
+            return {"0", Type::void_type()};
+        }
+
+        const std::string reg = next_register();
+        body_ += "  " + reg + " = call " + llvm_type(return_type) + " @" + lowered_name + "(" + call_args + ")\n";
         return {reg, return_type};
     }
 

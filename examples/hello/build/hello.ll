@@ -25,150 +25,61 @@ define void @pinggen_bounds_abort() {
   unreachable
 }
 
+%struct.Counter = type { i64 }
+
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
 
-define [2 x i64] @swap_pair([2 x i64] %arg0) {
-  %1 = alloca [2 x i64]
-  store [2 x i64] %arg0, ptr %1
-  %2 = load [2 x i64], ptr %1
-  %3 = alloca [2 x i64]
-  store [2 x i64] %2, ptr %3
-  %4 = icmp sge i64 0, 0
-  %5 = icmp slt i64 0, 2
-  %6 = and i1 %4, %5
-  br i1 %6, label %bounds_ok.2, label %bounds_fail.1
-bounds_fail.1:
-  call void @pinggen_bounds_abort()
-  unreachable
-bounds_ok.2:
-  %7 = getelementptr inbounds [2 x i64], ptr %3, i32 0, i64 0
-  %8 = load i64, ptr %7
-  %9 = alloca i64
-  store i64 %8, ptr %9
-  %10 = icmp sge i64 0, 0
-  %11 = icmp slt i64 0, 2
-  %12 = and i1 %10, %11
-  br i1 %12, label %bounds_ok.4, label %bounds_fail.3
-bounds_fail.3:
-  call void @pinggen_bounds_abort()
-  unreachable
-bounds_ok.4:
-  %13 = icmp sge i64 1, 0
-  %14 = icmp slt i64 1, 2
-  %15 = and i1 %13, %14
-  br i1 %15, label %bounds_ok.6, label %bounds_fail.5
-bounds_fail.5:
-  call void @pinggen_bounds_abort()
-  unreachable
-bounds_ok.6:
-  %16 = getelementptr inbounds [2 x i64], ptr %3, i32 0, i64 1
-  %17 = load i64, ptr %16
-  %18 = getelementptr inbounds [2 x i64], ptr %3, i32 0, i64 0
-  store i64 %17, ptr %18
-  %19 = icmp sge i64 1, 0
-  %20 = icmp slt i64 1, 2
-  %21 = and i1 %19, %20
-  br i1 %21, label %bounds_ok.8, label %bounds_fail.7
-bounds_fail.7:
-  call void @pinggen_bounds_abort()
-  unreachable
-bounds_ok.8:
-  %22 = load i64, ptr %9
-  %23 = getelementptr inbounds [2 x i64], ptr %3, i32 0, i64 1
-  store i64 %22, ptr %23
-  %24 = load [2 x i64], ptr %3
-  ret [2 x i64] %24
+define %struct.Counter @Counter__bumped(%struct.Counter %arg0, i64 %arg1) {
+  %1 = alloca %struct.Counter
+  store %struct.Counter %arg0, ptr %1
+  %2 = alloca i64
+  store i64 %arg1, ptr %2
+  %3 = getelementptr inbounds %struct.Counter, ptr %1, i32 0, i32 0
+  %4 = load i64, ptr %3
+  %5 = load i64, ptr %2
+  %6 = add i64 %4, %5
+  %7 = getelementptr inbounds %struct.Counter, ptr %1, i32 0, i32 0
+  store i64 %6, ptr %7
+  %8 = load %struct.Counter, ptr %1
+  ret %struct.Counter %8
+}
+
+define i64 @Counter__total(%struct.Counter %arg0) {
+  %1 = alloca %struct.Counter
+  store %struct.Counter %arg0, ptr %1
+  %2 = getelementptr inbounds %struct.Counter, ptr %1, i32 0, i32 0
+  %3 = load i64, ptr %2
+  ret i64 %3
+}
+
+define i64 @show(%struct.Counter %arg0) {
+  %1 = alloca %struct.Counter
+  store %struct.Counter %arg0, ptr %1
+  %2 = load %struct.Counter, ptr %1
+  %3 = call i64 @Counter__total(%struct.Counter %2)
+  ret i64 %3
 }
 
 define i32 @main() {
-  %1 = alloca [2 x i64]
-  %2 = getelementptr inbounds [2 x i64], ptr %1, i32 0, i64 0
-  store i64 1, ptr %2
-  %3 = getelementptr inbounds [2 x i64], ptr %1, i32 0, i64 1
-  store i64 2, ptr %3
-  %4 = load [2 x i64], ptr %1
-  %5 = alloca [2 x [2 x i64]]
-  %6 = getelementptr inbounds [2 x [2 x i64]], ptr %5, i32 0, i64 0
-  store [2 x i64] %4, ptr %6
-  %7 = alloca [2 x i64]
-  %8 = getelementptr inbounds [2 x i64], ptr %7, i32 0, i64 0
-  store i64 3, ptr %8
-  %9 = getelementptr inbounds [2 x i64], ptr %7, i32 0, i64 1
-  store i64 4, ptr %9
-  %10 = load [2 x i64], ptr %7
-  %11 = getelementptr inbounds [2 x [2 x i64]], ptr %5, i32 0, i64 1
-  store [2 x i64] %10, ptr %11
-  %12 = load [2 x [2 x i64]], ptr %5
-  %13 = alloca [2 x [2 x i64]]
-  store [2 x [2 x i64]] %12, ptr %13
-  %14 = alloca [2 x i64]
-  %15 = getelementptr inbounds [2 x i64], ptr %14, i32 0, i64 0
-  store i64 10, ptr %15
-  %16 = getelementptr inbounds [2 x i64], ptr %14, i32 0, i64 1
-  store i64 20, ptr %16
-  %17 = load [2 x i64], ptr %14
-  %18 = alloca [2 x i64]
-  store [2 x i64] %17, ptr %18
-  %19 = icmp sge i64 0, 0
-  %20 = icmp slt i64 0, 2
-  %21 = and i1 %19, %20
-  br i1 %21, label %bounds_ok.10, label %bounds_fail.9
-bounds_fail.9:
-  call void @pinggen_bounds_abort()
-  unreachable
-bounds_ok.10:
-  %22 = getelementptr inbounds [2 x i64], ptr %18, i32 0, i64 0
-  store i64 99, ptr %22
-  %23 = load [2 x i64], ptr %18
-  %24 = call [2 x i64] @swap_pair([2 x i64] %23)
-  %25 = alloca [2 x i64]
-  store [2 x i64] %24, ptr %25
-  %26 = icmp sge i64 0, 0
-  %27 = icmp slt i64 0, 2
-  %28 = and i1 %26, %27
-  br i1 %28, label %bounds_ok.12, label %bounds_fail.11
-bounds_fail.11:
-  call void @pinggen_bounds_abort()
-  unreachable
-bounds_ok.12:
-  %29 = getelementptr inbounds [2 x i64], ptr %25, i32 0, i64 0
-  %30 = load i64, ptr %29
-  %31 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %32 = call i32 (ptr, ...) @printf(ptr %31, i64 %30)
-  %33 = icmp sge i64 1, 0
-  %34 = icmp slt i64 1, 2
-  %35 = and i1 %33, %34
-  br i1 %35, label %bounds_ok.14, label %bounds_fail.13
-bounds_fail.13:
-  call void @pinggen_bounds_abort()
-  unreachable
-bounds_ok.14:
-  %36 = getelementptr inbounds [2 x i64], ptr %25, i32 0, i64 1
-  %37 = load i64, ptr %36
-  %38 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %39 = call i32 (ptr, ...) @printf(ptr %38, i64 %37)
-  %40 = icmp sge i64 1, 0
-  %41 = icmp slt i64 1, 2
-  %42 = and i1 %40, %41
-  br i1 %42, label %bounds_ok.16, label %bounds_fail.15
-bounds_fail.15:
-  call void @pinggen_bounds_abort()
-  unreachable
-bounds_ok.16:
-  %43 = getelementptr inbounds [2 x [2 x i64]], ptr %13, i32 0, i64 1
-  %44 = icmp sge i64 0, 0
-  %45 = icmp slt i64 0, 2
-  %46 = and i1 %44, %45
-  br i1 %46, label %bounds_ok.18, label %bounds_fail.17
-bounds_fail.17:
-  call void @pinggen_bounds_abort()
-  unreachable
-bounds_ok.18:
-  %47 = getelementptr inbounds [2 x i64], ptr %43, i32 0, i64 0
-  %48 = load i64, ptr %47
-  %49 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %50 = call i32 (ptr, ...) @printf(ptr %49, i64 %48)
+  %1 = alloca %struct.Counter
+  %2 = getelementptr inbounds %struct.Counter, ptr %1, i32 0, i32 0
+  store i64 10, ptr %2
+  %3 = load %struct.Counter, ptr %1
+  %4 = alloca %struct.Counter
+  store %struct.Counter %3, ptr %4
+  %5 = load %struct.Counter, ptr %4
+  %6 = call %struct.Counter @Counter__bumped(%struct.Counter %5, i64 5)
+  %7 = alloca %struct.Counter
+  store %struct.Counter %6, ptr %7
+  %8 = load %struct.Counter, ptr %7
+  %9 = call i64 @show(%struct.Counter %8)
+  %10 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %11 = call i32 (ptr, ...) @printf(ptr %10, i64 %9)
+  %12 = load %struct.Counter, ptr %4
+  %13 = call i64 @Counter__total(%struct.Counter %12)
+  %14 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %15 = call i32 (ptr, ...) @printf(ptr %14, i64 %13)
   ret i32 0
 }
 

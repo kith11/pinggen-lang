@@ -18,7 +18,17 @@ Program Parser::parse() {
             program.structs.push_back(parse_struct());
             continue;
         }
-        program.functions.push_back(parse_function());
+        if (check(TokenKind::KwImpl)) {
+            consume(TokenKind::KwImpl, "expected 'impl'");
+            const std::string impl_target = consume(TokenKind::Identifier, "expected impl target type").lexeme;
+            consume(TokenKind::LBrace, "expected '{' after impl target");
+            while (!check(TokenKind::RBrace) && !is_at_end()) {
+                program.functions.push_back(parse_function(impl_target));
+            }
+            consume(TokenKind::RBrace, "expected '}' after impl block");
+            continue;
+        }
+        program.functions.push_back(parse_function(""));
     }
     return program;
 }
@@ -88,20 +98,28 @@ StructDecl Parser::parse_struct() {
     return decl;
 }
 
-FunctionDecl Parser::parse_function() {
+FunctionDecl Parser::parse_function(const std::string& impl_target) {
     const Token func_token = consume(TokenKind::KwFunc, "expected 'func'");
     FunctionDecl decl;
     decl.location = func_token.location;
     decl.name = consume(TokenKind::Identifier, "expected function name").lexeme;
+    decl.impl_target = impl_target;
     consume(TokenKind::LParen, "expected '(' after function name");
     if (!check(TokenKind::RParen)) {
+        bool first_param = true;
         do {
             Parameter param;
             param.location = current().location;
             param.name = consume(TokenKind::Identifier, "expected parameter name").lexeme;
-            consume(TokenKind::Colon, "expected ':' after parameter name");
-            param.type = parse_type();
+            if (!impl_target.empty() && first_param && param.name == "self") {
+                param.is_self = true;
+                param.type = Type::struct_type(impl_target);
+            } else {
+                consume(TokenKind::Colon, "expected ':' after parameter name");
+                param.type = parse_type();
+            }
             decl.params.push_back(std::move(param));
+            first_param = false;
         } while (match(TokenKind::Comma));
     }
     consume(TokenKind::RParen, "expected ')' after function parameters");
@@ -388,7 +406,18 @@ std::unique_ptr<Expr> Parser::parse_postfix(std::unique_ptr<Expr> expr) {
     while (true) {
         if (match(TokenKind::Dot)) {
             const Token field = consume(TokenKind::Identifier, "expected field name after '.'");
-            expr = std::make_unique<FieldAccessExpr>(field.location, std::move(expr), field.lexeme);
+            if (match(TokenKind::LParen)) {
+                std::vector<std::unique_ptr<Expr>> args;
+                if (!check(TokenKind::RParen)) {
+                    do {
+                        args.push_back(parse_expression());
+                    } while (match(TokenKind::Comma));
+                }
+                consume(TokenKind::RParen, "expected ')' after arguments");
+                expr = std::make_unique<MethodCallExpr>(field.location, std::move(expr), field.lexeme, std::move(args));
+            } else {
+                expr = std::make_unique<FieldAccessExpr>(field.location, std::move(expr), field.lexeme);
+            }
             continue;
         }
         if (match(TokenKind::LBracket)) {

@@ -1,0 +1,14 @@
+struct Counter {
+    value: int,
+}
+
+impl Counter {
+    func total(self) -> int {
+        return self.value;
+    }
+}
+
+func main() {
+    let counter = Counter { value: 1 };
+    counter.bumped();
+}

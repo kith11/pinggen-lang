@@ -1,0 +1,7 @@
+[package]
+name = "invalid_method_on_non_struct"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_method_on_non_struct"
