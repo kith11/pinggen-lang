@@ -89,6 +89,13 @@ struct FieldAccessExpr final : Expr {
     std::string field;
 };
 
+struct UnaryExpr final : Expr {
+    UnaryExpr(SourceLocation loc, std::string o, std::unique_ptr<Expr> e)
+        : Expr(loc), op(std::move(o)), expr(std::move(e)) {}
+    std::string op;
+    std::unique_ptr<Expr> expr;
+};
+
 struct CallExpr final : Expr {
     CallExpr(SourceLocation loc, std::string c, std::vector<std::unique_ptr<Expr>> a)
         : Expr(loc), callee(std::move(c)), args(std::move(a)) {}

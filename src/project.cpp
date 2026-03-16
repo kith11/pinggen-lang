@@ -89,21 +89,21 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
 
     std::ofstream source(target_dir / "src" / "main.pg");
     source << "import std::{ io }\n\n";
-    source << "struct Hero {\n";
-    source << "    hp: int\n";
-    source << "    alive: bool\n";
-    source << "    name: string\n";
-    source << "}\n\n";
-    source << "func buff(hero: Hero) -> Hero {\n";
-    source << "    return Hero { hp: hero.hp + 25, alive: hero.alive, name: hero.name };\n";
+    source << "func should_print(value: int) -> bool {\n";
+    source << "    return value <= 2 || value == 4;\n";
     source << "}\n\n";
     source << "func main() {\n";
-    source << "    let mut hero = Hero { hp: 75, alive: true, name: \"ping\" };\n";
-    source << "    hero.hp = 100;\n";
-    source << "    let buffed = buff(hero);\n";
-    source << "    if buffed.alive {\n";
-    source << "        io::println(buffed.name);\n";
-    source << "        io::println(buffed.hp);\n";
+    source << "    let mut count = 4;\n";
+    source << "    while count > 0 {\n";
+    source << "        if !should_print(count) {\n";
+    source << "            count = count - 1;\n";
+    source << "            continue;\n";
+    source << "        }\n";
+    source << "        io::println(count);\n";
+    source << "        if count <= 2 {\n";
+    source << "            break;\n";
+    source << "        }\n";
+    source << "        count = count - 1;\n";
     source << "    }\n";
     source << "}\n";
 }

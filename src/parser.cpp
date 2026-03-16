@@ -222,11 +222,45 @@ std::unique_ptr<Stmt> Parser::parse_assignment_or_expression_statement() {
     return std::make_unique<ExprStmt>(expr->location, std::move(expr));
 }
 
-std::unique_ptr<Expr> Parser::parse_expression() { return parse_equality(); }
+std::unique_ptr<Expr> Parser::parse_expression() { return parse_or(); }
+
+std::unique_ptr<Expr> Parser::parse_or() {
+    auto expr = parse_and();
+    while (check(TokenKind::OrOr)) {
+        const Token op = current();
+        ++current_;
+        auto right = parse_and();
+        expr = std::make_unique<BinaryExpr>(op.location, op.lexeme, std::move(expr), std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::parse_and() {
+    auto expr = parse_equality();
+    while (check(TokenKind::AndAnd)) {
+        const Token op = current();
+        ++current_;
+        auto right = parse_equality();
+        expr = std::make_unique<BinaryExpr>(op.location, op.lexeme, std::move(expr), std::move(right));
+    }
+    return expr;
+}
 
 std::unique_ptr<Expr> Parser::parse_equality() {
-    auto expr = parse_term();
+    auto expr = parse_comparison();
     while (check(TokenKind::EqualEqual) || check(TokenKind::BangEqual)) {
+        const Token op = current();
+        ++current_;
+        auto right = parse_comparison();
+        expr = std::make_unique<BinaryExpr>(op.location, op.lexeme, std::move(expr), std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::parse_comparison() {
+    auto expr = parse_term();
+    while (check(TokenKind::Less) || check(TokenKind::LessEqual) || check(TokenKind::Greater) ||
+           check(TokenKind::GreaterEqual)) {
         const Token op = current();
         ++current_;
         auto right = parse_term();
@@ -247,14 +281,22 @@ std::unique_ptr<Expr> Parser::parse_term() {
 }
 
 std::unique_ptr<Expr> Parser::parse_factor() {
-    auto expr = parse_primary();
+    auto expr = parse_unary();
     while (check(TokenKind::Star) || check(TokenKind::Slash)) {
         const Token op = current();
         ++current_;
-        auto right = parse_primary();
+        auto right = parse_unary();
         expr = std::make_unique<BinaryExpr>(op.location, op.lexeme, std::move(expr), std::move(right));
     }
     return expr;
+}
+
+std::unique_ptr<Expr> Parser::parse_unary() {
+    if (match(TokenKind::Bang)) {
+        const Token op = previous();
+        return std::make_unique<UnaryExpr>(op.location, op.lexeme, parse_unary());
+    }
+    return parse_primary();
 }
 
 std::unique_ptr<Expr> Parser::parse_primary() {

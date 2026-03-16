@@ -18,6 +18,8 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     label_counter_ = 0;
     current_function_name_.clear();
     current_return_type_ = Type::void_type();
+    break_labels_.clear();
+    continue_labels_.clear();
 
     globals_ += "@.fmt.int = private unnamed_addr constant [6 x i8] c\"%lld\\0A\\00\"\n";
     globals_ += "@.fmt.str = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"\n";
@@ -165,14 +167,39 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
         body_ += "  " + reg + " = load " + llvm_type(address.type) + ", ptr " + address.address + "\n";
         return {reg, address.type};
     }
+    if (const auto* node = dynamic_cast<const UnaryExpr*>(&expr)) {
+        const TypedIRValue value = emit_expr(*node->expr);
+        if (node->op == "!") {
+            const std::string reg = next_register();
+            body_ += "  " + reg + " = xor i1 " + value.ir + ", true\n";
+            return {reg, Type::bool_type()};
+        }
+    }
     if (const auto* node = dynamic_cast<const BinaryExpr*>(&expr)) {
         const TypedIRValue left = emit_expr(*node->left);
         const TypedIRValue right = emit_expr(*node->right);
         const std::string reg = next_register();
 
+        if (node->op == "&&") {
+            body_ += "  " + reg + " = and i1 " + left.ir + ", " + right.ir + "\n";
+            return {reg, Type::bool_type()};
+        }
+        if (node->op == "||") {
+            body_ += "  " + reg + " = or i1 " + left.ir + ", " + right.ir + "\n";
+            return {reg, Type::bool_type()};
+        }
         if (node->op == "==" || node->op == "!=") {
             const std::string cmp = node->op == "==" ? "eq" : "ne";
             body_ += "  " + reg + " = icmp " + cmp + " " + llvm_type(left.type) + " " + left.ir + ", " + right.ir + "\n";
+            return {reg, Type::bool_type()};
+        }
+        if (node->op == "<" || node->op == "<=" || node->op == ">" || node->op == ">=") {
+            std::string cmp;
+            if (node->op == "<") cmp = "slt";
+            if (node->op == "<=") cmp = "sle";
+            if (node->op == ">") cmp = "sgt";
+            if (node->op == ">=") cmp = "sge";
+            body_ += "  " + reg + " = icmp " + cmp + " i64 " + left.ir + ", " + right.ir + "\n";
             return {reg, Type::bool_type()};
         }
 
@@ -303,12 +330,26 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
         const TypedIRValue condition = emit_expr(*node->condition);
         body_ += "  br i1 " + condition.ir + ", label %" + body_label + ", label %" + end_label + "\n";
         body_ += body_label + ":\n";
+
+        continue_labels_.push_back(cond_label);
+        break_labels_.push_back(end_label);
         const bool body_returns = emit_block(node->body);
+        continue_labels_.pop_back();
+        break_labels_.pop_back();
+
         if (!body_returns) {
             body_ += "  br label %" + cond_label + "\n";
         }
         body_ += end_label + ":\n";
         return false;
+    }
+    if (dynamic_cast<const BreakStmt*>(&stmt)) {
+        body_ += "  br label %" + break_labels_.back() + "\n";
+        return true;
+    }
+    if (dynamic_cast<const ContinueStmt*>(&stmt)) {
+        body_ += "  br label %" + continue_labels_.back() + "\n";
+        return true;
     }
     if (const auto* node = dynamic_cast<const ReturnStmt*>(&stmt)) {
         if (!node->value) {

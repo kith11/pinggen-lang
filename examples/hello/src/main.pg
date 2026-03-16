@@ -1,21 +1,19 @@
 import std::{ io }
 
-struct Hero {
-    hp: int
-    alive: bool
-    name: string
-}
-
-func revive(hero: Hero) -> Hero {
-    return Hero { hp: hero.hp + 50, alive: true, name: hero.name };
+func keep_value(value: int) -> bool {
+    return value == 3 || value == 1;
 }
 
 func main() {
-    let mut hero = Hero { hp: 10, alive: false, name: "pinggen" };
-    hero.hp = 25;
-    let upgraded = revive(hero);
-    if upgraded.alive {
-        io::println(upgraded.name);
-        io::println(upgraded.hp);
+    let mut count = 4;
+    while count != 0 {
+        count = count - 1;
+        if !keep_value(count) && count != 0 {
+            continue;
+        }
+        io::println(count);
+        if count == 1 || count == 0 {
+            break;
+        }
     }
 }

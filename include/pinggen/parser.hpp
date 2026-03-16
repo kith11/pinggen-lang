@@ -33,9 +33,13 @@ class Parser {
     std::unique_ptr<Stmt> parse_continue_statement();
     std::unique_ptr<Stmt> parse_assignment_or_expression_statement();
     std::unique_ptr<Expr> parse_expression();
+    std::unique_ptr<Expr> parse_or();
+    std::unique_ptr<Expr> parse_and();
+    std::unique_ptr<Expr> parse_comparison();
     std::unique_ptr<Expr> parse_equality();
     std::unique_ptr<Expr> parse_term();
     std::unique_ptr<Expr> parse_factor();
+    std::unique_ptr<Expr> parse_unary();
     std::unique_ptr<Expr> parse_primary();
     std::unique_ptr<Expr> parse_postfix(std::unique_ptr<Expr> expr);
     Type parse_type();

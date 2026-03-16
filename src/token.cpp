@@ -32,8 +32,15 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::Star: return "*";
         case TokenKind::Slash: return "/";
         case TokenKind::Equal: return "=";
+        case TokenKind::Bang: return "!";
+        case TokenKind::Less: return "<";
+        case TokenKind::LessEqual: return "<=";
+        case TokenKind::Greater: return ">";
+        case TokenKind::GreaterEqual: return ">=";
         case TokenKind::EqualEqual: return "==";
         case TokenKind::BangEqual: return "!=";
+        case TokenKind::AndAnd: return "&&";
+        case TokenKind::OrOr: return "||";
         case TokenKind::Dot: return ".";
         case TokenKind::Colon: return ":";
         case TokenKind::ColonColon: return "::";

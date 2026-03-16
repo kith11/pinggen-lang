@@ -15,6 +15,9 @@ Current features:
 - `bool`, `true`, `false`
 - `if condition { ... } else { ... }`
 - `while condition { ... }`
+- `break` and `continue` inside `while`
+- `!`, `&&`, and `||` for boolean logic
+- `<`, `<=`, `>`, and `>=` for integer comparisons
 - `let` and `let mut`
 - integers and strings
 - `==` and `!=` for `int` and `bool`
@@ -43,23 +46,22 @@ Example:
 ```pinggen
 import std::{ io }
 
-struct Hero {
-    hp: int
-    alive: bool
-    name: string
-}
-
-func heal(hero: Hero) -> Hero {
-    return Hero { hp: hero.hp + 10, alive: true, name: hero.name };
+func should_print(value: int) -> bool {
+    return value <= 2 || value == 4;
 }
 
 func main() {
-    let mut hero = Hero { hp: 20, alive: false, name: "pinggen" };
-    hero.hp = 40;
-    let healed = heal(hero);
-    if healed.alive {
-        io::println(healed.name);
-        io::println(healed.hp);
+    let mut count = 4;
+    while count > 0 {
+        if !should_print(count) {
+            count = count - 1;
+            continue;
+        }
+        io::println(count);
+        if count <= 2 {
+            break;
+        }
+        count = count - 1;
     }
 }
 ```

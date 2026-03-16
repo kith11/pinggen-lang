@@ -1,0 +1,7 @@
+[package]
+name = "invalid_break_outside_loop"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_break_outside_loop"

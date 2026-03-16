@@ -46,6 +46,18 @@ std::vector<Token> Lexer::tokenize() {
                 break;
             case '*': tokens.push_back(make_token(TokenKind::Star, start_line, start_column, "*")); break;
             case '/': tokens.push_back(make_token(TokenKind::Slash, start_line, start_column, "/")); break;
+            case '&':
+                if (!match('&')) {
+                    fail({start_line, start_column}, "unexpected character");
+                }
+                tokens.push_back(make_token(TokenKind::AndAnd, start_line, start_column, "&&"));
+                break;
+            case '|':
+                if (!match('|')) {
+                    fail({start_line, start_column}, "unexpected character");
+                }
+                tokens.push_back(make_token(TokenKind::OrOr, start_line, start_column, "||"));
+                break;
             case '.': tokens.push_back(make_token(TokenKind::Dot, start_line, start_column, ".")); break;
             case '=':
                 if (match('=')) {
@@ -55,10 +67,25 @@ std::vector<Token> Lexer::tokenize() {
                 }
                 break;
             case '!':
-                if (!match('=')) {
-                    fail({start_line, start_column}, "unexpected character");
+                if (match('=')) {
+                    tokens.push_back(make_token(TokenKind::BangEqual, start_line, start_column, "!="));
+                } else {
+                    tokens.push_back(make_token(TokenKind::Bang, start_line, start_column, "!"));
                 }
-                tokens.push_back(make_token(TokenKind::BangEqual, start_line, start_column, "!="));
+                break;
+            case '<':
+                if (match('=')) {
+                    tokens.push_back(make_token(TokenKind::LessEqual, start_line, start_column, "<="));
+                } else {
+                    tokens.push_back(make_token(TokenKind::Less, start_line, start_column, "<"));
+                }
+                break;
+            case '>':
+                if (match('=')) {
+                    tokens.push_back(make_token(TokenKind::GreaterEqual, start_line, start_column, ">="));
+                } else {
+                    tokens.push_back(make_token(TokenKind::Greater, start_line, start_column, ">"));
+                }
                 break;
             case ':':
                 if (match(':')) {

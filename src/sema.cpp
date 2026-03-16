@@ -163,15 +163,37 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         }
         return info.fields[field_it->second].type;
     }
+    if (const auto* node = dynamic_cast<const UnaryExpr*>(&expr)) {
+        const Type value = analyze_expr(*node->expr);
+        if (node->op == "!") {
+            if (value != Type::bool_type()) {
+                fail(node->location, "unary operator '!' only supports bool operands");
+            }
+            return Type::bool_type();
+        }
+        fail(node->location, "unsupported unary operator '" + node->op + "'");
+    }
     if (const auto* node = dynamic_cast<const BinaryExpr*>(&expr)) {
         const Type left = analyze_expr(*node->left);
         const Type right = analyze_expr(*node->right);
+        if (node->op == "&&" || node->op == "||") {
+            if (left != Type::bool_type() || right != Type::bool_type()) {
+                fail(node->location, "operator '" + node->op + "' only supports bool operands");
+            }
+            return Type::bool_type();
+        }
         if (node->op == "==" || node->op == "!=") {
             if (left != right) {
                 fail(node->location, "comparison operands must have the same type");
             }
             if (left != Type::int_type() && left != Type::bool_type()) {
                 fail(node->location, "operator '" + node->op + "' only supports int and bool operands");
+            }
+            return Type::bool_type();
+        }
+        if (node->op == "<" || node->op == "<=" || node->op == ">" || node->op == ">=") {
+            if (left != Type::int_type() || right != Type::int_type()) {
+                fail(node->location, "operator '" + node->op + "' only supports int operands");
             }
             return Type::bool_type();
         }
@@ -288,7 +310,21 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
         if (condition_type != Type::bool_type()) {
             fail(node->condition->location, "while condition must be bool");
         }
+        ++loop_depth_;
         analyze_block(node->body);
+        --loop_depth_;
+        return false;
+    }
+    if (dynamic_cast<const BreakStmt*>(&stmt)) {
+        if (loop_depth_ == 0) {
+            fail(stmt.location, "'break' can only be used inside a while loop");
+        }
+        return false;
+    }
+    if (dynamic_cast<const ContinueStmt*>(&stmt)) {
+        if (loop_depth_ == 0) {
+            fail(stmt.location, "'continue' can only be used inside a while loop");
+        }
         return false;
     }
     if (const auto* node = dynamic_cast<const ReturnStmt*>(&stmt)) {

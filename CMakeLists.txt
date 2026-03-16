@@ -83,4 +83,24 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_field_assign_immutable
     )
     set_tests_properties(pinggen-check-invalid-field-assign-immutable PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-break-outside-loop
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_break_outside_loop
+    )
+    set_tests_properties(pinggen-check-invalid-break-outside-loop PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-continue-outside-loop
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_continue_outside_loop
+    )
+    set_tests_properties(pinggen-check-invalid-continue-outside-loop PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-logical-operands
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_logical_operands
+    )
+    set_tests_properties(pinggen-check-invalid-logical-operands PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-relational-operands
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_relational_operands
+    )
+    set_tests_properties(pinggen-check-invalid-relational-operands PROPERTIES WILL_FAIL TRUE)
 endif()
