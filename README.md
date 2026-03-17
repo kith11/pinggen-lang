@@ -6,6 +6,8 @@
 
 Source files use the `.pg` extension.
 
+This repository is now targeting a small usable `1.0` surface. The current language, stdlib, manifest v2 targets, and CLI should be treated as frozen for this release pass.
+
 ## Quick Start
 
 Build the compiler:
@@ -33,6 +35,11 @@ Build a named target:
 ```powershell
 .\build\pinggen.exe build .\examples\multi_target --target tool
 ```
+
+Reference docs:
+
+- [1.0 Reference](./docs/reference.md)
+- [Release Checklist](./docs/release-checklist.md)
 
 ## Project Layout
 
@@ -99,9 +106,12 @@ output = "build/tool"
 - [file_process](./examples/file_process): practical `fs` + `match` example
 - [hello](./examples/hello): advanced multi-feature demo
 
+For the compact syntax and stdlib reference, use [docs/reference.md](./docs/reference.md).
+
 ## Current 1.0 Limits
 
 - arrays are fixed-size only
 - `con` is intentionally strict and only allows approved safe calls
 - build configuration is declarative; there is no programmable build scripting
 - no generics, borrow checker, package manager, formatter, or LSP in this milestone
+- post-1.0 work is documented in [docs/release-checklist.md](./docs/release-checklist.md)

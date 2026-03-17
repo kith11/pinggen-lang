@@ -637,4 +637,14 @@ if(BUILD_TESTING)
         COMMAND powershell -NoProfile -Command
                 "& '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target tool; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if (-not (Test-Path '${CMAKE_SOURCE_DIR}/examples/multi_target/build/tools/ping-tool.exe')) { throw 'expected named target exe'; }"
     )
+    add_test(
+        NAME pinggen-release-sweep
+        COMMAND powershell -NoProfile -Command
+                "& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target tool; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/file_process'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hello'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+    )
+    add_test(
+        NAME pinggen-docs-consistency
+        COMMAND powershell -NoProfile -Command
+                "$readme = Get-Content -Raw '${CMAKE_SOURCE_DIR}/README.md'; $reference = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/reference.md'; $release = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/release-checklist.md'; foreach ($path in @('starter','multi_target','file_process','hello')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}/examples' $path))) { throw \"missing example $path\" } }; if ($readme -notmatch 'docs/reference\\.md' -or $readme -notmatch 'docs/release-checklist\\.md') { throw 'README missing docs links'; }; if ($reference -notmatch '\\[\\[target\\]\\]' -or $reference -notmatch '--target <name>') { throw 'reference missing manifest or target selector docs'; }; if ($release -notmatch 'ctest --test-dir build -C Debug --output-on-failure' -or $release -notmatch 'examples/file_process') { throw 'release checklist missing verification coverage'; }"
+    )
 endif()
