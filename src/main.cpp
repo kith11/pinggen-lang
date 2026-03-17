@@ -77,13 +77,13 @@ static void load_module_graph(const ProjectConfig& project, const fs::path& path
     append_program(merged, std::move(program));
 }
 
-static Program compile_frontend(const ProjectConfig& project) {
+static Program compile_frontend(const ProjectConfig& project, const BuildTarget& target) {
     Program program;
     std::unordered_set<std::string> loaded_modules;
     std::unordered_set<std::string> active_modules;
-    const std::string entry_module_name = project.entry.stem().string();
+    const std::string entry_module_name = target.entry.stem().string();
     loaded_modules.insert(entry_module_name);
-    load_module_graph(project, project.entry, entry_module_name, program, loaded_modules, active_modules);
+    load_module_graph(project, target.entry, entry_module_name, program, loaded_modules, active_modules);
     SemanticAnalyzer sema;
     sema.analyze(program);
     return program;
@@ -91,22 +91,23 @@ static Program compile_frontend(const ProjectConfig& project) {
 
 static int command_check(const fs::path& project_dir) {
     const ProjectConfig project = load_project(project_dir);
-    compile_frontend(project);
+    compile_frontend(project, project.default_target);
     std::cout << "checked " << project.name << '\n';
     return 0;
 }
 
-static int command_build(const fs::path& project_dir) {
+static int command_build(const fs::path& project_dir, const std::optional<std::string>& target_name) {
     const ProjectConfig project = load_project(project_dir);
-    Program program = compile_frontend(project);
+    const BuildTarget& target = resolve_target(project, target_name);
+    Program program = compile_frontend(project, target);
     LLVMIRGenerator ir;
     const std::string llvm = ir.generate(program);
 
-    fs::create_directories(project.output.parent_path());
-    const std::string ll_path = project.output.string() + ".ll";
-    const std::string obj_path = project.output.string() + ".obj";
-    const std::string runtime_obj_path = project.output.string() + ".runtime.obj";
-    const std::string exe_path = project.output.string() + ".exe";
+    fs::create_directories(target.output.parent_path());
+    const std::string ll_path = target.output.string() + ".ll";
+    const std::string obj_path = target.output.string() + ".obj";
+    const std::string runtime_obj_path = target.output.string() + ".runtime.obj";
+    const std::string exe_path = target.output.string() + ".exe";
     const fs::path runtime_source = fs::path(PINGGEN_SOURCE_ROOT) / "runtime" / "pinggen_runtime.cpp";
 
     {
@@ -116,7 +117,7 @@ static int command_build(const fs::path& project_dir) {
 
     const std::string compile_command = "clang -c \"" + ll_path + "\" -o \"" + obj_path + "\"";
     if (std::system(compile_command.c_str()) != 0) {
-        throw std::runtime_error("clang failed while compiling " + project.name);
+        throw std::runtime_error("clang failed while compiling target '" + target.name + "'");
     }
 
     const std::string runtime_compile_command =
@@ -128,19 +129,20 @@ static int command_build(const fs::path& project_dir) {
     const std::string link_command =
         "clang++ \"" + obj_path + "\" \"" + runtime_obj_path + "\" -o \"" + exe_path + "\"";
     if (std::system(link_command.c_str()) != 0) {
-        throw std::runtime_error("clang failed while linking " + project.name);
+        throw std::runtime_error("clang failed while linking target '" + target.name + "'");
     }
 
     std::cout << "built " << exe_path << '\n';
     return 0;
 }
 
-static int command_run(const fs::path& project_dir) {
+static int command_run(const fs::path& project_dir, const std::optional<std::string>& target_name) {
     const ProjectConfig project = load_project(project_dir);
-    command_build(project_dir);
+    const BuildTarget& target = resolve_target(project, target_name);
+    command_build(project_dir, target.name);
     const fs::path previous_dir = fs::current_path();
     fs::current_path(project.root);
-    const std::string command = "\"" + project.output.string() + ".exe\"";
+    const std::string command = "\"" + target.output.string() + ".exe\"";
     const int exit_code = std::system(command.c_str());
     fs::current_path(previous_dir);
     return exit_code;
@@ -157,24 +159,47 @@ static int command_new(const fs::path& target_dir) {
 int main(int argc, char** argv) {
     try {
         if (argc < 2) {
-            std::cerr << "usage: pinggen <new|check|build|run> [path]\n";
+            std::cerr << "usage: pinggen <new|check|build|run> [path] [--target <name>]\n";
             return 1;
         }
 
         const std::string command = argv[1];
-        const fs::path path = argc >= 3 ? fs::path(argv[2]) : fs::current_path();
+        fs::path path = fs::current_path();
+        std::optional<std::string> target_name;
+        bool path_set = false;
+        for (int i = 2; i < argc; ++i) {
+            const std::string arg = argv[i];
+            if (arg == "--target") {
+                if (i + 1 >= argc) {
+                    throw std::runtime_error("missing target name after --target");
+                }
+                target_name = argv[++i];
+                continue;
+            }
+            if (path_set) {
+                throw std::runtime_error("unexpected argument: " + arg);
+            }
+            path = fs::path(arg);
+            path_set = true;
+        }
 
         if (command == "new") {
+            if (target_name.has_value()) {
+                throw std::runtime_error("--target is only supported with build and run");
+            }
             return pinggen::command_new(path);
         }
         if (command == "check") {
+            if (target_name.has_value()) {
+                throw std::runtime_error("--target is only supported with build and run");
+            }
             return pinggen::command_check(path);
         }
         if (command == "build") {
-            return pinggen::command_build(path);
+            return pinggen::command_build(path, target_name);
         }
         if (command == "run") {
-            return pinggen::command_run(path);
+            return pinggen::command_run(path, target_name);
         }
 
         std::cerr << "unknown command: " << command << '\n';

@@ -1,0 +1,8 @@
+[package]
+name = "invalid_target_missing_entry"
+
+[build]
+entry = "src/main.pg"
+
+[[target]]
+name = "tool"

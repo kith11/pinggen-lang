@@ -45,6 +45,7 @@ Current features:
 - `io::println(...)`
 - `return`
 - `pinggen.toml` project files
+- named build targets in `pinggen.toml`
 - `pinggen new`, `check`, `build`, `run`
 
 Build:
@@ -58,6 +59,12 @@ Run the example:
 
 ```powershell
 .\build\pinggen.exe run .\examples\hello
+```
+
+Build a named target:
+
+```powershell
+.\build\pinggen.exe build .\examples\multi_target --target tool
 ```
 
 Example:

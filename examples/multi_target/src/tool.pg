@@ -1,0 +1,6 @@
+import std::{ io }
+import shared;
+
+func main() {
+    io::println(shared_value() + 1);
+}

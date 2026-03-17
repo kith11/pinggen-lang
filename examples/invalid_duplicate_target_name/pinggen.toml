@@ -1,0 +1,10 @@
+[package]
+name = "invalid_duplicate_target_name"
+
+[build]
+name = "app"
+entry = "src/main.pg"
+
+[[target]]
+name = "app"
+entry = "src/tool.pg"

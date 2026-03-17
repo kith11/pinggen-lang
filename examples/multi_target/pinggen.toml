@@ -1,0 +1,13 @@
+[package]
+name = "multi_target"
+version = "0.1.0"
+
+[build]
+name = "app"
+entry = "src/main.pg"
+output = "build/app-main"
+
+[[target]]
+name = "tool"
+entry = "src/tool.pg"
+output = "build/tools/ping-tool"
