@@ -70,16 +70,23 @@ const Token& Parser::consume(TokenKind kind, const std::string& message) {
 
 ImportDecl Parser::parse_import() {
     const Token import_token = consume(TokenKind::KwImport, "expected 'import'");
-    consume(TokenKind::Identifier, "expected namespace name");
-    consume(TokenKind::ColonColon, "expected '::' in import");
-    consume(TokenKind::LBrace, "expected '{' in import");
-
     ImportDecl decl;
     decl.location = import_token.location;
-    do {
-        decl.items.push_back(consume(TokenKind::Identifier, "expected import item").lexeme);
-    } while (match(TokenKind::Comma));
-    consume(TokenKind::RBrace, "expected '}' after import list");
+    const Token first = consume(TokenKind::Identifier, "expected import target");
+    if (match(TokenKind::ColonColon)) {
+        decl.kind = ImportKind::Std;
+        decl.module_name = first.lexeme;
+        consume(TokenKind::LBrace, "expected '{' in import");
+        do {
+            decl.items.push_back(consume(TokenKind::Identifier, "expected import item").lexeme);
+        } while (match(TokenKind::Comma));
+        consume(TokenKind::RBrace, "expected '}' after import list");
+        return decl;
+    }
+
+    decl.kind = ImportKind::Module;
+    decl.module_name = first.lexeme;
+    consume(TokenKind::Semicolon, "expected ';' after module import");
     return decl;
 }
 

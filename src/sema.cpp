@@ -89,7 +89,16 @@ void SemanticAnalyzer::analyze(const Program& program) {
 void SemanticAnalyzer::collect_imports(const Program& program) {
     imported_std_items_.clear();
     for (const auto& decl : program.imports) {
+        if (decl.kind != ImportKind::Std) {
+            continue;
+        }
+        if (decl.module_name != "std") {
+            fail(decl.location, "unknown import namespace '" + decl.module_name + "'");
+        }
         for (const auto& item : decl.items) {
+            if (item != "io" && item != "str") {
+                fail(decl.location, "unknown std import '" + item + "'");
+            }
             imported_std_items_.insert(item);
         }
     }

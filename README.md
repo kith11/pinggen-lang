@@ -9,6 +9,7 @@ Source files use the `.pg` extension.
 Current features:
 
 - `import std::{ io, str }`
+- project-local flat modules with `import name;`
 - typed top-level functions with `func name(arg: type) -> type`
 - top-level `enum` declarations with qualified variants like `State::Ready`
 - single-payload enum variants like `Result::Ok(1)`
@@ -54,44 +55,14 @@ Run the example:
 Example:
 
 ```pinggen
-import std::{ io, str }
-
-enum Result {
-    Ok(int),
-    Err(string),
-    Pending,
-}
-
-struct Job {
-    result: Result,
-    label: string,
-}
-
-func finish(code: int) -> Result {
-    if code == 0 {
-        return Result::Ok(7);
-    }
-    return Result::Err("bad");
-}
-
-func describe(result: Result) -> string {
-    match result {
-        Result::Ok => {
-            return "ok";
-        }
-        Result::Err => {
-            return "err";
-        }
-        Result::Pending => {
-            return "pending";
-        }
-    }
-}
+// src/main.pg
+import std::{ io }
+import model;
+import logic;
 
 func main() {
     let job = Job { result: finish(0), label: "pinggen" };
     let results: [Result; 3] = [Result::Pending, Result::Err("bad"), Result::Ok(9)];
-    let label_size = str::len(job.label);
 
     match job.result {
         Result::Ok => {
@@ -105,8 +76,42 @@ func main() {
         }
     }
 
-    io::println(label_size);
+    io::println(job.label_len());
     io::println(describe(results[2]));
     io::println(describe(results[0]));
+}
+```
+
+```pinggen
+// src/model.pg
+import std::{ str }
+
+enum Result {
+    Ok(int),
+    Err(string),
+    Pending,
+}
+
+struct Job {
+    result: Result,
+    label: string,
+}
+
+impl Job {
+    func label_len(self) -> int {
+        return str::len(self.label);
+    }
+}
+```
+
+```pinggen
+// src/logic.pg
+import model;
+
+func finish(code: int) -> Result {
+    if code == 0 {
+        return Result::Ok(7);
+    }
+    return Result::Err("bad");
 }
 ```

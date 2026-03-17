@@ -204,6 +204,21 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-str-len-type PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-missing-module
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_missing_module
+    )
+    set_tests_properties(pinggen-check-invalid-missing-module PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-module-cycle
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_module_cycle
+    )
+    set_tests_properties(pinggen-check-invalid-module-cycle PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-std-import-item
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_std_import_item
+    )
+    set_tests_properties(pinggen-check-invalid-std-import-item PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-struct-duplicate-field
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_struct_duplicate_field
     )

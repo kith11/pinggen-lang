@@ -269,8 +269,15 @@ struct ContinueStmt final : Stmt {
     explicit ContinueStmt(SourceLocation loc) : Stmt(loc) {}
 };
 
+enum class ImportKind {
+    Std,
+    Module
+};
+
 struct ImportDecl {
     SourceLocation location;
+    ImportKind kind = ImportKind::Std;
+    std::string module_name;
     std::vector<std::string> items;
 };
 

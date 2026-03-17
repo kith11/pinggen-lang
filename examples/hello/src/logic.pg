@@ -1,0 +1,22 @@
+import model;
+
+func finish(code: int) -> Result {
+    if code == 0 {
+        return Result::Ok(7);
+    }
+    return Result::Err("bad");
+}
+
+func describe(result: Result) -> string {
+    match result {
+        Result::Ok => {
+            return "ok";
+        }
+        Result::Err => {
+            return "err";
+        }
+        Result::Pending => {
+            return "pending";
+        }
+    }
+}

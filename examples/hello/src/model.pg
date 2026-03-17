@@ -1,0 +1,18 @@
+import std::{ str }
+
+enum Result {
+    Ok(int),
+    Err(string),
+    Pending,
+}
+
+struct Job {
+    result: Result,
+    label: string,
+}
+
+impl Job {
+    func label_len(self) -> int {
+        return str::len(self.label);
+    }
+}
