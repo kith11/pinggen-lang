@@ -53,6 +53,7 @@ class LLVMIRGenerator {
     std::string emit_bounds_abort_helper() const;
     std::string emit_fs_read_helper() const;
     std::string emit_fs_write_helper() const;
+    std::string emit_fs_exists_helper() const;
     void emit_bounds_check(const std::string& index_ir, std::size_t size);
     std::string emit_enum_tag(const TypedIRValue& enum_value);
     std::string emit_string_constant(const std::string& value);

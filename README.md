@@ -32,6 +32,7 @@ Current features:
 - `str::len(value)` for byte-count string length
 - `fs::read_to_string(path)` returning `FsResult`
 - `fs::write_string(path, contents)` returning `FsWriteResult`
+- `fs::exists(path)` returning `bool`
 - fixed-size arrays with `[T; N]`, `[a, b, c]`, and `array[index]`
 - struct methods with `impl Type { ... }` and `value.method(...)`
 - mutating struct methods with `mut self`

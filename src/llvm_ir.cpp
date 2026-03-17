@@ -299,6 +299,7 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     if (has_fs_import) {
         out << emit_fs_read_helper();
         out << emit_fs_write_helper();
+        out << emit_fs_exists_helper();
     }
     out << helper_functions_;
     out << globals_ << "\n";
@@ -409,6 +410,22 @@ std::string LLVMIRGenerator::emit_fs_write_helper() const {
         "  %write_res0 = insertvalue %enum.FsWriteResult zeroinitializer, i64 1, 0\n"
         "  %write_res1 = insertvalue %enum.FsWriteResult %write_res0, ptr %write_msg, 1\n"
         "  ret %enum.FsWriteResult %write_res1\n"
+        "}\n\n";
+}
+
+std::string LLVMIRGenerator::emit_fs_exists_helper() const {
+    return
+        "define i1 @pinggen_fs_exists(ptr %path) {\n"
+        "entry:\n"
+        "  %mode = getelementptr inbounds [3 x i8], ptr @.fs.mode.rb, i64 0, i64 0\n"
+        "  %file = call ptr @fopen(ptr %path, ptr %mode)\n"
+        "  %exists = icmp ne ptr %file, null\n"
+        "  br i1 %exists, label %close_file, label %done\n"
+        "close_file:\n"
+        "  %close_status = call i32 @fclose(ptr %file)\n"
+        "  br label %done\n"
+        "done:\n"
+        "  ret i1 %exists\n"
         "}\n\n";
 }
 
@@ -836,6 +853,12 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
             body_ += "  " + reg + " = call %enum.FsWriteResult @pinggen_fs_write_string(ptr " + path.ir + ", ptr " +
                      contents.ir + ")\n";
             return {reg, Type::enum_type("FsWriteResult")};
+        }
+        if (node->callee == "fs::exists") {
+            const TypedIRValue path = emit_expr(*node->args[0]);
+            const std::string reg = next_register();
+            body_ += "  " + reg + " = call i1 @pinggen_fs_exists(ptr " + path.ir + ")\n";
+            return {reg, Type::bool_type()};
         }
 
         std::vector<TypedIRValue> args;

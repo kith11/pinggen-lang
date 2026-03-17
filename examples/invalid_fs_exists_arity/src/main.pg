@@ -1,0 +1,5 @@
+import std::{ fs }
+
+func main() {
+    let exists = fs::exists("a.txt", "b.txt");
+}

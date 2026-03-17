@@ -244,6 +244,21 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-fs-write-result-without-import PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-fs-exists-missing-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_exists_missing_import
+    )
+    set_tests_properties(pinggen-check-invalid-fs-exists-missing-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-exists-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_exists_arity
+    )
+    set_tests_properties(pinggen-check-invalid-fs-exists-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-exists-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_exists_type
+    )
+    set_tests_properties(pinggen-check-invalid-fs-exists-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-con-empty
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_con_empty
     )
@@ -398,6 +413,14 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-run-fs-write-missing
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_write_missing
+    )
+    add_test(
+        NAME pinggen-run-fs-exists-success
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_exists_success
+    )
+    add_test(
+        NAME pinggen-run-fs-exists-missing
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_exists_missing
     )
     add_test(
         NAME pinggen-run-con-success

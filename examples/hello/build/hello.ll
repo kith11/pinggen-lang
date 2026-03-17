@@ -117,6 +117,19 @@ write_fail:
   ret %enum.FsWriteResult %write_res1
 }
 
+define i1 @pinggen_fs_exists(ptr %path) {
+entry:
+  %mode = getelementptr inbounds [3 x i8], ptr @.fs.mode.rb, i64 0, i64 0
+  %file = call ptr @fopen(ptr %path, ptr %mode)
+  %exists = icmp ne ptr %file, null
+  br i1 %exists, label %close_file, label %done
+close_file:
+  %close_status = call i32 @fclose(ptr %file)
+  br label %done
+done:
+  ret i1 %exists
+}
+
 define void @pinggen_con_task_1_0(ptr %ctx) {
 entry:
   %task_result = call i64 @number_a()

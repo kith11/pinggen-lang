@@ -1,0 +1,3 @@
+func main() {
+    let exists = fs::exists("message.txt");
+}

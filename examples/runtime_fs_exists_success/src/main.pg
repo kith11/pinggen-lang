@@ -1,0 +1,9 @@
+import std::{ io, fs }
+
+func main() {
+    if fs::exists("message.txt") {
+        io::println("exists");
+    } else {
+        io::println("missing");
+    }
+}

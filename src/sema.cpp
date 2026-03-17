@@ -653,6 +653,17 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
             }
             return Type::enum_type("FsWriteResult");
         }
+        if (node->callee == "fs::exists") {
+            require_std_import("fs", node->location, "fs::exists");
+            if (node->args.size() != 1) {
+                fail(node->location, "fs::exists expects exactly one argument");
+            }
+            const Type path_type = analyze_expr(*node->args[0]);
+            if (path_type != Type::string_type()) {
+                fail(node->args[0]->location, "fs::exists only supports string path arguments");
+            }
+            return Type::bool_type();
+        }
 
         const auto it = functions_.find(node->callee);
         if (it == functions_.end()) {
@@ -687,7 +698,7 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         for (const auto& item : node->items) {
             if (const auto* call = dynamic_cast<const CallExpr*>(item.get())) {
                 if (call->callee == "io::println" || call->callee == "str::len" || call->callee == "fs::read_to_string" ||
-                    call->callee == "fs::write_string") {
+                    call->callee == "fs::write_string" || call->callee == "fs::exists") {
                     inside_con_ = false;
                     fail(call->location, "builtin function '" + call->callee + "' is not supported inside con");
                 }

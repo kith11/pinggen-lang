@@ -510,7 +510,8 @@ std::unique_ptr<Expr> Parser::parse_primary() {
                     } while (match(TokenKind::Comma));
                 }
                 consume(TokenKind::RParen, "expected ')' after arguments");
-                if (name == "io::println" || name == "str::len" || name == "fs::read_to_string" || name == "fs::write_string") {
+                if (name == "io::println" || name == "str::len" || name == "fs::read_to_string" || name == "fs::write_string" ||
+                    name == "fs::exists") {
                     return parse_postfix(std::make_unique<CallExpr>(first.location, name, std::move(args)));
                 }
                 if (name.find("::", name.find("::") + 2) != std::string::npos) {
