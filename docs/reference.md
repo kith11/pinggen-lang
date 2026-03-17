@@ -26,10 +26,15 @@ output = "build/my_app"
 name = "tool"
 entry = "src/tool.pg"
 output = "build/tool"
+
+[[dependency]]
+name = "shared"
+path = "../shared_lib"
 ```
 
 - `[build]` defines the default executable target.
 - `[[target]]` defines additional named executable targets.
+- `[[dependency]]` defines a local path dependency imported by its `name`.
 - `puff build` and `puff run` use the default target.
 - `puff build <project> --target <name>` and `puff run <project> --target <name>` select a named target.
 - `puff targets <project>` prints the available targets.
@@ -46,6 +51,7 @@ output = "build/tool"
 - `func name(arg: type) -> type { ... }`
 - `import name;`
 - `import util::path;`
+- `import shared::math;`
 - `import std::{ io, str, fs, env }`
 
 ### Data types
@@ -122,6 +128,7 @@ output = "build/tool"
 
 - fixed arrays plus built-in `Vec<T>` only; no general generics
 - declarative build configuration only
+- local path dependencies only; no registry or lockfile
 - strict `con` restrictions
 - no generics
 - no package manager

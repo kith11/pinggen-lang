@@ -88,10 +88,15 @@ output = "build/my_app"
 name = "tool"
 entry = "src/tool.pg"
 output = "build/tool"
+
+[[dependency]]
+name = "shared"
+path = "../shared_lib"
 ```
 
 - `[build]` defines the default executable target.
 - `[[target]]` defines additional named executable targets.
+- `[[dependency]]` defines a local path dependency imported by its `name`.
 - `puff build` and `puff run` use the default target.
 - `puff build <project> --target <name>` and `puff run <project> --target <name>` select a named target.
 
@@ -101,6 +106,7 @@ output = "build/tool"
 
 - typed top-level functions
 - flat and hierarchical project-local modules with `import name;` and `import util::path;`
+- local path dependencies with `[[dependency]]` plus imports like `import shared::math;`
 - `struct`, `enum`, payload enums, and exhaustive `match`
 - tuples and tuple destructuring
 - fixed-size arrays and dynamic `Vec<T>`
@@ -139,6 +145,7 @@ output = "build/tool"
 - [multi_target](./examples/multi_target): manifest v2 named targets
 - [file_process](./examples/file_process): practical `fs` + `match` example
 - [hierarchical_modules](./examples/hierarchical_modules): nested project modules with `import util::path;`
+- [path_dependency_app](./examples/path_dependency_app): local package dependency imported with `import shared::math;`
 - [runtime_vec_success](./examples/runtime_vec_success): dynamic `Vec<T>` with aliasing, struct fields, params, returns, and enum payloads
 - [hello](./examples/hello): advanced multi-feature demo
 
@@ -153,5 +160,6 @@ A minimal VS Code extension for `.pg` syntax highlighting lives at [editors/vsco
 - arrays are fixed-size; growable collections use built-in `Vec<T>`
 - `con` is intentionally strict and only allows approved safe calls
 - build configuration is declarative; there is no programmable build scripting
-- no generics, borrow checker, package manager, formatter, or LSP in this milestone
+- local path dependencies only; no remote registry, lockfile, or package manager in this milestone
+- no generics, borrow checker, formatter, or LSP in this milestone
 - post-1.0 work is documented in [docs/release-checklist.md](./docs/release-checklist.md)

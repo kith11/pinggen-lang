@@ -25,6 +25,8 @@
   - default target plus named target flow
 - `examples/file_process`
   - `fs` + `match` workflow
+- `examples/path_dependency_app`
+  - local path dependency flow
 - `examples/hello`
   - advanced multi-feature demo
 

@@ -18,6 +18,11 @@ struct RawTargetConfig {
     std::string output;
 };
 
+struct RawDependencyConfig {
+    std::string name;
+    std::string path;
+};
+
 std::string trim(const std::string& value) {
     const auto start = value.find_first_not_of(" \t\r\n");
     if (start == std::string::npos) {
@@ -73,6 +78,7 @@ ProjectConfig load_project(const std::filesystem::path& project_dir) {
     std::string line;
     RawTargetConfig build_section;
     std::vector<RawTargetConfig> raw_targets;
+    std::vector<RawDependencyConfig> raw_dependencies;
     while (std::getline(input, line)) {
         line = trim(line);
         if (line.empty() || line.front() == '#') {
@@ -82,6 +88,9 @@ ProjectConfig load_project(const std::filesystem::path& project_dir) {
             section = line.substr(1, line.size() - 2);
             if (section == "[target]") {
                 raw_targets.push_back(RawTargetConfig{});
+            }
+            if (section == "[dependency]") {
+                raw_dependencies.push_back(RawDependencyConfig{});
             }
             continue;
         }
@@ -107,6 +116,13 @@ ProjectConfig load_project(const std::filesystem::path& project_dir) {
                 target.entry = value;
             } else if (key == "output") {
                 target.output = value;
+            }
+        } else if (section == "[dependency]") {
+            auto& dependency = raw_dependencies.back();
+            if (key == "name") {
+                dependency.name = value;
+            } else if (key == "path") {
+                dependency.path = value;
             }
         }
     }
@@ -134,6 +150,40 @@ ProjectConfig load_project(const std::filesystem::path& project_dir) {
                                      target.name + "'");
         }
         config.extra_targets.push_back(target);
+    }
+
+    std::unordered_set<std::string> seen_dependency_names;
+    for (std::size_t i = 0; i < raw_dependencies.size(); ++i) {
+        const auto& raw_dependency = raw_dependencies[i];
+        const std::string section_name = "[[dependency]] #" + std::to_string(i + 1);
+        if (raw_dependency.name.empty()) {
+            throw std::runtime_error("project config '" + config_path.string() + "' is missing " + section_name + ".name");
+        }
+        if (raw_dependency.path.empty()) {
+            throw std::runtime_error("project config '" + config_path.string() + "' is missing " + section_name + ".path");
+        }
+        if (raw_dependency.name == "std") {
+            throw std::runtime_error("project config '" + config_path.string() +
+                                     "' uses reserved dependency name 'std'");
+        }
+        if (raw_dependency.name.find("::") != std::string::npos) {
+            throw std::runtime_error("project config '" + config_path.string() + "' has invalid dependency name '" +
+                                     raw_dependency.name + "'; dependency names must be a single identifier");
+        }
+        if (!seen_dependency_names.insert(raw_dependency.name).second) {
+            throw std::runtime_error("project config '" + config_path.string() + "' defines duplicate dependency '" +
+                                     raw_dependency.name + "'");
+        }
+
+        DependencyConfig dependency;
+        dependency.name = raw_dependency.name;
+        dependency.path = std::filesystem::absolute(config.root / raw_dependency.path);
+        const auto dependency_config_path = dependency.path / "pinggen.toml";
+        if (!std::filesystem::exists(dependency_config_path)) {
+            throw std::runtime_error("dependency '" + dependency.name + "' config not found at '" +
+                                     dependency_config_path.string() + "'");
+        }
+        config.dependencies.push_back(std::move(dependency));
     }
     return config;
 }

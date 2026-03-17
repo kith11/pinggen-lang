@@ -1,0 +1,12 @@
+[package]
+name = "invalid_dependency_cycle_root"
+version = "0.1.0"
+
+[build]
+name = "invalid_dependency_cycle_root"
+entry = "src/main.pg"
+output = "build/invalid_dependency_cycle_root"
+
+[[dependency]]
+name = "loopdep"
+path = "../invalid_dependency_cycle_dep"

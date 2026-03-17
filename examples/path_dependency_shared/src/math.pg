@@ -1,0 +1,5 @@
+import numbers::seed;
+
+func expand(value: int) -> int {
+    return value + base();
+}

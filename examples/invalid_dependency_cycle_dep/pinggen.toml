@@ -1,0 +1,12 @@
+[package]
+name = "invalid_dependency_cycle_dep"
+version = "0.1.0"
+
+[build]
+name = "invalid_dependency_cycle_dep"
+entry = "src/main.pg"
+output = "build/invalid_dependency_cycle_dep"
+
+[[dependency]]
+name = "back"
+path = "../invalid_dependency_cycle_root"

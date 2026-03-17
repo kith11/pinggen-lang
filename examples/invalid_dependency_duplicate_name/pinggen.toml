@@ -1,0 +1,16 @@
+[package]
+name = "invalid_dependency_duplicate_name"
+version = "0.1.0"
+
+[build]
+name = "invalid_dependency_duplicate_name"
+entry = "src/main.pg"
+output = "build/invalid_dependency_duplicate_name"
+
+[[dependency]]
+name = "shared"
+path = "../path_dependency_shared"
+
+[[dependency]]
+name = "shared"
+path = "../path_dependency_numbers"

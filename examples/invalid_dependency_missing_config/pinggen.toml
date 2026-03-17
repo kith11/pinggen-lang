@@ -1,0 +1,12 @@
+[package]
+name = "invalid_dependency_missing_config"
+version = "0.1.0"
+
+[build]
+name = "invalid_dependency_missing_config"
+entry = "src/main.pg"
+output = "build/invalid_dependency_missing_config"
+
+[[dependency]]
+name = "missingdep"
+path = "../invalid_dependency_missing_config_dep"

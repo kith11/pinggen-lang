@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -20,6 +21,11 @@ namespace fs = std::filesystem;
 namespace pinggen {
 
 namespace {
+
+struct LoadedProject {
+    ProjectConfig config;
+    std::unordered_map<std::string, std::shared_ptr<LoadedProject>> dependencies;
+};
 
 std::string trim_copy(const std::string& value) {
     const std::size_t start = value.find_first_not_of(" \t\r\n");
@@ -243,8 +249,19 @@ static std::vector<std::string> split_module_name(const std::string& module_name
     return segments;
 }
 
-static fs::path project_module_path(const ProjectConfig& project, const std::string& module_name) {
-    fs::path path = project.root / "src";
+static std::string join_module_segments(const std::vector<std::string>& segments, std::size_t start_index = 0) {
+    std::string module_name;
+    for (std::size_t i = start_index; i < segments.size(); ++i) {
+        if (!module_name.empty()) {
+            module_name += "::";
+        }
+        module_name += segments[i];
+    }
+    return module_name;
+}
+
+static fs::path project_module_path(const LoadedProject& project, const std::string& module_name) {
+    fs::path path = project.config.root / "src";
     for (const auto& segment : split_module_name(module_name)) {
         path /= segment;
     }
@@ -252,8 +269,8 @@ static fs::path project_module_path(const ProjectConfig& project, const std::str
     return path;
 }
 
-static std::string module_name_from_source_path(const ProjectConfig& project, const fs::path& path) {
-    const fs::path source_root = project.root / "src";
+static std::string module_name_from_source_path(const LoadedProject& project, const fs::path& path) {
+    const fs::path source_root = project.config.root / "src";
     std::error_code error;
     fs::path relative = fs::relative(path, source_root, error);
     if (error || relative.empty()) {
@@ -271,6 +288,65 @@ static std::string module_name_from_source_path(const ProjectConfig& project, co
         return path.stem().string();
     }
     return module_name;
+}
+
+static std::shared_ptr<LoadedProject> load_project_graph(
+    const fs::path& project_dir,
+    std::unordered_map<std::string, std::shared_ptr<LoadedProject>>& cache,
+    std::unordered_set<std::string>& active_roots) {
+    const std::string canonical_root = fs::weakly_canonical(project_dir).string();
+    if (active_roots.contains(canonical_root)) {
+        throw std::runtime_error("circular project dependency detected at '" + canonical_root + "'");
+    }
+    if (const auto it = cache.find(canonical_root); it != cache.end()) {
+        return it->second;
+    }
+
+    active_roots.insert(canonical_root);
+    auto loaded = std::make_shared<LoadedProject>();
+    loaded->config = load_project(project_dir);
+    cache.emplace(canonical_root, loaded);
+
+    for (const auto& dependency : loaded->config.dependencies) {
+        loaded->dependencies.emplace(
+            dependency.name, load_project_graph(dependency.path, cache, active_roots));
+    }
+
+    active_roots.erase(canonical_root);
+    return loaded;
+}
+
+struct ModuleResolution {
+    std::shared_ptr<LoadedProject> project;
+    std::string local_module_name;
+    std::string canonical_module_name;
+    fs::path path;
+};
+
+static ModuleResolution resolve_import(const std::shared_ptr<LoadedProject>& project,
+                                       const std::string& namespace_prefix,
+                                       const std::string& import_name,
+                                       const SourceLocation& location) {
+    const std::vector<std::string> segments = split_module_name(import_name);
+    if (!segments.empty()) {
+        const auto dependency_it = project->dependencies.find(segments[0]);
+        if (dependency_it != project->dependencies.end()) {
+            if (segments.size() == 1) {
+                fail(location, "dependency imports must include a module path after '" + segments[0] + "::'");
+            }
+            const std::shared_ptr<LoadedProject>& dependency_project = dependency_it->second;
+            const std::string dependency_prefix =
+                namespace_prefix.empty() ? segments[0] : namespace_prefix + "::" + segments[0];
+            const std::string local_module_name = join_module_segments(segments, 1);
+            const std::string canonical_module_name = dependency_prefix + "::" + local_module_name;
+            return {dependency_project, local_module_name, canonical_module_name,
+                    project_module_path(*dependency_project, local_module_name)};
+        }
+    }
+
+    const std::string canonical_module_name =
+        namespace_prefix.empty() ? import_name : namespace_prefix + "::" + import_name;
+    return {project, import_name, canonical_module_name, project_module_path(*project, import_name)};
 }
 
 static Program parse_file(const fs::path& path) {
@@ -294,7 +370,8 @@ static void append_program(Program& target, Program source) {
     }
 }
 
-static void load_module_graph(const ProjectConfig& project, const fs::path& path, const std::string& module_name, Program& merged,
+static void load_module_graph(const std::shared_ptr<LoadedProject>& project, const std::string& namespace_prefix,
+                              const fs::path& path, const std::string& module_name, Program& merged,
                               std::unordered_set<std::string>& loaded_modules,
                               std::unordered_set<std::string>& active_modules) {
     Program program = parse_file(path);
@@ -303,32 +380,38 @@ static void load_module_graph(const ProjectConfig& project, const fs::path& path
         if (import_decl.kind != ImportKind::Module) {
             continue;
         }
-        const std::string& imported_name = import_decl.module_name;
-        if (active_modules.contains(imported_name)) {
-            fail(import_decl.location, "circular module import detected for '" + imported_name + "'");
+        const ModuleResolution resolved = resolve_import(project, namespace_prefix, import_decl.module_name, import_decl.location);
+        if (active_modules.contains(resolved.canonical_module_name)) {
+            fail(import_decl.location, "circular module import detected for '" + resolved.canonical_module_name + "'");
         }
-        if (loaded_modules.contains(imported_name)) {
+        if (loaded_modules.contains(resolved.canonical_module_name)) {
             continue;
         }
-        const fs::path module_path = project_module_path(project, imported_name);
-        if (!fs::exists(module_path)) {
+        if (!fs::exists(resolved.path)) {
             fail(import_decl.location,
-                 "missing imported module '" + imported_name + "'; expected file '" + module_path.string() + "'");
+                 "missing imported module '" + resolved.canonical_module_name + "'; expected file '" + resolved.path.string() + "'");
         }
-        loaded_modules.insert(imported_name);
-        load_module_graph(project, module_path, imported_name, merged, loaded_modules, active_modules);
+        loaded_modules.insert(resolved.canonical_module_name);
+        const std::string child_prefix =
+            resolved.canonical_module_name.substr(0, resolved.canonical_module_name.size() - resolved.local_module_name.size() -
+                                                  (resolved.canonical_module_name.size() == resolved.local_module_name.size() ? 0 : 2));
+        load_module_graph(resolved.project, child_prefix, resolved.path, resolved.canonical_module_name, merged, loaded_modules,
+                          active_modules);
     }
     active_modules.erase(module_name);
     append_program(merged, std::move(program));
 }
 
 static Program compile_frontend(const ProjectConfig& project, const BuildTarget& target) {
+    std::unordered_map<std::string, std::shared_ptr<LoadedProject>> cache;
+    std::unordered_set<std::string> active_roots;
+    const std::shared_ptr<LoadedProject> root_project = load_project_graph(project.root, cache, active_roots);
     Program program;
     std::unordered_set<std::string> loaded_modules;
     std::unordered_set<std::string> active_modules;
-    const std::string entry_module_name = module_name_from_source_path(project, target.entry);
+    const std::string entry_module_name = module_name_from_source_path(*root_project, target.entry);
     loaded_modules.insert(entry_module_name);
-    load_module_graph(project, target.entry, entry_module_name, program, loaded_modules, active_modules);
+    load_module_graph(root_project, "", target.entry, entry_module_name, program, loaded_modules, active_modules);
     SemanticAnalyzer sema;
     sema.analyze(program);
     return program;

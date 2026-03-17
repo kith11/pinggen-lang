@@ -1,0 +1,12 @@
+[package]
+name = "invalid_dependency_cycle_lib"
+version = "0.1.0"
+
+[build]
+name = "invalid_dependency_cycle_lib"
+entry = "src/helper.pg"
+output = "build/invalid_dependency_cycle_lib"
+
+[[dependency]]
+name = "app"
+path = "../invalid_dependency_cycle_app"

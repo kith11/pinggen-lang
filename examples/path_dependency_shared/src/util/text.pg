@@ -1,0 +1,17 @@
+struct SharedLabel {
+    count: int,
+}
+
+impl SharedLabel {
+    func width(self) -> int {
+        return self.count;
+    }
+}
+
+func shared_label() -> SharedLabel {
+    return SharedLabel { count: 5 };
+}
+
+func shared_value() -> int {
+    return 9;
+}

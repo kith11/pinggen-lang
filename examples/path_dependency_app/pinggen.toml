@@ -1,0 +1,12 @@
+[package]
+name = "path_dependency_app"
+version = "0.1.0"
+
+[build]
+name = "path_dependency_app"
+entry = "src/main.pg"
+output = "build/path_dependency_app"
+
+[[dependency]]
+name = "shared"
+path = "../path_dependency_shared"

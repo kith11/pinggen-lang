@@ -1,0 +1,12 @@
+[package]
+name = "invalid_dependency_root_import"
+version = "0.1.0"
+
+[build]
+name = "invalid_dependency_root_import"
+entry = "src/main.pg"
+output = "build/invalid_dependency_root_import"
+
+[[dependency]]
+name = "shared"
+path = "../path_dependency_shared"
