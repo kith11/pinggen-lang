@@ -37,6 +37,7 @@ std::string type_name(const Type& type) {
 }
 
 void SemanticAnalyzer::analyze(const Program& program) {
+    collect_imports(program);
     collect_enums(program);
     collect_structs(program);
     for (const auto& decl : program.enums) {
@@ -82,6 +83,15 @@ void SemanticAnalyzer::analyze(const Program& program) {
 
     if (!has_main) {
         fail({1, 1}, "program must define func main()");
+    }
+}
+
+void SemanticAnalyzer::collect_imports(const Program& program) {
+    imported_std_items_.clear();
+    for (const auto& decl : program.imports) {
+        for (const auto& item : decl.items) {
+            imported_std_items_.insert(item);
+        }
     }
 }
 
@@ -258,6 +268,13 @@ void SemanticAnalyzer::validate_type(const Type& type, const SourceLocation& loc
         if (!structs_.contains(type.name)) {
             fail(location, "unknown struct type '" + type.name + "'");
         }
+    }
+}
+
+void SemanticAnalyzer::require_std_import(const std::string& item, const SourceLocation& location,
+                                          const std::string& feature) const {
+    if (!imported_std_items_.contains(item)) {
+        fail(location, feature + " requires 'import std::{ " + item + " }'");
     }
 }
 
@@ -476,6 +493,7 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
     }
     if (const auto* node = dynamic_cast<const CallExpr*>(&expr)) {
         if (node->callee == "io::println") {
+            require_std_import("io", node->location, "io::println");
             if (node->args.size() != 1) {
                 fail(node->location, "io::println expects exactly one argument");
             }
@@ -484,6 +502,17 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
                 fail(node->args[0]->location, "io::println only supports int and string arguments");
             }
             return Type::void_type();
+        }
+        if (node->callee == "str::len") {
+            require_std_import("str", node->location, "str::len");
+            if (node->args.size() != 1) {
+                fail(node->location, "str::len expects exactly one argument");
+            }
+            const Type arg_type = analyze_expr(*node->args[0]);
+            if (arg_type != Type::string_type()) {
+                fail(node->args[0]->location, "str::len only supports string arguments");
+            }
+            return Type::int_type();
         }
 
         const auto it = functions_.find(node->callee);

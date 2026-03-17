@@ -189,6 +189,21 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-payload-match-binding PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-str-len-missing-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_str_len_missing_import
+    )
+    set_tests_properties(pinggen-check-invalid-str-len-missing-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-str-len-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_str_len_arity
+    )
+    set_tests_properties(pinggen-check-invalid-str-len-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-str-len-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_str_len_type
+    )
+    set_tests_properties(pinggen-check-invalid-str-len-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-struct-duplicate-field
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_struct_duplicate_field
     )

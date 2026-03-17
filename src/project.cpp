@@ -88,7 +88,7 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
     config << "output = \"build/" << name << "\"\n";
 
     std::ofstream source(target_dir / "src" / "main.pg");
-    source << "import std::{ io }\n\n";
+    source << "import std::{ io, str }\n\n";
     source << "enum Result {\n";
     source << "    Ok(int),\n";
     source << "    Err(string),\n";
@@ -120,6 +120,7 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
     source << "func main() {\n";
     source << "    let job = Job { result: finish(0), label: \"pinggen\" };\n";
     source << "    let results: [Result; 3] = [Result::Pending, Result::Err(\"bad\"), Result::Ok(9)];\n";
+    source << "    let label_size = str::len(job.label);\n";
     source << "    match job.result {\n";
     source << "        Result::Ok => {\n";
     source << "            io::println(job.label);\n";
@@ -131,6 +132,7 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
     source << "            io::println(\"pending\");\n";
     source << "        }\n";
     source << "    }\n";
+    source << "    io::println(label_size);\n";
     source << "    io::println(describe(results[2]));\n";
     source << "    io::println(describe(results[0]));\n";
     source << "}\n";

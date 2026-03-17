@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_set>
 #include <unordered_map>
 #include <vector>
 
@@ -37,6 +38,7 @@ class SemanticAnalyzer {
     void analyze(const Program& program);
 
   private:
+    void collect_imports(const Program& program);
     void collect_enums(const Program& program);
     void collect_structs(const Program& program);
     void collect_signatures(const Program& program);
@@ -50,8 +52,10 @@ class SemanticAnalyzer {
     const StructInfo& require_struct(const Type& type, const SourceLocation& location) const;
     const Type& require_array(const Type& type, const SourceLocation& location) const;
     void validate_type(const Type& type, const SourceLocation& location, bool allow_struct);
+    void require_std_import(const std::string& item, const SourceLocation& location, const std::string& feature) const;
 
     std::unordered_map<std::string, Symbol> symbols_;
+    std::unordered_set<std::string> imported_std_items_;
     std::unordered_map<std::string, EnumInfo> enums_;
     std::unordered_map<std::string, StructInfo> structs_;
     std::unordered_map<std::string, FunctionSignature> functions_;

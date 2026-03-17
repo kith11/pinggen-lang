@@ -428,6 +428,12 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
             }
             return {"0", Type::void_type()};
         }
+        if (node->callee == "str::len") {
+            const TypedIRValue arg = emit_expr(*node->args[0]);
+            const std::string reg = next_register();
+            body_ += "  " + reg + " = call i64 @strlen(ptr " + arg.ir + ")\n";
+            return {reg, Type::int_type()};
+        }
 
         std::vector<TypedIRValue> args;
         for (const auto& arg : node->args) {

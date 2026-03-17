@@ -8,7 +8,7 @@ Source files use the `.pg` extension.
 
 Current features:
 
-- `import std::{ io }`
+- `import std::{ io, str }`
 - typed top-level functions with `func name(arg: type) -> type`
 - top-level `enum` declarations with qualified variants like `State::Ready`
 - single-payload enum variants like `Result::Ok(1)`
@@ -24,6 +24,7 @@ Current features:
 - `<`, `<=`, `>`, and `>=` for integer comparisons
 - `%` for integer modulo
 - `+` for string concatenation
+- `str::len(value)` for byte-count string length
 - fixed-size arrays with `[T; N]`, `[a, b, c]`, and `array[index]`
 - struct methods with `impl Type { ... }` and `value.method(...)`
 - mutating struct methods with `mut self`
@@ -53,7 +54,7 @@ Run the example:
 Example:
 
 ```pinggen
-import std::{ io }
+import std::{ io, str }
 
 enum Result {
     Ok(int),
@@ -90,6 +91,7 @@ func describe(result: Result) -> string {
 func main() {
     let job = Job { result: finish(0), label: "pinggen" };
     let results: [Result; 3] = [Result::Pending, Result::Err("bad"), Result::Ok(9)];
+    let label_size = str::len(job.label);
 
     match job.result {
         Result::Ok => {
@@ -103,6 +105,7 @@ func main() {
         }
     }
 
+    io::println(label_size);
     io::println(describe(results[2]));
     io::println(describe(results[0]));
 }

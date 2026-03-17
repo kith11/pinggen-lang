@@ -1,0 +1,7 @@
+[package]
+name = "invalid_str_len_arity"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_str_len_arity"

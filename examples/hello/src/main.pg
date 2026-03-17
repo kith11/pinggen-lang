@@ -1,4 +1,4 @@
-import std::{ io }
+import std::{ io, str }
 
 enum Result {
     Ok(int),
@@ -35,6 +35,7 @@ func describe(result: Result) -> string {
 func main() {
     let job = Job { result: finish(0), label: "pinggen" };
     let results: [Result; 3] = [Result::Pending, Result::Err("bad"), Result::Ok(9)];
+    let label_size = str::len(job.label);
 
     match job.result {
         Result::Ok => {
@@ -48,6 +49,7 @@ func main() {
         }
     }
 
+    io::println(label_size);
     io::println(describe(results[2]));
     io::println(describe(results[0]));
 }
