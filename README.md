@@ -41,6 +41,10 @@ Reference docs:
 - [1.0 Reference](./docs/reference.md)
 - [Release Checklist](./docs/release-checklist.md)
 
+Editor support:
+
+- [VS Code syntax highlighting](./editors/vscode/pinggen/README.md)
+
 ## Project Layout
 
 `pinggen` projects use `pinggen.toml` plus flat modules under `src/`.
@@ -107,6 +111,10 @@ output = "build/tool"
 - [hello](./examples/hello): advanced multi-feature demo
 
 For the compact syntax and stdlib reference, use [docs/reference.md](./docs/reference.md).
+
+## Editor Support
+
+A minimal VS Code extension for `.pg` syntax highlighting lives at [editors/vscode/pinggen](./editors/vscode/pinggen).
 
 ## Current 1.0 Limits
 

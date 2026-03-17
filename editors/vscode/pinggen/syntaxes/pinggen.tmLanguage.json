@@ -1,0 +1,164 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "pinggen",
+  "scopeName": "source.pinggen",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#constants"
+    },
+    {
+      "include": "#builtin-types"
+    },
+    {
+      "include": "#stdlib"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#types"
+    },
+    {
+      "include": "#operators"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.pinggen",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.pinggen",
+          "begin": "\"",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.pinggen"
+            }
+          },
+          "end": "\"",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.pinggen"
+            }
+          },
+          "patterns": [
+            {
+              "name": "constant.character.escape.pinggen",
+              "match": "\\\\[nt\"\\\\]"
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.integer.pinggen",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.pinggen",
+          "match": "\\b(import|return|if|else|while|for|in|match|break|continue|con)\\b"
+        },
+        {
+          "name": "storage.type.declaration.pinggen",
+          "match": "\\b(func|struct|enum|impl|let)\\b"
+        },
+        {
+          "name": "storage.modifier.pinggen",
+          "match": "\\b(mut|safe)\\b"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.pinggen",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "name": "variable.language.self.pinggen",
+          "match": "\\bself\\b"
+        }
+      ]
+    },
+    "builtin-types": {
+      "patterns": [
+        {
+          "name": "support.type.primitive.pinggen",
+          "match": "\\b(int|bool|string)\\b"
+        }
+      ]
+    },
+    "stdlib": {
+      "patterns": [
+        {
+          "name": "support.module.stdlib.pinggen",
+          "match": "\\b(std|io|str|fs|env)\\b(?=\\s*::)"
+        },
+        {
+          "name": "support.function.stdlib.pinggen",
+          "match": "\\b(println|len|read_to_string|write_string|exists|get)\\b(?=\\s*\\()"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.definition.pinggen",
+          "match": "(?<=\\bfunc\\s)([A-Za-z_][A-Za-z0-9_]*)"
+        },
+        {
+          "name": "entity.name.function.call.pinggen",
+          "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\b(?=\\s*\\()"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "entity.name.type.enum-variant.pinggen",
+          "match": "\\b([A-Z][A-Za-z0-9_]*)\\b(?=\\s*::)"
+        },
+        {
+          "name": "entity.name.type.variant-member.pinggen",
+          "match": "(?<=::)\\b([A-Z][A-Za-z0-9_]*)\\b"
+        },
+        {
+          "name": "entity.name.type.pinggen",
+          "match": "\\b[A-Z][A-Za-z0-9_]*\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.pinggen",
+          "match": "=>|->|::|\\.\\.|==|!=|<=|>=|&&|\\|\\||[=+\\-*/%<>!:.,;]"
+        }
+      ]
+    }
+  }
+}

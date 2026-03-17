@@ -1,0 +1,35 @@
+{
+  "name": "pinggen-language",
+  "displayName": "pinggen Language Support",
+  "description": "Syntax highlighting and editor basics for pinggen .pg files.",
+  "version": "0.1.0",
+  "publisher": "pinggen",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "pinggen",
+        "aliases": [
+          "pinggen",
+          "Pinggen"
+        ],
+        "extensions": [
+          ".pg"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "pinggen",
+        "scopeName": "source.pinggen",
+        "path": "./syntaxes/pinggen.tmLanguage.json"
+      }
+    ]
+  }
+}

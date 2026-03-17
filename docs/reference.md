@@ -31,6 +31,11 @@ output = "build/tool"
 - `pinggen build` and `pinggen run` use the default target.
 - `pinggen build <project> --target <name>` and `pinggen run <project> --target <name>` select a named target.
 
+## Editor Support
+
+- VS Code syntax highlighting is available in [../editors/vscode/pinggen](../editors/vscode/pinggen).
+- It currently provides `.pg` syntax highlighting, `#` comments, and bracket/quote auto-closing.
+
 ## Syntax Summary
 
 ### Functions and modules
