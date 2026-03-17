@@ -7,7 +7,7 @@
 
 namespace pinggen {
 
-Lexer::Lexer(std::string source) : source_(std::move(source)) {}
+Lexer::Lexer(std::string source, std::string source_name) : source_(std::move(source)), source_name_(std::move(source_name)) {}
 
 std::vector<Token> Lexer::tokenize() {
     std::vector<Token> tokens;
@@ -163,7 +163,7 @@ void Lexer::skip_whitespace() {
 }
 
 Token Lexer::make_token(TokenKind kind, std::size_t start_line, std::size_t start_column, std::string lexeme) {
-    return Token{kind, std::move(lexeme), {start_line, start_column}};
+    return Token{kind, std::move(lexeme), {source_name_, start_line, start_column}};
 }
 
 Token Lexer::lex_identifier(std::size_t start_line, std::size_t start_column) {

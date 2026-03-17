@@ -12,9 +12,9 @@
 #include "pinggen/diagnostics.hpp"
 #include "pinggen/dependency_resolver.hpp"
 #include "pinggen/formatter.hpp"
-#include "pinggen/lexer.hpp"
+#include "pinggen/frontend.hpp"
+#include "pinggen/lsp.hpp"
 #include "pinggen/llvm_ir.hpp"
-#include "pinggen/parser.hpp"
 #include "pinggen/project.hpp"
 #include "pinggen/sema.hpp"
 
@@ -23,11 +23,6 @@ namespace fs = std::filesystem;
 namespace pinggen {
 
 namespace {
-
-struct LoadedProject {
-    ProjectConfig config;
-    std::unordered_map<std::string, std::shared_ptr<LoadedProject>> dependencies;
-};
 
 struct PackageSpec {
     std::string name;
@@ -148,6 +143,7 @@ void print_usage(std::ostream& out, const std::string& command_name) {
     out << "  " << command_name << " init <path>\n";
     out << "  " << command_name << " check [path]\n";
     out << "  " << command_name << " fmt [path] [--check]\n";
+    out << "  " << command_name << " lsp\n";
     out << "  " << command_name << " build [path] [--target <name>]\n";
     out << "  " << command_name << " run [path] [--target <name>]\n";
     out << "  " << command_name << " add <name>[@version] [path]\n";
@@ -161,6 +157,7 @@ void print_usage(std::ostream& out, const std::string& command_name) {
     out << "  " << command_name << " doctor         check toolchain and current project\n";
     out << "  " << command_name << " init my_app     create a starter project\n";
     out << "  " << command_name << " fmt my_app      format project source files\n";
+    out << "  " << command_name << " lsp             start the language server\n";
     out << "  " << command_name << " run my_app      build and run the default target\n";
 }
 
@@ -395,207 +392,9 @@ int command_setup(const fs::path& project_dir, const fs::path& executable_path, 
 
 }  // namespace
 
-static std::string read_file(const fs::path& path) {
-    std::ifstream input(path);
-    if (!input) {
-        throw std::runtime_error("failed to read source file '" + path.string() + "'");
-    }
-    std::ostringstream out;
-    out << input.rdbuf();
-    return out.str();
-}
-
-static std::vector<std::string> split_module_name(const std::string& module_name) {
-    std::vector<std::string> segments;
-    std::size_t start = 0;
-    while (start < module_name.size()) {
-        const std::size_t separator = module_name.find("::", start);
-        if (separator == std::string::npos) {
-            segments.push_back(module_name.substr(start));
-            break;
-        }
-        segments.push_back(module_name.substr(start, separator - start));
-        start = separator + 2;
-    }
-    return segments;
-}
-
-static std::string join_module_segments(const std::vector<std::string>& segments, std::size_t start_index = 0) {
-    std::string module_name;
-    for (std::size_t i = start_index; i < segments.size(); ++i) {
-        if (!module_name.empty()) {
-            module_name += "::";
-        }
-        module_name += segments[i];
-    }
-    return module_name;
-}
-
-static fs::path project_module_path(const LoadedProject& project, const std::string& module_name) {
-    fs::path path = project.config.root / "src";
-    for (const auto& segment : split_module_name(module_name)) {
-        path /= segment;
-    }
-    path += ".pg";
-    return path;
-}
-
-static std::string module_name_from_source_path(const LoadedProject& project, const fs::path& path) {
-    const fs::path source_root = project.config.root / "src";
-    std::error_code error;
-    fs::path relative = fs::relative(path, source_root, error);
-    if (error || relative.empty()) {
-        return path.stem().string();
-    }
-    relative.replace_extension();
-    std::string module_name;
-    for (const auto& segment : relative) {
-        if (!module_name.empty()) {
-            module_name += "::";
-        }
-        module_name += segment.string();
-    }
-    if (module_name.empty()) {
-        return path.stem().string();
-    }
-    return module_name;
-}
-
-static std::shared_ptr<LoadedProject> load_project_graph(
-    const fs::path& project_dir,
-    std::unordered_map<std::string, std::shared_ptr<LoadedProject>>& cache,
-    std::unordered_set<std::string>& active_roots,
-    const std::optional<std::string>& inherited_registry_index = std::nullopt) {
-    const std::string canonical_root = fs::weakly_canonical(project_dir).string();
-    if (active_roots.contains(canonical_root)) {
-        throw std::runtime_error("circular project dependency detected at '" + canonical_root + "'");
-    }
-    if (const auto it = cache.find(canonical_root); it != cache.end()) {
-        return it->second;
-    }
-
-    active_roots.insert(canonical_root);
-    auto loaded = std::make_shared<LoadedProject>();
-    loaded->config =
-        resolve_registry_dependencies(load_project(project_dir, inherited_registry_index.has_value()), inherited_registry_index);
-    cache.emplace(canonical_root, loaded);
-
-    const std::optional<std::string> effective_registry =
-        loaded->config.registry.index.has_value() ? loaded->config.registry.index : inherited_registry_index;
-    for (const auto& dependency : loaded->config.dependencies) {
-        loaded->dependencies.emplace(
-            dependency.name, load_project_graph(dependency.resolved_path, cache, active_roots, effective_registry));
-    }
-
-    active_roots.erase(canonical_root);
-    return loaded;
-}
-
-struct ModuleResolution {
-    std::shared_ptr<LoadedProject> project;
-    std::string local_module_name;
-    std::string canonical_module_name;
-    fs::path path;
-};
-
-static ModuleResolution resolve_import(const std::shared_ptr<LoadedProject>& project,
-                                       const std::string& namespace_prefix,
-                                       const std::string& import_name,
-                                       const SourceLocation& location) {
-    const std::vector<std::string> segments = split_module_name(import_name);
-    if (!segments.empty()) {
-        const auto dependency_it = project->dependencies.find(segments[0]);
-        if (dependency_it != project->dependencies.end()) {
-            if (segments.size() == 1) {
-                fail(location, "dependency imports must include a module path after '" + segments[0] + "::'");
-            }
-            const std::shared_ptr<LoadedProject>& dependency_project = dependency_it->second;
-            const std::string dependency_prefix =
-                namespace_prefix.empty() ? segments[0] : namespace_prefix + "::" + segments[0];
-            const std::string local_module_name = join_module_segments(segments, 1);
-            const std::string canonical_module_name = dependency_prefix + "::" + local_module_name;
-            return {dependency_project, local_module_name, canonical_module_name,
-                    project_module_path(*dependency_project, local_module_name)};
-        }
-    }
-
-    const std::string canonical_module_name =
-        namespace_prefix.empty() ? import_name : namespace_prefix + "::" + import_name;
-    return {project, import_name, canonical_module_name, project_module_path(*project, import_name)};
-}
-
-static Program parse_file(const fs::path& path) {
-    Lexer lexer(read_file(path));
-    Parser parser(lexer.tokenize());
-    return parser.parse();
-}
-
-static void append_program(Program& target, Program source) {
-    for (auto& import_decl : source.imports) {
-        target.imports.push_back(std::move(import_decl));
-    }
-    for (auto& enum_decl : source.enums) {
-        target.enums.push_back(std::move(enum_decl));
-    }
-    for (auto& struct_decl : source.structs) {
-        target.structs.push_back(std::move(struct_decl));
-    }
-    for (auto& function_decl : source.functions) {
-        target.functions.push_back(std::move(function_decl));
-    }
-}
-
-static void load_module_graph(const std::shared_ptr<LoadedProject>& project, const std::string& namespace_prefix,
-                              const fs::path& path, const std::string& module_name, Program& merged,
-                              std::unordered_set<std::string>& loaded_modules,
-                              std::unordered_set<std::string>& active_modules) {
-    Program program = parse_file(path);
-    active_modules.insert(module_name);
-    for (const auto& import_decl : program.imports) {
-        if (import_decl.kind != ImportKind::Module) {
-            continue;
-        }
-        const ModuleResolution resolved = resolve_import(project, namespace_prefix, import_decl.module_name, import_decl.location);
-        if (active_modules.contains(resolved.canonical_module_name)) {
-            fail(import_decl.location, "circular module import detected for '" + resolved.canonical_module_name + "'");
-        }
-        if (loaded_modules.contains(resolved.canonical_module_name)) {
-            continue;
-        }
-        if (!fs::exists(resolved.path)) {
-            fail(import_decl.location,
-                 "missing imported module '" + resolved.canonical_module_name + "'; expected file '" + resolved.path.string() + "'");
-        }
-        loaded_modules.insert(resolved.canonical_module_name);
-        const std::string child_prefix =
-            resolved.canonical_module_name.substr(0, resolved.canonical_module_name.size() - resolved.local_module_name.size() -
-                                                  (resolved.canonical_module_name.size() == resolved.local_module_name.size() ? 0 : 2));
-        load_module_graph(resolved.project, child_prefix, resolved.path, resolved.canonical_module_name, merged, loaded_modules,
-                          active_modules);
-    }
-    active_modules.erase(module_name);
-    append_program(merged, std::move(program));
-}
-
-static Program compile_frontend(const ProjectConfig& project, const BuildTarget& target) {
-    std::unordered_map<std::string, std::shared_ptr<LoadedProject>> cache;
-    std::unordered_set<std::string> active_roots;
-    const std::shared_ptr<LoadedProject> root_project = load_project_graph(project.root, cache, active_roots);
-    Program program;
-    std::unordered_set<std::string> loaded_modules;
-    std::unordered_set<std::string> active_modules;
-    const std::string entry_module_name = module_name_from_source_path(*root_project, target.entry);
-    loaded_modules.insert(entry_module_name);
-    load_module_graph(root_project, "", target.entry, entry_module_name, program, loaded_modules, active_modules);
-    SemanticAnalyzer sema;
-    sema.analyze(program);
-    return program;
-}
-
 static int command_check(const fs::path& project_dir) {
-    const ProjectConfig project = load_project(project_dir);
-    compile_frontend(project, project.default_target);
-    std::cout << "checked " << project.name << '\n';
+    const FrontendResult frontend = load_frontend_project(project_dir);
+    std::cout << "checked " << frontend.project.name << '\n';
     return 0;
 }
 
@@ -622,17 +421,15 @@ static int command_fmt(const fs::path& project_dir, bool check_only) {
 }
 
 static int command_build(const fs::path& project_dir, const std::optional<std::string>& target_name) {
-    const ProjectConfig project = load_project(project_dir);
-    const BuildTarget& target = resolve_target(project, target_name);
-    Program program = compile_frontend(project, target);
+    const FrontendResult frontend = load_frontend_project(project_dir, target_name);
     LLVMIRGenerator ir;
-    const std::string llvm = ir.generate(program);
+    const std::string llvm = ir.generate(frontend.merged_program);
 
-    fs::create_directories(target.output.parent_path());
-    const std::string ll_path = target.output.string() + ".ll";
-    const std::string obj_path = target.output.string() + ".obj";
-    const std::string runtime_obj_path = target.output.string() + ".runtime.obj";
-    const std::string exe_path = target.output.string() + ".exe";
+    fs::create_directories(frontend.target.output.parent_path());
+    const std::string ll_path = frontend.target.output.string() + ".ll";
+    const std::string obj_path = frontend.target.output.string() + ".obj";
+    const std::string runtime_obj_path = frontend.target.output.string() + ".runtime.obj";
+    const std::string exe_path = frontend.target.output.string() + ".exe";
     const fs::path runtime_source = fs::path(PINGGEN_SOURCE_ROOT) / "runtime" / "pinggen_runtime.cpp";
 
     {
@@ -642,7 +439,7 @@ static int command_build(const fs::path& project_dir, const std::optional<std::s
 
     const std::string compile_command = "clang -c \"" + ll_path + "\" -o \"" + obj_path + "\"";
     if (std::system(compile_command.c_str()) != 0) {
-        throw std::runtime_error("clang failed while compiling target '" + target.name + "'");
+        throw std::runtime_error("clang failed while compiling target '" + frontend.target.name + "'");
     }
 
     const std::string runtime_compile_command =
@@ -654,7 +451,7 @@ static int command_build(const fs::path& project_dir, const std::optional<std::s
     const std::string link_command =
         "clang++ \"" + obj_path + "\" \"" + runtime_obj_path + "\" -o \"" + exe_path + "\"";
     if (std::system(link_command.c_str()) != 0) {
-        throw std::runtime_error("clang failed while linking target '" + target.name + "'");
+        throw std::runtime_error("clang failed while linking target '" + frontend.target.name + "'");
     }
 
     std::cout << "built " << exe_path << '\n';
@@ -761,6 +558,12 @@ int main(int argc, char** argv) {
         if (command == "help" || command == "--help" || command == "-h") {
             pinggen::print_usage(std::cout, command_name);
             return 0;
+        }
+        if (command == "lsp") {
+            if (argc != 2) {
+                throw std::runtime_error("usage: " + command_name + " lsp");
+            }
+            return pinggen::command_lsp();
         }
         if (command == "new") {
             if (target_name.has_value() || bin_dir.has_value()) {

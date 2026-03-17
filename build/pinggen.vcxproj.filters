@@ -16,7 +16,13 @@
     <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\formatter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\frontend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\lexer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\lsp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\parser.cpp">

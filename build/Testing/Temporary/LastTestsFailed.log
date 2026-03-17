@@ -1,7 +1,1 @@
-2:pinggen-check-starter
-3:pinggen-fmt-check-starter
-4:pinggen-run-starter
-14:pinggen-build-multi-target-default
-20:pinggen-fmt-rewrites-project
-21:pinggen-fmt-check-fails-on-unformatted-project
-207:pinggen-release-sweep
+210:pinggen-release-sweep

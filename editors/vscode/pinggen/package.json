@@ -1,12 +1,16 @@
 {
   "name": "pinggen-language",
   "displayName": "pinggen Language Support",
-  "description": "Syntax highlighting and editor basics for pinggen .pg files.",
+  "description": "Syntax highlighting and minimal LSP support for pinggen .pg files.",
   "version": "0.1.0",
   "publisher": "pinggen",
+  "main": "./extension.js",
   "engines": {
     "vscode": "^1.85.0"
   },
+  "activationEvents": [
+    "onLanguage:pinggen"
+  ],
   "categories": [
     "Programming Languages"
   ],
@@ -30,6 +34,22 @@
         "scopeName": "source.pinggen",
         "path": "./syntaxes/pinggen.tmLanguage.json"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "pinggen",
+      "properties": {
+        "pinggen.puffPath": {
+          "type": "string",
+          "default": "puff",
+          "description": "Path to the puff executable used for language server features."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0"
   }
 }

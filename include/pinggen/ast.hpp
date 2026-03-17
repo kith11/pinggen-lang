@@ -144,6 +144,7 @@ struct EnumValueExpr final : Expr {
           payload(std::move(p)) {}
     std::string enum_name;
     std::string variant;
+    SourceLocation variant_location;
     bool uses_call_syntax = false;
     std::unique_ptr<Expr> payload;
 };
@@ -211,8 +212,10 @@ struct Stmt {
 };
 
 struct LetStmt final : Stmt {
-    LetStmt(SourceLocation loc, std::string n, bool m, std::optional<Type> t, std::unique_ptr<Expr> i)
-        : Stmt(loc), name(std::move(n)), is_mutable(m), declared_type(std::move(t)), initializer(std::move(i)) {}
+    LetStmt(SourceLocation loc, SourceLocation name_loc, std::string n, bool m, std::optional<Type> t, std::unique_ptr<Expr> i)
+        : Stmt(loc), name_location(std::move(name_loc)), name(std::move(n)), is_mutable(m), declared_type(std::move(t)),
+          initializer(std::move(i)) {}
+    SourceLocation name_location;
     std::string name;
     bool is_mutable;
     std::optional<Type> declared_type;
@@ -220,8 +223,9 @@ struct LetStmt final : Stmt {
 };
 
 struct TupleLetStmt final : Stmt {
-    TupleLetStmt(SourceLocation loc, std::vector<std::string> n, bool m, std::unique_ptr<Expr> i)
-        : Stmt(loc), names(std::move(n)), is_mutable(m), initializer(std::move(i)) {}
+    TupleLetStmt(SourceLocation loc, std::vector<SourceLocation> locs, std::vector<std::string> n, bool m, std::unique_ptr<Expr> i)
+        : Stmt(loc), name_locations(std::move(locs)), names(std::move(n)), is_mutable(m), initializer(std::move(i)) {}
+    std::vector<SourceLocation> name_locations;
     std::vector<std::string> names;
     bool is_mutable;
     std::unique_ptr<Expr> initializer;
@@ -277,9 +281,11 @@ struct WhileStmt final : Stmt {
 };
 
 struct ForStmt final : Stmt {
-    ForStmt(SourceLocation loc, std::string n, std::unique_ptr<Expr> s, std::unique_ptr<Expr> e,
+    ForStmt(SourceLocation loc, SourceLocation name_loc, std::string n, std::unique_ptr<Expr> s, std::unique_ptr<Expr> e,
             std::vector<std::unique_ptr<Stmt>> b)
-        : Stmt(loc), name(std::move(n)), start(std::move(s)), end(std::move(e)), body(std::move(b)) {}
+        : Stmt(loc), name_location(std::move(name_loc)), name(std::move(n)), start(std::move(s)), end(std::move(e)),
+          body(std::move(b)) {}
+    SourceLocation name_location;
     std::string name;
     std::unique_ptr<Expr> start;
     std::unique_ptr<Expr> end;
@@ -290,6 +296,9 @@ struct MatchArm {
     SourceLocation location;
     std::string enum_name;
     std::string variant;
+    SourceLocation enum_name_location;
+    SourceLocation variant_location;
+    std::optional<SourceLocation> binding_location;
     std::optional<std::string> binding_name;
     std::vector<std::unique_ptr<Stmt>> body;
 };
@@ -318,23 +327,27 @@ struct ImportDecl {
     SourceLocation location;
     ImportKind kind = ImportKind::Std;
     std::string module_name;
+    SourceLocation module_name_location;
     std::vector<std::string> items;
 };
 
 struct StructDecl {
     SourceLocation location;
+    SourceLocation name_location;
     std::string name;
     std::vector<StructField> fields;
 };
 
 struct EnumDecl {
     SourceLocation location;
+    SourceLocation name_location;
     std::string name;
     std::vector<EnumVariant> variants;
 };
 
 struct FunctionDecl {
     SourceLocation location;
+    SourceLocation name_location;
     std::string name;
     std::vector<Parameter> params;
     Type return_type = Type::void_type();

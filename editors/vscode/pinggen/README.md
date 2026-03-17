@@ -7,6 +7,12 @@ Current support:
 - syntax highlighting
 - `#` line comments
 - bracket and quote auto-closing
+- live diagnostics via `puff lsp`
+- completions
+- go-to-definition
+- hover
+
+The extension launches `puff lsp`, so make sure `puff` is installed and available on your `PATH`, or set the `pinggen.puffPath` VS Code setting.
 
 Install manually by copying this folder to your VS Code extensions directory with a versioned name, for example:
 

@@ -75,6 +75,7 @@ ImportDecl Parser::parse_import() {
     ImportDecl decl;
     decl.location = import_token.location;
     const Token first = consume(TokenKind::Identifier, "expected std import namespace or module name after 'import'");
+    decl.module_name_location = first.location;
     if (first.lexeme == "std" && check(TokenKind::ColonColon)) {
         consume(TokenKind::ColonColon, "expected '::' after 'std'");
         if (!match(TokenKind::LBrace)) {
@@ -103,7 +104,9 @@ EnumDecl Parser::parse_enum() {
     const Token enum_token = consume(TokenKind::KwEnum, "expected 'enum'");
     EnumDecl decl;
     decl.location = enum_token.location;
-    decl.name = consume(TokenKind::Identifier, "expected enum name").lexeme;
+    const Token enum_name = consume(TokenKind::Identifier, "expected enum name");
+    decl.name_location = enum_name.location;
+    decl.name = enum_name.lexeme;
     consume(TokenKind::LBrace, "expected '{' after enum name");
     while (!check(TokenKind::RBrace) && !is_at_end()) {
         EnumVariant variant;
@@ -124,7 +127,9 @@ StructDecl Parser::parse_struct() {
     const Token struct_token = consume(TokenKind::KwStruct, "expected 'struct'");
     StructDecl decl;
     decl.location = struct_token.location;
-    decl.name = consume(TokenKind::Identifier, "expected struct name").lexeme;
+    const Token struct_name = consume(TokenKind::Identifier, "expected struct name");
+    decl.name_location = struct_name.location;
+    decl.name = struct_name.lexeme;
     consume(TokenKind::LBrace, "expected '{' after struct name");
     while (!check(TokenKind::RBrace) && !is_at_end()) {
         StructField field;
@@ -144,7 +149,9 @@ FunctionDecl Parser::parse_function(bool is_con_safe, const std::string& impl_ta
     FunctionDecl decl;
     decl.location = func_token.location;
     decl.is_con_safe = is_con_safe;
-    decl.name = consume(TokenKind::Identifier, "expected function name").lexeme;
+    const Token function_name = consume(TokenKind::Identifier, "expected function name");
+    decl.name_location = function_name.location;
+    decl.name = function_name.lexeme;
     decl.impl_target = impl_target;
     consume(TokenKind::LParen, "expected '(' after function name");
     if (!check(TokenKind::RParen)) {
@@ -228,13 +235,15 @@ std::unique_ptr<Stmt> Parser::parse_let_statement() {
     const Token let_token = consume(TokenKind::KwLet, "expected 'let'");
     const bool is_mutable = match(TokenKind::KwMut);
     if (check(TokenKind::LParen)) {
-        auto names = parse_tuple_binding_names();
+        auto [name_locations, names] = parse_tuple_binding_names();
         consume(TokenKind::Equal, "expected '=' after tuple binding");
         auto initializer = parse_expression();
         consume(TokenKind::Semicolon, "expected ';' after variable declaration");
-        return std::make_unique<TupleLetStmt>(let_token.location, std::move(names), is_mutable, std::move(initializer));
+        return std::make_unique<TupleLetStmt>(let_token.location, std::move(name_locations), std::move(names), is_mutable,
+                                              std::move(initializer));
     }
-    const std::string name = consume(TokenKind::Identifier, "expected variable name").lexeme;
+    const Token name_token = consume(TokenKind::Identifier, "expected variable name");
+    const std::string name = name_token.lexeme;
     std::optional<Type> declared_type;
     if (match(TokenKind::Colon)) {
         declared_type = parse_type();
@@ -242,7 +251,8 @@ std::unique_ptr<Stmt> Parser::parse_let_statement() {
     consume(TokenKind::Equal, "expected '=' after variable name");
     auto initializer = parse_expression();
     consume(TokenKind::Semicolon, "expected ';' after variable declaration");
-    return std::make_unique<LetStmt>(let_token.location, name, is_mutable, std::move(declared_type), std::move(initializer));
+    return std::make_unique<LetStmt>(let_token.location, name_token.location, name, is_mutable, std::move(declared_type),
+                                     std::move(initializer));
 }
 
 std::unique_ptr<Stmt> Parser::parse_return_statement() {
@@ -284,14 +294,16 @@ std::unique_ptr<Stmt> Parser::parse_while_statement() {
 
 std::unique_ptr<Stmt> Parser::parse_for_statement() {
     const Token for_token = consume(TokenKind::KwFor, "expected 'for'");
-    const std::string name = consume(TokenKind::Identifier, "expected loop variable name").lexeme;
+    const Token loop_name = consume(TokenKind::Identifier, "expected loop variable name");
+    const std::string name = loop_name.lexeme;
     consume(TokenKind::KwIn, "expected 'in' after loop variable");
     auto start = parse_for_bound_expression();
     consume(TokenKind::DotDot, "expected '..' in for range");
     auto end = parse_for_bound_expression();
     consume(TokenKind::LBrace, "expected '{' before for block");
     auto loop_body = parse_block();
-    return std::make_unique<ForStmt>(for_token.location, name, std::move(start), std::move(end), std::move(loop_body));
+    return std::make_unique<ForStmt>(for_token.location, loop_name.location, name, std::move(start), std::move(end),
+                                     std::move(loop_body));
 }
 
 std::unique_ptr<Stmt> Parser::parse_match_statement() {
@@ -302,11 +314,17 @@ std::unique_ptr<Stmt> Parser::parse_match_statement() {
     while (!check(TokenKind::RBrace) && !is_at_end()) {
         MatchArm arm;
         arm.location = current().location;
-        arm.enum_name = consume(TokenKind::Identifier, "expected enum type in match arm").lexeme;
+        const Token enum_name = consume(TokenKind::Identifier, "expected enum type in match arm");
+        arm.enum_name_location = enum_name.location;
+        arm.enum_name = enum_name.lexeme;
         consume(TokenKind::ColonColon, "expected '::' in match arm");
-        arm.variant = consume(TokenKind::Identifier, "expected enum variant in match arm").lexeme;
+        const Token variant_name = consume(TokenKind::Identifier, "expected enum variant in match arm");
+        arm.variant_location = variant_name.location;
+        arm.variant = variant_name.lexeme;
         if (match(TokenKind::LParen)) {
-            arm.binding_name = consume(TokenKind::Identifier, "expected payload binding name").lexeme;
+            const Token binding_name = consume(TokenKind::Identifier, "expected payload binding name");
+            arm.binding_location = binding_name.location;
+            arm.binding_name = binding_name.lexeme;
             consume(TokenKind::RParen, "expected ')' after payload binding");
         }
         consume(TokenKind::FatArrow, "expected '=>' after match arm pattern");
@@ -355,14 +373,17 @@ std::unique_ptr<Stmt> Parser::parse_assignment_or_expression_statement() {
     return std::make_unique<ExprStmt>(expr->location, std::move(expr));
 }
 
-std::vector<std::string> Parser::parse_tuple_binding_names() {
+std::pair<std::vector<SourceLocation>, std::vector<std::string>> Parser::parse_tuple_binding_names() {
     consume(TokenKind::LParen, "expected '(' in tuple binding");
+    std::vector<SourceLocation> locations;
     std::vector<std::string> names;
     do {
-        names.push_back(consume(TokenKind::Identifier, "expected tuple binding name").lexeme);
+        const Token name = consume(TokenKind::Identifier, "expected tuple binding name");
+        locations.push_back(name.location);
+        names.push_back(name.lexeme);
     } while (match(TokenKind::Comma));
     consume(TokenKind::RParen, "expected ')' after tuple binding");
-    return names;
+    return {std::move(locations), std::move(names)};
 }
 
 std::unique_ptr<Expr> Parser::parse_expression() { return parse_or(); }
@@ -536,13 +557,16 @@ std::unique_ptr<Expr> Parser::parse_primary() {
                 if (!args.empty()) {
                     payload = std::move(args[0]);
                 }
-                return parse_postfix(
-                    std::make_unique<EnumValueExpr>(first.location, first.lexeme, second.lexeme, true, std::move(payload)));
+                auto expr = std::make_unique<EnumValueExpr>(first.location, first.lexeme, second.lexeme, true, std::move(payload));
+                expr->variant_location = second.location;
+                return parse_postfix(std::move(expr));
             }
             if (name.find("::", name.find("::") + 2) != std::string::npos) {
                 fail(first.location, "qualified values only support 'Type::Variant'");
             }
-            return parse_postfix(std::make_unique<EnumValueExpr>(first.location, first.lexeme, second.lexeme));
+            auto expr = std::make_unique<EnumValueExpr>(first.location, first.lexeme, second.lexeme);
+            expr->variant_location = second.location;
+            return parse_postfix(std::move(expr));
         }
         if (match(TokenKind::LParen)) {
             std::vector<std::unique_ptr<Expr>> args;

@@ -53,7 +53,8 @@ version = "1.2.0"
 ## Editor Support
 
 - VS Code syntax highlighting is available in [../editors/vscode/pinggen](../editors/vscode/pinggen).
-- It currently provides `.pg` syntax highlighting, `#` comments, and bracket/quote auto-closing.
+- It currently provides syntax highlighting, `#` comments, bracket/quote auto-closing, diagnostics, completions, go-to-definition, and hover.
+- `puff lsp` is the stdio language server used by the VS Code extension.
 
 ## Syntax Summary
 
@@ -130,6 +131,7 @@ version = "1.2.0"
 - `puff init <path>`
 - `puff check [path]`
 - `puff fmt [path] [--check]`
+- `puff lsp`
 - `puff build [path] [--target <name>]`
 - `puff run [path] [--target <name>]`
 - `puff add <name>[@version] [path]`
@@ -148,4 +150,4 @@ version = "1.2.0"
 - strict `con` restrictions
 - no generics
 - `puff fmt` currently formats `.pg` source files only and does not support source comments yet
-- no LSP
+- no rename, references, code actions, semantic tokens, or formatting-through-LSP

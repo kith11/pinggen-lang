@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 
 namespace pinggen {
 
@@ -61,6 +62,11 @@ enum class TokenKind {
 };
 
 struct SourceLocation {
+    SourceLocation() = default;
+    SourceLocation(std::size_t line_value, std::size_t column_value) : line(line_value), column(column_value) {}
+    SourceLocation(std::string file_value, std::size_t line_value, std::size_t column_value)
+        : file(std::move(file_value)), line(line_value), column(column_value) {}
+    std::string file;
     std::size_t line = 1;
     std::size_t column = 1;
 };

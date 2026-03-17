@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <vector>
 
 #include "pinggen/ast.hpp"
@@ -35,7 +36,7 @@ class Parser {
     std::unique_ptr<Stmt> parse_break_statement();
     std::unique_ptr<Stmt> parse_continue_statement();
     std::unique_ptr<Stmt> parse_assignment_or_expression_statement();
-    std::vector<std::string> parse_tuple_binding_names();
+    std::pair<std::vector<SourceLocation>, std::vector<std::string>> parse_tuple_binding_names();
     std::unique_ptr<Expr> parse_expression();
     std::unique_ptr<Expr> parse_or();
     std::unique_ptr<Expr> parse_and();

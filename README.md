@@ -158,6 +158,7 @@ version = "1.2.0"
 - `puff init`
 - `puff check`
 - `puff fmt`
+- `puff lsp`
 - `puff build`
 - `puff run`
 - `puff add`
@@ -184,7 +185,13 @@ For the compact syntax and stdlib reference, use [docs/reference.md](./docs/refe
 
 ## Editor Support
 
-A minimal VS Code extension for `.pg` syntax highlighting lives at [editors/vscode/pinggen](./editors/vscode/pinggen).
+The VS Code extension at [editors/vscode/pinggen](./editors/vscode/pinggen) now provides:
+
+- syntax highlighting
+- live diagnostics through `puff lsp`
+- completions
+- go-to-definition
+- hover
 
 ## Current 1.0 Limits
 
@@ -192,6 +199,6 @@ A minimal VS Code extension for `.pg` syntax highlighting lives at [editors/vsco
 - `con` is intentionally strict and only allows approved safe calls
 - build configuration is declarative; there is no programmable build scripting
 - package management uses one registry per project, exact or caret version requirements, a generated `puff.lock`, and a user-local cache
-- no generics, borrow checker, or LSP in this milestone
+- no generics or borrow checker in this milestone
 - `puff fmt` currently formats `.pg` source files only and does not support source comments yet
 - post-1.0 work is documented in [docs/release-checklist.md](./docs/release-checklist.md)
