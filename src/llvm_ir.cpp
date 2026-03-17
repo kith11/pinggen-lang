@@ -24,12 +24,46 @@ Type LLVMIRGenerator::normalize_type(const Type& type) const {
     return type;
 }
 
+bool LLVMIRGenerator::enum_has_payload(const std::string& enum_name) const {
+    const auto it = enums_.find(enum_name);
+    if (it == enums_.end()) {
+        return false;
+    }
+    for (const auto& variant : it->second.variants) {
+        if (variant.payload_type.has_value()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::optional<Type> LLVMIRGenerator::enum_payload_type(const std::string& enum_name, const std::string& variant) const {
+    const auto enum_it = enums_.find(enum_name);
+    if (enum_it == enums_.end()) {
+        return std::nullopt;
+    }
+    const auto variant_it = enum_variant_indices_.find(enum_name);
+    if (variant_it == enum_variant_indices_.end()) {
+        return std::nullopt;
+    }
+    const auto ordinal_it = variant_it->second.find(variant);
+    if (ordinal_it == variant_it->second.end()) {
+        return std::nullopt;
+    }
+    const auto& decl_variant = enum_it->second.variants[ordinal_it->second];
+    if (!decl_variant.payload_type.has_value()) {
+        return std::nullopt;
+    }
+    return normalize_type(*decl_variant.payload_type);
+}
+
 std::string LLVMIRGenerator::generate(const Program& program) {
     globals_.clear();
     functions_.clear();
     body_.clear();
     enums_.clear();
     enum_variant_indices_.clear();
+    enum_payload_field_indices_.clear();
     structs_.clear();
     struct_field_indices_.clear();
     variables_.clear();
@@ -49,12 +83,29 @@ std::string LLVMIRGenerator::generate(const Program& program) {
 
     for (const auto& decl : program.enums) {
         enums_[decl.name] = decl;
+        std::size_t payload_field_index = 1;
         for (std::size_t i = 0; i < decl.variants.size(); ++i) {
             enum_variant_indices_[decl.name][decl.variants[i].name] = i;
+            if (decl.variants[i].payload_type.has_value()) {
+                enum_payload_field_indices_[decl.name][decl.variants[i].name] = payload_field_index++;
+            }
         }
     }
 
     std::ostringstream type_defs;
+    for (const auto& decl : program.enums) {
+        if (!enum_has_payload(decl.name)) {
+            continue;
+        }
+        type_defs << "%enum." << decl.name << " = type { i64";
+        for (const auto& variant : decl.variants) {
+            if (!variant.payload_type.has_value()) {
+                continue;
+            }
+            type_defs << ", " << llvm_type(normalize_type(*variant.payload_type));
+        }
+        type_defs << " }\n";
+    }
     for (const auto& decl : program.structs) {
         structs_[decl.name] = decl;
         for (std::size_t i = 0; i < decl.fields.size(); ++i) {
@@ -86,7 +137,7 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     out << "declare ptr @memcpy(ptr, ptr, i64)\n\n";
     out << emit_concat_helper();
     out << emit_bounds_abort_helper();
-    if (!program.structs.empty()) {
+    if (!program.structs.empty() || !enum_payload_field_indices_.empty()) {
         out << type_defs.str() << "\n";
     }
 
@@ -244,7 +295,29 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
     }
     if (const auto* node = dynamic_cast<const EnumValueExpr*>(&expr)) {
         const std::size_t ordinal = enum_variant_indices_.at(node->enum_name).at(node->variant);
-        return {std::to_string(ordinal), Type::enum_type(node->enum_name)};
+        const Type enum_type = Type::enum_type(node->enum_name);
+        if (!enum_has_payload(node->enum_name)) {
+            return {std::to_string(ordinal), enum_type};
+        }
+        const std::string storage = next_register();
+        body_ += "  " + storage + " = alloca " + llvm_type(enum_type) + "\n";
+        body_ += "  store " + llvm_type(enum_type) + " zeroinitializer, ptr " + storage + "\n";
+        const std::string tag_ptr = next_register();
+        body_ += "  " + tag_ptr + " = getelementptr inbounds " + llvm_type(enum_type) + ", ptr " + storage +
+                 ", i32 0, i32 0\n";
+        body_ += "  store i64 " + std::to_string(ordinal) + ", ptr " + tag_ptr + "\n";
+        if (node->payload) {
+            const Type payload_type = *enum_payload_type(node->enum_name, node->variant);
+            const TypedIRValue payload_value = emit_expr(*node->payload);
+            const std::size_t payload_field_index = enum_payload_field_indices_.at(node->enum_name).at(node->variant);
+            const std::string payload_ptr = next_register();
+            body_ += "  " + payload_ptr + " = getelementptr inbounds " + llvm_type(enum_type) + ", ptr " + storage +
+                     ", i32 0, i32 " + std::to_string(payload_field_index) + "\n";
+            body_ += "  store " + llvm_type(payload_type) + " " + payload_value.ir + ", ptr " + payload_ptr + "\n";
+        }
+        const std::string reg = next_register();
+        body_ += "  " + reg + " = load " + llvm_type(enum_type) + ", ptr " + storage + "\n";
+        return {reg, enum_type};
     }
     if (const auto* node = dynamic_cast<const ArrayLiteralExpr*>(&expr)) {
         const TypedIRValue first = emit_expr(*node->elements[0]);
@@ -431,6 +504,15 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
     return {"0", Type::void_type()};
 }
 
+std::string LLVMIRGenerator::emit_enum_tag(const TypedIRValue& enum_value) {
+    if (!enum_has_payload(enum_value.type.name)) {
+        return enum_value.ir;
+    }
+    const std::string tag_reg = next_register();
+    body_ += "  " + tag_reg + " = extractvalue " + llvm_type(enum_value.type) + " " + enum_value.ir + ", 0\n";
+    return tag_reg;
+}
+
 bool LLVMIRGenerator::emit_block(const std::vector<std::unique_ptr<Stmt>>& body) {
     for (const auto& stmt : body) {
         if (emit_stmt(*stmt)) {
@@ -510,6 +592,7 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
     }
     if (const auto* node = dynamic_cast<const MatchStmt*>(&stmt)) {
         const TypedIRValue subject = emit_expr(*node->subject);
+        const std::string subject_tag = subject.type.kind == TypeKind::Enum ? emit_enum_tag(subject) : subject.ir;
         const std::string end_label = next_label("match_end");
         const std::string fail_label = next_label("match_unreachable");
         std::vector<std::string> arm_labels;
@@ -530,7 +613,7 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
             const std::string next_label_name = i + 1 < node->arms.size() ? check_labels[i] : fail_label;
             const std::string cmp_reg = next_register();
             const std::size_t ordinal = enum_variant_indices_.at(arm.enum_name).at(arm.variant);
-            body_ += "  " + cmp_reg + " = icmp eq i64 " + subject.ir + ", " + std::to_string(ordinal) + "\n";
+            body_ += "  " + cmp_reg + " = icmp eq i64 " + subject_tag + ", " + std::to_string(ordinal) + "\n";
             body_ += "  br i1 " + cmp_reg + ", label %" + arm_labels[i] + ", label %" + next_label_name + "\n";
             body_ += arm_labels[i] + ":\n";
             const bool arm_returns = emit_block(arm.body);
@@ -655,8 +738,11 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
                 body_ += "  ret void\n";
             } else if (current_return_type_ == Type::bool_type()) {
                 body_ += "  ret i1 0\n";
-            } else if (current_return_type_ == Type::int_type() || current_return_type_.kind == TypeKind::Enum) {
+            } else if (current_return_type_ == Type::int_type() ||
+                       (current_return_type_.kind == TypeKind::Enum && !enum_has_payload(current_return_type_.name))) {
                 body_ += "  ret i64 0\n";
+            } else if (current_return_type_.kind == TypeKind::Enum && enum_has_payload(current_return_type_.name)) {
+                body_ += "  ret " + llvm_type(current_return_type_) + " zeroinitializer\n";
             }
             return true;
         }
@@ -680,7 +766,7 @@ std::string LLVMIRGenerator::llvm_type(const Type& type) const {
         case TypeKind::Bool: return "i1";
         case TypeKind::String: return "ptr";
         case TypeKind::Void: return "void";
-        case TypeKind::Enum: return "i64";
+        case TypeKind::Enum: return enum_has_payload(type.name) ? "%enum." + type.name : "i64";
         case TypeKind::Struct: return "%struct." + type.name;
         case TypeKind::Array: return "[" + std::to_string(type.array_size) + " x " + llvm_type(*type.element_type) + "]";
     }

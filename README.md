@@ -11,11 +11,12 @@ Current features:
 - `import std::{ io }`
 - typed top-level functions with `func name(arg: type) -> type`
 - top-level `enum` declarations with qualified variants like `State::Ready`
+- single-payload enum variants like `Result::Ok(1)`
 - plain `struct` declarations with named fields
 - named-field struct literals and `value.field` access
 - `bool`, `true`, `false`
 - `if`, `else if`, and `else`
-- exhaustive enum `match` statements
+- exhaustive enum `match` statements by variant tag
 - `while condition { ... }`
 - `for name in start..end { ... }`
 - `break` and `continue` inside loops
@@ -28,7 +29,7 @@ Current features:
 - mutating struct methods with `mut self`
 - `let` and `let mut`
 - integers and strings
-- `==` and `!=` for `int` and `bool`
+- `==` and `!=` for `int`, `bool`, and tag-only enums
 - integer arithmetic
 - assignment to mutable variables
 - `io::println(...)`
@@ -54,63 +55,55 @@ Example:
 ```pinggen
 import std::{ io }
 
-enum State {
-    Idle,
-    Ready,
-    Done,
+enum Result {
+    Ok(int),
+    Err(string),
+    Pending,
 }
 
 struct Job {
-    state: State,
+    result: Result,
     label: string,
 }
 
-func is_ready(state: State) -> bool {
-    return state == State::Ready;
+func finish(code: int) -> Result {
+    if code == 0 {
+        return Result::Ok(7);
+    }
+    return Result::Err("bad");
 }
 
-func code(state: State) -> int {
-    match state {
-        State::Idle => {
-            return 0;
+func describe(result: Result) -> string {
+    match result {
+        Result::Ok => {
+            return "ok";
         }
-        State::Ready => {
-            return 1;
+        Result::Err => {
+            return "err";
         }
-        State::Done => {
-            return 2;
+        Result::Pending => {
+            return "pending";
         }
     }
 }
 
 func main() {
-    let job = Job { state: State::Ready, label: "pinggen" };
-    let states: [State; 3] = [State::Idle, State::Ready, State::Done];
+    let job = Job { result: finish(0), label: "pinggen" };
+    let results: [Result; 3] = [Result::Pending, Result::Err("bad"), Result::Ok(9)];
 
-    match job.state {
-        State::Idle => {
-            io::println("idle");
-        }
-        State::Ready => {
+    match job.result {
+        Result::Ok => {
             io::println(job.label);
         }
-        State::Done => {
-            io::println("done");
+        Result::Err => {
+            io::println("err");
+        }
+        Result::Pending => {
+            io::println("pending");
         }
     }
 
-    match states[2] {
-        State::Idle => {
-            io::println("zero");
-        }
-        State::Ready => {
-            io::println("one");
-        }
-        State::Done => {
-            io::println("two");
-        }
-    }
-
-    io::println(code(State::Done));
+    io::println(describe(results[2]));
+    io::println(describe(results[0]));
 }
 ```

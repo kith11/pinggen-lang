@@ -1,0 +1,12 @@
+enum Result {
+    Ok(int),
+    Pending,
+}
+
+func same(left: Result, right: Result) -> bool {
+    return left == right;
+}
+
+func main() {
+    same(Result::Ok(1), Result::Pending);
+}

@@ -39,6 +39,14 @@ std::string type_name(const Type& type) {
 void SemanticAnalyzer::analyze(const Program& program) {
     collect_enums(program);
     collect_structs(program);
+    for (const auto& decl : program.enums) {
+        for (std::size_t i = 0; i < decl.variants.size(); ++i) {
+            if (!decl.variants[i].payload_type.has_value()) {
+                continue;
+            }
+            validate_type(enums_.at(decl.name).variant_payload_types[i].value(), decl.variants[i].location, true);
+        }
+    }
     collect_signatures(program);
 
     bool has_main = false;
@@ -83,16 +91,26 @@ void SemanticAnalyzer::collect_enums(const Program& program) {
         if (enums_.contains(decl.name)) {
             fail(decl.location, "duplicate enum '" + decl.name + "'");
         }
-        EnumInfo info;
+        enums_[decl.name] = EnumInfo{};
+    }
+    for (const auto& decl : program.enums) {
+        auto& info = enums_.at(decl.name);
         std::unordered_set<std::string> seen_variants;
+        info.variant_payload_types.clear();
         for (std::size_t i = 0; i < decl.variants.size(); ++i) {
             const auto& variant = decl.variants[i];
             if (!seen_variants.insert(variant.name).second) {
                 fail(variant.location, "duplicate variant '" + variant.name + "' in enum '" + decl.name + "'");
             }
             info.variant_indices[variant.name] = i;
+            if (variant.payload_type.has_value()) {
+                Type payload_type = normalize_type(*variant.payload_type);
+                info.variant_payload_types.push_back(payload_type);
+                info.has_payload = true;
+            } else {
+                info.variant_payload_types.push_back(std::nullopt);
+            }
         }
-        enums_[decl.name] = std::move(info);
     }
 }
 
@@ -258,8 +276,27 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         if (enum_it == enums_.end()) {
             fail(node->location, "unknown enum '" + node->enum_name + "'");
         }
-        if (!enum_it->second.variant_indices.contains(node->variant)) {
+        const auto variant_it = enum_it->second.variant_indices.find(node->variant);
+        if (variant_it == enum_it->second.variant_indices.end()) {
             fail(node->location, "unknown variant '" + node->variant + "' for enum '" + node->enum_name + "'");
+        }
+        const auto& payload_type = enum_it->second.variant_payload_types[variant_it->second];
+        if (payload_type.has_value()) {
+            if (!node->uses_call_syntax) {
+                fail(node->location, "variant '" + node->variant + "' of enum '" + node->enum_name + "' requires a payload");
+            }
+            if (!node->payload) {
+                fail(node->location, "variant '" + node->variant + "' of enum '" + node->enum_name + "' expects one payload value");
+            }
+            const Type actual_type = analyze_expr(*node->payload);
+            if (actual_type != *payload_type) {
+                fail(node->payload->location,
+                     "variant '" + node->variant + "' of enum '" + node->enum_name + "' expects " +
+                         type_name(*payload_type) + " but got " + type_name(actual_type));
+            }
+        } else if (node->uses_call_syntax) {
+            fail(node->location, "variant '" + node->variant + "' of enum '" + node->enum_name +
+                                     "' does not take a payload");
         }
         return Type::enum_type(node->enum_name);
     }
@@ -408,6 +445,9 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         if (node->op == "==" || node->op == "!=") {
             if (left != right) {
                 fail(node->location, "comparison operands must have the same type");
+            }
+            if (left.kind == TypeKind::Enum && enums_.at(left.name).has_payload) {
+                fail(node->location, "operator '" + node->op + "' is not supported for payload enums");
             }
             if (left != Type::int_type() && left != Type::bool_type() && left.kind != TypeKind::Enum) {
                 fail(node->location, "operator '" + node->op + "' only supports int, bool, and enum operands");

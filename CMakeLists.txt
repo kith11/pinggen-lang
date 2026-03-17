@@ -159,6 +159,36 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-match-non-block-arm PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-payload-enum-wrong-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_payload_enum_wrong_arity
+    )
+    set_tests_properties(pinggen-check-invalid-payload-enum-wrong-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-payload-enum-wrong-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_payload_enum_wrong_type
+    )
+    set_tests_properties(pinggen-check-invalid-payload-enum-wrong-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-payload-enum-call-plain
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_payload_enum_call_plain_variant
+    )
+    set_tests_properties(pinggen-check-invalid-payload-enum-call-plain PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-payload-enum-missing-argument
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_payload_enum_missing_argument
+    )
+    set_tests_properties(pinggen-check-invalid-payload-enum-missing-argument PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-payload-enum-equality
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_payload_enum_equality
+    )
+    set_tests_properties(pinggen-check-invalid-payload-enum-equality PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-payload-match-binding
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_payload_match_binding
+    )
+    set_tests_properties(pinggen-check-invalid-payload-match-binding PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-struct-duplicate-field
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_struct_duplicate_field
     )

@@ -20,7 +20,9 @@ struct StructInfo {
 };
 
 struct EnumInfo {
+    std::vector<std::optional<Type>> variant_payload_types;
     std::unordered_map<std::string, std::size_t> variant_indices;
+    bool has_payload = false;
 };
 
 struct FunctionSignature {

@@ -63,6 +63,7 @@ struct StructField {
 struct EnumVariant {
     SourceLocation location;
     std::string name;
+    std::optional<Type> payload_type;
 };
 
 struct Parameter {
@@ -111,10 +112,14 @@ struct VariableExpr final : Expr {
 };
 
 struct EnumValueExpr final : Expr {
-    EnumValueExpr(SourceLocation loc, std::string e, std::string v)
-        : Expr(loc), enum_name(std::move(e)), variant(std::move(v)) {}
+    EnumValueExpr(SourceLocation loc, std::string e, std::string v, bool call_syntax = false,
+                  std::unique_ptr<Expr> p = nullptr)
+        : Expr(loc), enum_name(std::move(e)), variant(std::move(v)), uses_call_syntax(call_syntax),
+          payload(std::move(p)) {}
     std::string enum_name;
     std::string variant;
+    bool uses_call_syntax = false;
+    std::unique_ptr<Expr> payload;
 };
 
 struct StructLiteralExpr final : Expr {

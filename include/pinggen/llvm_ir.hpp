@@ -25,9 +25,12 @@ class LLVMIRGenerator {
   private:
     static std::string lowered_function_name(const FunctionDecl& function);
     Type normalize_type(const Type& type) const;
+    bool enum_has_payload(const std::string& enum_name) const;
+    std::optional<Type> enum_payload_type(const std::string& enum_name, const std::string& variant) const;
     std::string emit_concat_helper() const;
     std::string emit_bounds_abort_helper() const;
     void emit_bounds_check(const std::string& index_ir, std::size_t size);
+    std::string emit_enum_tag(const TypedIRValue& enum_value);
     std::string emit_string_constant(const std::string& value);
     TypedIRValue emit_expr(const Expr& expr);
     AddressValue emit_address(const Expr& expr);
@@ -45,6 +48,7 @@ class LLVMIRGenerator {
     std::string body_;
     std::unordered_map<std::string, EnumDecl> enums_;
     std::unordered_map<std::string, std::unordered_map<std::string, std::size_t>> enum_variant_indices_;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::size_t>> enum_payload_field_indices_;
     std::unordered_map<std::string, StructDecl> structs_;
     std::unordered_map<std::string, std::unordered_map<std::string, std::size_t>> struct_field_indices_;
     std::unordered_map<std::string, std::string> variables_;

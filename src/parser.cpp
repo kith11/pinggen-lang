@@ -93,6 +93,10 @@ EnumDecl Parser::parse_enum() {
         EnumVariant variant;
         variant.location = current().location;
         variant.name = consume(TokenKind::Identifier, "expected variant name").lexeme;
+        if (match(TokenKind::LParen)) {
+            variant.payload_type = parse_type();
+            consume(TokenKind::RParen, "expected ')' after enum payload type");
+        }
         decl.variants.push_back(std::move(variant));
         match(TokenKind::Comma);
     }
@@ -475,7 +479,21 @@ std::unique_ptr<Expr> Parser::parse_primary() {
                     } while (match(TokenKind::Comma));
                 }
                 consume(TokenKind::RParen, "expected ')' after arguments");
-                return parse_postfix(std::make_unique<CallExpr>(first.location, name, std::move(args)));
+                if (name == "io::println") {
+                    return parse_postfix(std::make_unique<CallExpr>(first.location, name, std::move(args)));
+                }
+                if (name.find("::", name.find("::") + 2) != std::string::npos) {
+                    fail(first.location, "qualified values only support 'Type::Variant'");
+                }
+                if (args.size() > 1) {
+                    fail(first.location, "enum variants support at most one payload value");
+                }
+                std::unique_ptr<Expr> payload;
+                if (!args.empty()) {
+                    payload = std::move(args[0]);
+                }
+                return parse_postfix(
+                    std::make_unique<EnumValueExpr>(first.location, first.lexeme, second.lexeme, true, std::move(payload)));
             }
             if (name.find("::", name.find("::") + 2) != std::string::npos) {
                 fail(first.location, "qualified values only support 'Type::Variant'");
