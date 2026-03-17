@@ -6,6 +6,16 @@ declare i64 @strlen(ptr)
 declare ptr @malloc(i64)
 declare ptr @memcpy(ptr, ptr, i64)
 
+declare ptr @fopen(ptr, ptr)
+declare i32 @fclose(ptr)
+declare i32 @fseek(ptr, i64, i32)
+declare i64 @ftell(ptr)
+declare i64 @fread(ptr, i64, i64, ptr)
+
+%enum.FsResult = type { i64, ptr, ptr }
+%enum.Result = type { i64, i64, ptr }
+%struct.Job = type { %enum.Result, ptr }
+
 define ptr @pinggen_concat(ptr %lhs, ptr %rhs) {
   %1 = call i64 @strlen(ptr %lhs)
   %2 = call i64 @strlen(ptr %rhs)
@@ -25,11 +35,57 @@ define void @pinggen_bounds_abort() {
   unreachable
 }
 
-%enum.Result = type { i64, i64, ptr }
-%struct.Job = type { %enum.Result, ptr }
+define %enum.FsResult @pinggen_fs_read_to_string(ptr %path) {
+entry:
+  %mode = getelementptr inbounds [3 x i8], ptr @.fs.mode.rb, i64 0, i64 0
+  %file = call ptr @fopen(ptr %path, ptr %mode)
+  %file_ok = icmp ne ptr %file, null
+  br i1 %file_ok, label %seek_end, label %open_fail
+open_fail:
+  %open_msg = getelementptr inbounds [20 x i8], ptr @.fs.err.open, i64 0, i64 0
+  %open_res0 = insertvalue %enum.FsResult zeroinitializer, i64 1, 0
+  %open_res1 = insertvalue %enum.FsResult %open_res0, ptr %open_msg, 2
+  ret %enum.FsResult %open_res1
+seek_end:
+  %seek_end_ok = call i32 @fseek(ptr %file, i64 0, i32 2)
+  %seek_end_cmp = icmp eq i32 %seek_end_ok, 0
+  br i1 %seek_end_cmp, label %tell_size, label %read_fail_close
+tell_size:
+  %size = call i64 @ftell(ptr %file)
+  %size_ok = icmp sge i64 %size, 0
+  br i1 %size_ok, label %seek_start, label %read_fail_close
+seek_start:
+  %seek_start_ok = call i32 @fseek(ptr %file, i64 0, i32 0)
+  %seek_start_cmp = icmp eq i32 %seek_start_ok, 0
+  br i1 %seek_start_cmp, label %alloc_buf, label %read_fail_close
+alloc_buf:
+  %alloc_size = add i64 %size, 1
+  %buffer = call ptr @malloc(i64 %alloc_size)
+  %read_count = call i64 @fread(ptr %buffer, i64 1, i64 %size, ptr %file)
+  %close_ok = call i32 @fclose(ptr %file)
+  %read_exact = icmp eq i64 %read_count, %size
+  br i1 %read_exact, label %terminate, label %read_fail
+terminate:
+  %end_ptr = getelementptr inbounds i8, ptr %buffer, i64 %size
+  store i8 0, ptr %end_ptr
+  %ok_res0 = insertvalue %enum.FsResult zeroinitializer, i64 0, 0
+  %ok_res1 = insertvalue %enum.FsResult %ok_res0, ptr %buffer, 1
+  ret %enum.FsResult %ok_res1
+read_fail_close:
+  %close_fail = call i32 @fclose(ptr %file)
+  br label %read_fail
+read_fail:
+  %read_msg = getelementptr inbounds [20 x i8], ptr @.fs.err.read, i64 0, i64 0
+  %read_res0 = insertvalue %enum.FsResult zeroinitializer, i64 1, 0
+  %read_res1 = insertvalue %enum.FsResult %read_res0, ptr %read_msg, 2
+  ret %enum.FsResult %read_res1
+}
 
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
+@.fs.mode.rb = private unnamed_addr constant [3 x i8] c"rb\00"
+@.fs.err.open = private unnamed_addr constant [20 x i8] c"failed to open file\00"
+@.fs.err.read = private unnamed_addr constant [20 x i8] c"failed to read file\00"
 @.str.1 = private unnamed_addr constant [4 x i8] c"bad\00"
 @.str.2 = private unnamed_addr constant [3 x i8] c"ok\00"
 @.str.3 = private unnamed_addr constant [6 x i8] c"small\00"
@@ -37,6 +93,7 @@ define void @pinggen_bounds_abort() {
 @.str.5 = private unnamed_addr constant [8 x i8] c"pinggen\00"
 @.str.6 = private unnamed_addr constant [4 x i8] c"bad\00"
 @.str.7 = private unnamed_addr constant [8 x i8] c"pending\00"
+@.str.8 = private unnamed_addr constant [12 x i8] c"message.txt\00"
 
 define i64 @Job__label_len(%struct.Job %arg0) {
   %1 = alloca %struct.Job
@@ -201,32 +258,59 @@ match_end.14:
   %50 = call i64 @Job__label_len(%struct.Job %49)
   %51 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
   %52 = call i32 (ptr, ...) @printf(ptr %51, i64 %50)
-  %53 = icmp sge i64 2, 0
-  %54 = icmp slt i64 2, 3
-  %55 = and i1 %53, %54
-  br i1 %55, label %bounds_ok.22, label %bounds_fail.21
-bounds_fail.21:
+  %53 = getelementptr inbounds [12 x i8], ptr @.str.8, i64 0, i64 0
+  %54 = call %enum.FsResult @pinggen_fs_read_to_string(ptr %53)
+  %55 = extractvalue %enum.FsResult %54, 0
+  %56 = icmp eq i64 %55, 0
+  br i1 %56, label %match_arm.23, label %match_check.24
+match_arm.23:
+  %57 = extractvalue %enum.FsResult %54, 1
+  %58 = alloca ptr
+  store ptr %57, ptr %58
+  %59 = load ptr, ptr %58
+  %60 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %61 = call i32 (ptr, ...) @printf(ptr %60, ptr %59)
+  br label %match_end.21
+match_check.24:
+  %62 = icmp eq i64 %55, 1
+  br i1 %62, label %match_arm.25, label %match_unreachable.22
+match_arm.25:
+  %63 = extractvalue %enum.FsResult %54, 2
+  %64 = alloca ptr
+  store ptr %63, ptr %64
+  %65 = load ptr, ptr %64
+  %66 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %67 = call i32 (ptr, ...) @printf(ptr %66, ptr %65)
+  br label %match_end.21
+match_unreachable.22:
+  unreachable
+match_end.21:
+  %68 = icmp sge i64 2, 0
+  %69 = icmp slt i64 2, 3
+  %70 = and i1 %68, %69
+  br i1 %70, label %bounds_ok.27, label %bounds_fail.26
+bounds_fail.26:
   call void @pinggen_bounds_abort()
   unreachable
-bounds_ok.22:
-  %56 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 2
-  %57 = load %enum.Result, ptr %56
-  %58 = call ptr @describe(%enum.Result %57)
-  %59 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %60 = call i32 (ptr, ...) @printf(ptr %59, ptr %58)
-  %61 = icmp sge i64 0, 0
-  %62 = icmp slt i64 0, 3
-  %63 = and i1 %61, %62
-  br i1 %63, label %bounds_ok.24, label %bounds_fail.23
-bounds_fail.23:
+bounds_ok.27:
+  %71 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 2
+  %72 = load %enum.Result, ptr %71
+  %73 = call ptr @describe(%enum.Result %72)
+  %74 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %75 = call i32 (ptr, ...) @printf(ptr %74, ptr %73)
+  %76 = icmp sge i64 0, 0
+  %77 = icmp slt i64 0, 3
+  %78 = and i1 %76, %77
+  br i1 %78, label %bounds_ok.29, label %bounds_fail.28
+bounds_fail.28:
   call void @pinggen_bounds_abort()
   unreachable
-bounds_ok.24:
-  %64 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 0
-  %65 = load %enum.Result, ptr %64
-  %66 = call ptr @describe(%enum.Result %65)
-  %67 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %68 = call i32 (ptr, ...) @printf(ptr %67, ptr %66)
+bounds_ok.29:
+  %79 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 0
+  %80 = load %enum.Result, ptr %79
+  %81 = call ptr @describe(%enum.Result %80)
+  %82 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %83 = call i32 (ptr, ...) @printf(ptr %82, ptr %81)
   ret i32 0
 }
 

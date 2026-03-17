@@ -8,7 +8,7 @@ Source files use the `.pg` extension.
 
 Current features:
 
-- `import std::{ io, str }`
+- `import std::{ io, str, fs }`
 - project-local flat modules with `import name;`
 - typed top-level functions with `func name(arg: type) -> type`
 - top-level `enum` declarations with qualified variants like `State::Ready`
@@ -27,6 +27,7 @@ Current features:
 - `%` for integer modulo
 - `+` for string concatenation
 - `str::len(value)` for byte-count string length
+- `fs::read_to_string(path)` returning `FsResult`
 - fixed-size arrays with `[T; N]`, `[a, b, c]`, and `array[index]`
 - struct methods with `impl Type { ... }` and `value.method(...)`
 - mutating struct methods with `mut self`
@@ -57,7 +58,7 @@ Example:
 
 ```pinggen
 // src/main.pg
-import std::{ io }
+import std::{ io, fs }
 import model;
 import logic;
 
@@ -79,6 +80,14 @@ func main() {
     }
 
     io::println(job.label_len());
+    match fs::read_to_string("message.txt") {
+        FsResult::Ok(text) => {
+            io::println(text);
+        }
+        FsResult::Err(message) => {
+            io::println(message);
+        }
+    }
     io::println(describe(results[2]));
     io::println(describe(results[0]));
 }

@@ -1,4 +1,4 @@
-import std::{ io }
+import std::{ io, fs }
 import model;
 import logic;
 
@@ -20,6 +20,14 @@ func main() {
     }
 
     io::println(job.label_len());
+    match fs::read_to_string("message.txt") {
+        FsResult::Ok(text) => {
+            io::println(text);
+        }
+        FsResult::Err(message) => {
+            io::println(message);
+        }
+    }
     io::println(describe(results[2]));
     io::println(describe(results[0]));
 }

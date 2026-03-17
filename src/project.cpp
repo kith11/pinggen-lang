@@ -87,8 +87,11 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
     config << "entry = \"src/main.pg\"\n";
     config << "output = \"build/" << name << "\"\n";
 
+    std::ofstream message_file(target_dir / "message.txt");
+    message_file << "hello from file\n";
+
     std::ofstream main_source(target_dir / "src" / "main.pg");
-    main_source << "import std::{ io }\n";
+    main_source << "import std::{ io, fs }\n";
     main_source << "import model;\n";
     main_source << "import logic;\n\n";
     main_source << "func main() {\n";
@@ -107,6 +110,14 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
     main_source << "        }\n";
     main_source << "    }\n";
     main_source << "    io::println(job.label_len());\n";
+    main_source << "    match fs::read_to_string(\"message.txt\") {\n";
+    main_source << "        FsResult::Ok(text) => {\n";
+    main_source << "            io::println(text);\n";
+    main_source << "        }\n";
+    main_source << "        FsResult::Err(message) => {\n";
+    main_source << "            io::println(message);\n";
+    main_source << "        }\n";
+    main_source << "    }\n";
     main_source << "    io::println(describe(results[2]));\n";
     main_source << "    io::println(describe(results[0]));\n";
     main_source << "}\n";

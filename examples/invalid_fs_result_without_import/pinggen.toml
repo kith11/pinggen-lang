@@ -1,0 +1,7 @@
+[package]
+name = "invalid_fs_result_without_import"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_fs_result_without_import"

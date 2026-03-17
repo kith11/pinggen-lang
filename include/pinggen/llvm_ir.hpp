@@ -29,6 +29,7 @@ class LLVMIRGenerator {
     std::optional<Type> enum_payload_type(const std::string& enum_name, const std::string& variant) const;
     std::string emit_concat_helper() const;
     std::string emit_bounds_abort_helper() const;
+    std::string emit_fs_read_helper() const;
     void emit_bounds_check(const std::string& index_ir, std::size_t size);
     std::string emit_enum_tag(const TypedIRValue& enum_value);
     std::string emit_string_constant(const std::string& value);

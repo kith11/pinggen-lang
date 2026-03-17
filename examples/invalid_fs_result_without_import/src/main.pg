@@ -1,0 +1,7 @@
+func fail_read() -> FsResult {
+    return FsResult::Err("no fs");
+}
+
+func main() {
+    fail_read();
+}

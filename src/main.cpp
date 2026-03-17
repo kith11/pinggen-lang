@@ -128,8 +128,12 @@ static int command_build(const fs::path& project_dir) {
 static int command_run(const fs::path& project_dir) {
     const ProjectConfig project = load_project(project_dir);
     command_build(project_dir);
+    const fs::path previous_dir = fs::current_path();
+    fs::current_path(project.root);
     const std::string command = "\"" + project.output.string() + ".exe\"";
-    return std::system(command.c_str());
+    const int exit_code = std::system(command.c_str());
+    fs::current_path(previous_dir);
+    return exit_code;
 }
 
 static int command_new(const fs::path& target_dir) {

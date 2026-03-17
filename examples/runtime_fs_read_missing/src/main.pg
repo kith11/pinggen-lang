@@ -1,0 +1,12 @@
+import std::{ io, fs }
+
+func main() {
+    match fs::read_to_string("missing.txt") {
+        FsResult::Ok(text) => {
+            io::println(text);
+        }
+        FsResult::Err(message) => {
+            io::println(message);
+        }
+    }
+}

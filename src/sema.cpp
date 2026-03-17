@@ -8,6 +8,26 @@ namespace pinggen {
 
 namespace {
 
+EnumDecl builtin_fs_result_enum() {
+    EnumDecl decl;
+    decl.location = {1, 1};
+    decl.name = "FsResult";
+
+    EnumVariant ok;
+    ok.location = {1, 1};
+    ok.name = "Ok";
+    ok.payload_type = Type::string_type();
+    decl.variants.push_back(std::move(ok));
+
+    EnumVariant err;
+    err.location = {1, 1};
+    err.name = "Err";
+    err.payload_type = Type::string_type();
+    decl.variants.push_back(std::move(err));
+
+    return decl;
+}
+
 const VariableExpr* root_variable_expr(const Expr& expr) {
     if (const auto* variable = dynamic_cast<const VariableExpr*>(&expr)) {
         return variable;
@@ -96,7 +116,7 @@ void SemanticAnalyzer::collect_imports(const Program& program) {
             fail(decl.location, "unknown import namespace '" + decl.module_name + "'");
         }
         for (const auto& item : decl.items) {
-            if (item != "io" && item != "str") {
+            if (item != "io" && item != "str" && item != "fs") {
                 fail(decl.location, "unknown std import '" + item + "'");
             }
             imported_std_items_.insert(item);
@@ -106,11 +126,24 @@ void SemanticAnalyzer::collect_imports(const Program& program) {
 
 void SemanticAnalyzer::collect_enums(const Program& program) {
     enums_.clear();
+    if (imported_std_items_.contains("fs")) {
+        enums_["FsResult"] = EnumInfo{};
+    }
     for (const auto& decl : program.enums) {
         if (enums_.contains(decl.name)) {
             fail(decl.location, "duplicate enum '" + decl.name + "'");
         }
         enums_[decl.name] = EnumInfo{};
+    }
+    if (imported_std_items_.contains("fs")) {
+        const EnumDecl builtin = builtin_fs_result_enum();
+        auto& info = enums_.at(builtin.name);
+        info.variant_payload_types.clear();
+        for (std::size_t i = 0; i < builtin.variants.size(); ++i) {
+            info.variant_indices[builtin.variants[i].name] = i;
+            info.variant_payload_types.push_back(Type::string_type());
+            info.has_payload = true;
+        }
     }
     for (const auto& decl : program.enums) {
         auto& info = enums_.at(decl.name);
@@ -522,6 +555,17 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
                 fail(node->args[0]->location, "str::len only supports string arguments");
             }
             return Type::int_type();
+        }
+        if (node->callee == "fs::read_to_string") {
+            require_std_import("fs", node->location, "fs::read_to_string");
+            if (node->args.size() != 1) {
+                fail(node->location, "fs::read_to_string expects exactly one argument");
+            }
+            const Type arg_type = analyze_expr(*node->args[0]);
+            if (arg_type != Type::string_type()) {
+                fail(node->args[0]->location, "fs::read_to_string only supports string arguments");
+            }
+            return Type::enum_type("FsResult");
         }
 
         const auto it = functions_.find(node->callee);

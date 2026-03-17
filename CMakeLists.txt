@@ -194,6 +194,26 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-plain-match-binding PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-fs-read-missing-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_read_missing_import
+    )
+    set_tests_properties(pinggen-check-invalid-fs-read-missing-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-read-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_read_arity
+    )
+    set_tests_properties(pinggen-check-invalid-fs-read-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-read-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_read_type
+    )
+    set_tests_properties(pinggen-check-invalid-fs-read-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-result-without-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_result_without_import
+    )
+    set_tests_properties(pinggen-check-invalid-fs-result-without-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-str-len-missing-import
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_str_len_missing_import
     )
@@ -298,6 +318,14 @@ if(BUILD_TESTING)
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_invalid_array_bounds
     )
     set_tests_properties(pinggen-run-invalid-array-bounds PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-run-fs-read-success
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_read_success
+    )
+    add_test(
+        NAME pinggen-run-fs-read-missing
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_read_missing
+    )
     add_test(
         NAME pinggen-check-invalid-unknown-impl
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_unknown_impl

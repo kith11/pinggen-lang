@@ -4,6 +4,44 @@
 
 namespace pinggen {
 
+namespace {
+
+EnumDecl builtin_fs_result_enum() {
+    EnumDecl decl;
+    decl.location = {1, 1};
+    decl.name = "FsResult";
+
+    EnumVariant ok;
+    ok.location = {1, 1};
+    ok.name = "Ok";
+    ok.payload_type = Type::string_type();
+    decl.variants.push_back(std::move(ok));
+
+    EnumVariant err;
+    err.location = {1, 1};
+    err.name = "Err";
+    err.payload_type = Type::string_type();
+    decl.variants.push_back(std::move(err));
+
+    return decl;
+}
+
+bool program_imports_std_item(const Program& program, const std::string& item) {
+    for (const auto& import_decl : program.imports) {
+        if (import_decl.kind != ImportKind::Std || import_decl.module_name != "std") {
+            continue;
+        }
+        for (const auto& imported_item : import_decl.items) {
+            if (imported_item == item) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+}  // namespace
+
 std::string LLVMIRGenerator::lowered_function_name(const FunctionDecl& function) {
     if (!function.is_method()) {
         return function.name;
@@ -80,7 +118,22 @@ std::string LLVMIRGenerator::generate(const Program& program) {
 
     globals_ += "@.fmt.int = private unnamed_addr constant [6 x i8] c\"%lld\\0A\\00\"\n";
     globals_ += "@.fmt.str = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"\n";
+    const bool has_fs_import = program_imports_std_item(program, "fs");
+    if (has_fs_import) {
+        globals_ += "@.fs.mode.rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"\n";
+        globals_ += "@.fs.err.open = private unnamed_addr constant [20 x i8] c\"failed to open file\\00\"\n";
+        globals_ += "@.fs.err.read = private unnamed_addr constant [20 x i8] c\"failed to read file\\00\"\n";
+    }
 
+    if (has_fs_import) {
+        const auto builtin = builtin_fs_result_enum();
+        enums_[builtin.name] = builtin;
+        std::size_t payload_field_index = 1;
+        for (std::size_t i = 0; i < builtin.variants.size(); ++i) {
+            enum_variant_indices_[builtin.name][builtin.variants[i].name] = i;
+            enum_payload_field_indices_[builtin.name][builtin.variants[i].name] = payload_field_index++;
+        }
+    }
     for (const auto& decl : program.enums) {
         enums_[decl.name] = decl;
         std::size_t payload_field_index = 1;
@@ -93,11 +146,11 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     }
 
     std::ostringstream type_defs;
-    for (const auto& decl : program.enums) {
-        if (!enum_has_payload(decl.name)) {
+    for (const auto& [enum_name, decl] : enums_) {
+        if (!enum_has_payload(enum_name)) {
             continue;
         }
-        type_defs << "%enum." << decl.name << " = type { i64";
+        type_defs << "%enum." << enum_name << " = type { i64";
         for (const auto& variant : decl.variants) {
             if (!variant.payload_type.has_value()) {
                 continue;
@@ -135,10 +188,20 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     out << "declare i64 @strlen(ptr)\n";
     out << "declare ptr @malloc(i64)\n";
     out << "declare ptr @memcpy(ptr, ptr, i64)\n\n";
-    out << emit_concat_helper();
-    out << emit_bounds_abort_helper();
+    if (has_fs_import) {
+        out << "declare ptr @fopen(ptr, ptr)\n";
+        out << "declare i32 @fclose(ptr)\n";
+        out << "declare i32 @fseek(ptr, i64, i32)\n";
+        out << "declare i64 @ftell(ptr)\n";
+        out << "declare i64 @fread(ptr, i64, i64, ptr)\n\n";
+    }
     if (!program.structs.empty() || !enum_payload_field_indices_.empty()) {
         out << type_defs.str() << "\n";
+    }
+    out << emit_concat_helper();
+    out << emit_bounds_abort_helper();
+    if (has_fs_import) {
+        out << emit_fs_read_helper();
     }
 
     for (const auto& function : program.functions) {
@@ -218,6 +281,55 @@ std::string LLVMIRGenerator::emit_bounds_abort_helper() const {
         "define void @pinggen_bounds_abort() {\n"
         "  call void @exit(i32 1)\n"
         "  unreachable\n"
+        "}\n\n";
+}
+
+std::string LLVMIRGenerator::emit_fs_read_helper() const {
+    return
+        "define %enum.FsResult @pinggen_fs_read_to_string(ptr %path) {\n"
+        "entry:\n"
+        "  %mode = getelementptr inbounds [3 x i8], ptr @.fs.mode.rb, i64 0, i64 0\n"
+        "  %file = call ptr @fopen(ptr %path, ptr %mode)\n"
+        "  %file_ok = icmp ne ptr %file, null\n"
+        "  br i1 %file_ok, label %seek_end, label %open_fail\n"
+        "open_fail:\n"
+        "  %open_msg = getelementptr inbounds [20 x i8], ptr @.fs.err.open, i64 0, i64 0\n"
+        "  %open_res0 = insertvalue %enum.FsResult zeroinitializer, i64 1, 0\n"
+        "  %open_res1 = insertvalue %enum.FsResult %open_res0, ptr %open_msg, 2\n"
+        "  ret %enum.FsResult %open_res1\n"
+        "seek_end:\n"
+        "  %seek_end_ok = call i32 @fseek(ptr %file, i64 0, i32 2)\n"
+        "  %seek_end_cmp = icmp eq i32 %seek_end_ok, 0\n"
+        "  br i1 %seek_end_cmp, label %tell_size, label %read_fail_close\n"
+        "tell_size:\n"
+        "  %size = call i64 @ftell(ptr %file)\n"
+        "  %size_ok = icmp sge i64 %size, 0\n"
+        "  br i1 %size_ok, label %seek_start, label %read_fail_close\n"
+        "seek_start:\n"
+        "  %seek_start_ok = call i32 @fseek(ptr %file, i64 0, i32 0)\n"
+        "  %seek_start_cmp = icmp eq i32 %seek_start_ok, 0\n"
+        "  br i1 %seek_start_cmp, label %alloc_buf, label %read_fail_close\n"
+        "alloc_buf:\n"
+        "  %alloc_size = add i64 %size, 1\n"
+        "  %buffer = call ptr @malloc(i64 %alloc_size)\n"
+        "  %read_count = call i64 @fread(ptr %buffer, i64 1, i64 %size, ptr %file)\n"
+        "  %close_ok = call i32 @fclose(ptr %file)\n"
+        "  %read_exact = icmp eq i64 %read_count, %size\n"
+        "  br i1 %read_exact, label %terminate, label %read_fail\n"
+        "terminate:\n"
+        "  %end_ptr = getelementptr inbounds i8, ptr %buffer, i64 %size\n"
+        "  store i8 0, ptr %end_ptr\n"
+        "  %ok_res0 = insertvalue %enum.FsResult zeroinitializer, i64 0, 0\n"
+        "  %ok_res1 = insertvalue %enum.FsResult %ok_res0, ptr %buffer, 1\n"
+        "  ret %enum.FsResult %ok_res1\n"
+        "read_fail_close:\n"
+        "  %close_fail = call i32 @fclose(ptr %file)\n"
+        "  br label %read_fail\n"
+        "read_fail:\n"
+        "  %read_msg = getelementptr inbounds [20 x i8], ptr @.fs.err.read, i64 0, i64 0\n"
+        "  %read_res0 = insertvalue %enum.FsResult zeroinitializer, i64 1, 0\n"
+        "  %read_res1 = insertvalue %enum.FsResult %read_res0, ptr %read_msg, 2\n"
+        "  ret %enum.FsResult %read_res1\n"
         "}\n\n";
 }
 
@@ -433,6 +545,12 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
             const std::string reg = next_register();
             body_ += "  " + reg + " = call i64 @strlen(ptr " + arg.ir + ")\n";
             return {reg, Type::int_type()};
+        }
+        if (node->callee == "fs::read_to_string") {
+            const TypedIRValue arg = emit_expr(*node->args[0]);
+            const std::string reg = next_register();
+            body_ += "  " + reg + " = call %enum.FsResult @pinggen_fs_read_to_string(ptr " + arg.ir + ")\n";
+            return {reg, Type::enum_type("FsResult")};
         }
 
         std::vector<TypedIRValue> args;

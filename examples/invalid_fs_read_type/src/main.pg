@@ -1,0 +1,5 @@
+import std::{ fs }
+
+func main() {
+    let result = fs::read_to_string(123);
+}
