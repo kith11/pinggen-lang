@@ -7,6 +7,9 @@
       "include": "#comments"
     },
     {
+      "include": "#imports"
+    },
+    {
       "include": "#strings"
     },
     {
@@ -16,22 +19,22 @@
       "include": "#keywords"
     },
     {
-      "include": "#constants"
-    },
-    {
-      "include": "#builtin-types"
-    },
-    {
-      "include": "#stdlib"
+      "include": "#types"
     },
     {
       "include": "#functions"
     },
     {
-      "include": "#types"
+      "include": "#variables"
+    },
+    {
+      "include": "#constants"
     },
     {
       "include": "#operators"
+    },
+    {
+      "include": "#punctuation"
     }
   ],
   "repository": {
@@ -40,6 +43,65 @@
         {
           "name": "comment.line.number-sign.pinggen",
           "match": "#.*$"
+        }
+      ]
+    },
+    "imports": {
+      "patterns": [
+        {
+          "name": "meta.import.pinggen",
+          "begin": "\\bimport\\b",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.control.import.pinggen"
+            }
+          },
+          "end": ";",
+          "patterns": [
+            {
+              "include": "#module-path"
+            },
+            {
+              "include": "#import-items"
+            }
+          ]
+        }
+      ]
+    },
+    "module-path": {
+      "patterns": [
+        {
+          "name": "entity.name.namespace.pinggen",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=::)"
+        }
+      ]
+    },
+    "import-items": {
+      "patterns": [
+        {
+          "name": "meta.import.braces.pinggen",
+          "begin": "\\{",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.brace.curly.begin.pinggen"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.brace.curly.end.pinggen"
+            }
+          },
+          "patterns": [
+            {
+              "name": "entity.name.function.pinggen",
+              "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+            },
+            {
+              "name": "punctuation.comma.pinggen",
+              "match": ","
+            }
+          ]
         }
       ]
     },
@@ -80,7 +142,11 @@
       "patterns": [
         {
           "name": "keyword.control.pinggen",
-          "match": "\\b(import|return|if|else|while|for|in|match|break|continue|con)\\b"
+          "match": "\\b(if|else|while|for|in|match|break|continue|return)\\b"
+        },
+        {
+          "name": "keyword.control.flow.pinggen",
+          "match": "\\b(con)\\b"
         },
         {
           "name": "storage.type.declaration.pinggen",
@@ -89,6 +155,412 @@
         {
           "name": "storage.modifier.pinggen",
           "match": "\\b(mut|safe)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "entity.name.type.struct.pinggen",
+          "match": "\\b[A-Z][A-Za-z0-9_]*\\b(?=\\s*\\{)"
+        },
+        {
+          "name": "entity.name.type.enum.pinggen",
+          "match": "\\b[A-Z][A-Za-z0-9_]*\\b(?=\\s*\\{[^}]*\\})"
+        },
+        {
+          "name": "entity.name.type.variant.pinggen",
+          "match": "\\b([A-Z][A-Za-z0-9_]*)\\b(?=\\s*::)"
+        },
+        {
+          "name": "entity.name.type.variant-member.pinggen",
+          "match": "(?<=::)\\b([A-Z][A-Za-z0-9_]*)\\b"
+        },
+        {
+          "name": "support.type.primitive.pinggen",
+          "match": "\\b(int|bool|string)\\b"
+        },
+        {
+          "name": "entity.name.type.pinggen",
+          "match": "\\b[A-Z][A-Za-z0-9_]*\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "meta.function.definition.pinggen",
+          "begin": "\\bfunc\\b\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.function.definition.pinggen"
+            }
+          },
+          "end": "(?=\\{)",
+          "patterns": [
+            {
+              "include": "#function-parameters"
+            },
+            {
+              "include": "#return-type"
+            }
+          ]
+        },
+        {
+          "name": "meta.function.call.pinggen",
+          "begin": "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*\\(",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.function.call.pinggen"
+            }
+          },
+          "end": "\\)",
+          "patterns": [
+            {
+              "include": "#function-arguments"
+            }
+          ]
+        },
+        {
+          "name": "meta.method.call.pinggen",
+          "begin": "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*::\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\(",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.type.pinggen"
+            },
+            "2": {
+              "name": "entity.name.function.call.pinggen"
+            }
+          },
+          "end": "\\)",
+          "patterns": [
+            {
+              "include": "#function-arguments"
+            }
+          ]
+        }
+      ]
+    },
+    "function-parameters": {
+      "patterns": [
+        {
+          "name": "variable.parameter.pinggen",
+          "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\b(?=\\s*:)"
+        },
+        {
+          "name": "punctuation.colon.pinggen",
+          "match": ":"
+        }
+      ]
+    },
+    "function-arguments": {
+      "patterns": [
+        {
+          "include": "#expressions"
+        },
+        {
+          "name": "punctuation.comma.pinggen",
+          "match": ","
+        }
+      ]
+    },
+    "return-type": {
+      "patterns": [
+        {
+          "name": "keyword.operator.arrow.pinggen",
+          "match": "->"
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "meta.variable.declaration.pinggen",
+          "begin": "\\blet\\b",
+          "beginCaptures": {
+            "0": {
+              "name": "storage.type.declaration.pinggen"
+            }
+          },
+          "end": "(?=;)|(?=\\})",
+          "patterns": [
+            {
+              "include": "#variable-pattern"
+            },
+            {
+              "include": "#type-annotation"
+            },
+            {
+              "include": "#expressions"
+            }
+          ]
+        },
+        {
+          "name": "variable.other.pinggen",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+        }
+      ]
+    },
+    "variable-pattern": {
+      "patterns": [
+        {
+          "name": "meta.tuple.destructure.pinggen",
+          "begin": "\\(",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.parenthesis.begin.pinggen"
+            }
+          },
+          "end": "\\)",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.parenthesis.end.pinggen"
+            }
+          },
+          "patterns": [
+            {
+              "name": "variable.other.pinggen",
+              "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+            },
+            {
+              "name": "punctuation.comma.pinggen",
+              "match": ","
+            }
+          ]
+        },
+        {
+          "name": "variable.other.pinggen",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+        }
+      ]
+    },
+    "type-annotation": {
+      "patterns": [
+        {
+          "name": "punctuation.colon.pinggen",
+          "match": ":"
+        },
+        {
+          "include": "#array-type"
+        }
+      ]
+    },
+    "array-type": {
+      "patterns": [
+        {
+          "name": "meta.array.type.pinggen",
+          "begin": "\\[",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.bracket.begin.pinggen"
+            }
+          },
+          "end": "\\]",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.bracket.end.pinggen"
+            }
+          },
+          "patterns": [
+            {
+              "name": "entity.name.type.pinggen",
+              "match": "\\b[A-Z][A-Za-z0-9_]*\\b"
+            },
+            {
+              "name": "punctuation.semicolon.pinggen",
+              "match": ";"
+            },
+            {
+              "include": "#numbers"
+            }
+          ]
+        }
+      ]
+    },
+    "expressions": {
+      "patterns": [
+        {
+          "include": "#array-literal"
+        },
+        {
+          "include": "#struct-literal"
+        },
+        {
+          "include": "#match-expression"
+        },
+        {
+          "include": "#concurrent-block"
+        },
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#numbers"
+        },
+        {
+          "include": "#variables"
+        }
+      ]
+    },
+    "array-literal": {
+      "patterns": [
+        {
+          "name": "meta.array.literal.pinggen",
+          "begin": "\\[",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.bracket.begin.pinggen"
+            }
+          },
+          "end": "\\]",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.bracket.end.pinggen"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#expressions"
+            },
+            {
+              "name": "punctuation.comma.pinggen",
+              "match": ","
+            }
+          ]
+        }
+      ]
+    },
+    "struct-literal": {
+      "patterns": [
+        {
+          "name": "meta.struct.literal.pinggen",
+          "begin": "\\b([A-Z][A-Za-z0-9_]*)\\s*\\{",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.type.pinggen"
+            },
+            "2": {
+              "name": "punctuation.brace.curly.begin.pinggen"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.brace.curly.end.pinggen"
+            }
+          },
+          "patterns": [
+            {
+              "name": "variable.other.property.pinggen",
+              "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\b(?=\\s*:)"
+            },
+            {
+              "name": "punctuation.colon.pinggen",
+              "match": ":"
+            },
+            {
+              "include": "#expressions"
+            },
+            {
+              "name": "punctuation.comma.pinggen",
+              "match": ","
+            }
+          ]
+        }
+      ]
+    },
+    "match-expression": {
+      "patterns": [
+        {
+          "name": "meta.match.expression.pinggen",
+          "begin": "\\bmatch\\b",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.control.pinggen"
+            }
+          },
+          "end": "(?=\\})",
+          "patterns": [
+            {
+              "include": "#expressions"
+            },
+            {
+              "include": "#match-arms"
+            }
+          ]
+        }
+      ]
+    },
+    "match-arms": {
+      "patterns": [
+        {
+          "name": "meta.match.arm.pinggen",
+          "begin": "([A-Z][A-Za-z0-9_]*)\\s*::\\s*([A-Za-z0-9_]*)\\s*=>",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.type.variant.pinggen"
+            },
+            "2": {
+              "name": "variable.parameter.pinggen"
+            },
+            "3": {
+              "name": "keyword.operator.arrow.pinggen"
+            }
+          },
+          "end": "(?=\\})|(?=([A-Z][A-Za-z0-9_]*)\\s*::)",
+          "patterns": [
+            {
+              "include": "#expressions"
+            }
+          ]
+        },
+        {
+          "name": "meta.match.arm.pinggen",
+          "begin": "([A-Z][A-Za-z0-9_]*)\\s*::\\s*([A-Z][A-Za-z0-9_]*)\\s*=>",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.type.pinggen"
+            },
+            "2": {
+              "name": "entity.name.type.variant-member.pinggen"
+            },
+            "3": {
+              "name": "keyword.operator.arrow.pinggen"
+            }
+          },
+          "end": "(?=\\})|(?=([A-Z][A-Za-z0-9_]*)\\s*::)",
+          "patterns": [
+            {
+              "include": "#expressions"
+            }
+          ]
+        }
+      ]
+    },
+    "concurrent-block": {
+      "patterns": [
+        {
+          "name": "meta.concurrent.block.pinggen",
+          "begin": "\\bcon\\b\\s*\\{",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.control.flow.pinggen"
+            },
+            "1": {
+              "name": "punctuation.brace.curly.begin.pinggen"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.brace.curly.end.pinggen"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#expressions"
+            }
+          ]
         }
       ]
     },
@@ -104,59 +576,75 @@
         }
       ]
     },
-    "builtin-types": {
-      "patterns": [
-        {
-          "name": "support.type.primitive.pinggen",
-          "match": "\\b(int|bool|string)\\b"
-        }
-      ]
-    },
-    "stdlib": {
-      "patterns": [
-        {
-          "name": "support.module.stdlib.pinggen",
-          "match": "\\b(std|io|str|fs|env)\\b(?=\\s*::)"
-        },
-        {
-          "name": "support.function.stdlib.pinggen",
-          "match": "\\b(println|len|read_to_string|write_string|exists|get)\\b(?=\\s*\\()"
-        }
-      ]
-    },
-    "functions": {
-      "patterns": [
-        {
-          "name": "entity.name.function.definition.pinggen",
-          "match": "(?<=\\bfunc\\s)([A-Za-z_][A-Za-z0-9_]*)"
-        },
-        {
-          "name": "entity.name.function.call.pinggen",
-          "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\b(?=\\s*\\()"
-        }
-      ]
-    },
-    "types": {
-      "patterns": [
-        {
-          "name": "entity.name.type.enum-variant.pinggen",
-          "match": "\\b([A-Z][A-Za-z0-9_]*)\\b(?=\\s*::)"
-        },
-        {
-          "name": "entity.name.type.variant-member.pinggen",
-          "match": "(?<=::)\\b([A-Z][A-Za-z0-9_]*)\\b"
-        },
-        {
-          "name": "entity.name.type.pinggen",
-          "match": "\\b[A-Z][A-Za-z0-9_]*\\b"
-        }
-      ]
-    },
     "operators": {
       "patterns": [
         {
-          "name": "keyword.operator.pinggen",
-          "match": "=>|->|::|\\.\\.|==|!=|<=|>=|&&|\\|\\||[=+\\-*/%<>!:.,;]"
+          "name": "keyword.operator.assignment.pinggen",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.comparison.pinggen",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.logical.pinggen",
+          "match": "&&|\\|\\|"
+        },
+        {
+          "name": "keyword.operator.arithmetic.pinggen",
+          "match": "\\+|-|\\*|/|%"
+        },
+        {
+          "name": "keyword.operator.access.pinggen",
+          "match": "\\.|::"
+        },
+        {
+          "name": "keyword.operator.range.pinggen",
+          "match": "\\.\\."
+        },
+        {
+          "name": "keyword.operator.arrow.pinggen",
+          "match": "=>|->"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.brace.curly.begin.pinggen",
+          "match": "\\{"
+        },
+        {
+          "name": "punctuation.brace.curly.end.pinggen",
+          "match": "\\}"
+        },
+        {
+          "name": "punctuation.bracket.begin.pinggen",
+          "match": "\\["
+        },
+        {
+          "name": "punctuation.bracket.end.pinggen",
+          "match": "\\]"
+        },
+        {
+          "name": "punctuation.parenthesis.begin.pinggen",
+          "match": "\\("
+        },
+        {
+          "name": "punctuation.parenthesis.end.pinggen",
+          "match": "\\)"
+        },
+        {
+          "name": "punctuation.comma.pinggen",
+          "match": ","
+        },
+        {
+          "name": "punctuation.semicolon.pinggen",
+          "match": ";"
+        },
+        {
+          "name": "punctuation.colon.pinggen",
+          "match": ":"
         }
       ]
     }

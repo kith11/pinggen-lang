@@ -18,5 +18,17 @@
     ["[", "]"],
     ["(", ")"],
     ["\"", "\""]
-  ]
+  ],
+  "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\?\\s]+)",
+  "indentationRules": {
+    "increaseIndentPattern": "^\\s*(func|struct|enum|impl|if|else|while|for|match)\\b.*\\{[^}]*$|^\\s*(con)\\b.*\\{[^}]*$",
+    "decreaseIndentPattern": "^\\s*\\}",
+    "indentNextLinePattern": "^\\s*(if|else|while|for|match)\\b.*\\{[^}]*$|^\\s*(con)\\b.*\\{[^}]*$"
+  },
+  "folding": {
+    "markers": {
+      "start": "^\\s*#region\\b",
+      "end": "^\\s*#endregion\\b"
+    }
+  }
 }

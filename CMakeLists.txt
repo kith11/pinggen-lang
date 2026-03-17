@@ -15,6 +15,7 @@ add_executable(pinggen
     src/llvm_ir.cpp
     src/project.cpp
 )
+set_target_properties(pinggen PROPERTIES OUTPUT_NAME puff)
 
 target_include_directories(pinggen PRIVATE include)
 target_compile_definitions(pinggen PRIVATE PINGGEN_SOURCE_ROOT="${CMAKE_SOURCE_DIR}")
@@ -65,6 +66,31 @@ if(BUILD_TESTING)
         NAME pinggen-new-template-smoke
         COMMAND powershell -NoProfile -Command
                 "$dir = Join-Path $env:TEMP 'pinggen_new_template_test'; if (Test-Path $dir) { Remove-Item -Recurse -Force $dir; }; & '$<TARGET_FILE:pinggen>' new $dir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $main = Get-Content -Raw (Join-Path $dir 'src/main.pg'); $helper = Get-Content -Raw (Join-Path $dir 'src/greet.pg'); $toml = Get-Content -Raw (Join-Path $dir 'pinggen.toml'); if ($main -match 'con \\{' -or $main -match 'fs::' -or $main -match 'Result::') { throw 'template is still feature-heavy'; }; if ($main -notmatch 'import greet;' -or $helper -notmatch 'func greeting') { throw 'template missing starter module'; }; if ($toml -notmatch '\\[build\\]' -or $toml -notmatch 'entry = \"src/main.pg\"') { throw 'template missing manifest v2 defaults'; }; & '$<TARGET_FILE:pinggen>' run $dir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+    )
+    add_test(
+        NAME pinggen-help
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' help 2>&1 | Out-String); if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if ($text -notlike '*puff commands:*' -or $text -notlike '*doctor*' -or $text -notlike '*setup*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-doctor-starter
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' doctor '${CMAKE_SOURCE_DIR}/examples/starter' 2>&1 | Out-String); if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if ($text -notlike '*toolchain status: ready*' -or $text -notlike '*default target: starter*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-targets-multi-target
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' targets '${CMAKE_SOURCE_DIR}/examples/multi_target' 2>&1 | Out-String); if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if ($text -notlike '*default target: app*' -or $text -notlike '*tool*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-install-local
+        COMMAND powershell -NoProfile -Command
+                "$binDir = Join-Path '${CMAKE_BINARY_DIR}' 'test-install\\bin'; if (Test-Path $binDir) { Remove-Item -Recurse -Force $binDir }; & '$<TARGET_FILE:pinggen>' install --bin-dir $binDir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if (-not (Test-Path (Join-Path $binDir 'puff.exe'))) { throw 'expected installed puff.exe'; }; if (-not (Test-Path (Join-Path $binDir 'puff.cmd'))) { throw 'expected installed puff.cmd'; }"
+    )
+    add_test(
+        NAME pinggen-root-launcher-help
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '${CMAKE_SOURCE_DIR}/puff.cmd' help 2>&1 | Out-String); if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if ($text -notlike '*puff commands:*') { throw $text; }"
     )
     add_test(
         NAME pinggen-check-invalid-arity

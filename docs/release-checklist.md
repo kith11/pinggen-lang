@@ -5,7 +5,7 @@
 - core language: functions, modules, structs, enums, payload `match`, tuples, fixed-size arrays, loops, methods, and strict `con`
 - std modules: `io`, `str`, `fs`, `env`
 - manifest v2 targets in `pinggen.toml`
-- CLI: `new`, `check`, `build`, `run`
+- CLI: `puff help`, `puff init`, `puff check`, `puff build`, `puff run`, `puff targets`, `puff doctor`, `puff install`, `puff setup`
 
 ## Intentionally Deferred
 
@@ -46,8 +46,9 @@ ctest --test-dir build -C Debug --output-on-failure
 Key acceptance coverage:
 
 - starter project builds and runs
-- `pinggen new` generates a runnable minimal starter
+- `puff init` generates a runnable minimal starter
 - named target build/run works
 - file-processing example runs
 - advanced demo still builds and runs
+- `puff doctor` reports toolchain and project status
 - diagnostics checks still cover the main failure classes

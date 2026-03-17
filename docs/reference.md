@@ -7,6 +7,8 @@
 - Source files use the `.pg` extension.
 - Projects use `pinggen.toml`.
 - Modules are flat files under `src/` and are imported with `import name;`.
+- From the repo root, use `.\puff ...`.
+- For a user-local install on Windows, run `.\install-puff.ps1`.
 
 ### Manifest v2
 
@@ -28,8 +30,9 @@ output = "build/tool"
 
 - `[build]` defines the default executable target.
 - `[[target]]` defines additional named executable targets.
-- `pinggen build` and `pinggen run` use the default target.
-- `pinggen build <project> --target <name>` and `pinggen run <project> --target <name>` select a named target.
+- `puff build` and `puff run` use the default target.
+- `puff build <project> --target <name>` and `puff run <project> --target <name>` select a named target.
+- `puff targets <project>` prints the available targets.
 
 ## Editor Support
 
@@ -87,6 +90,19 @@ output = "build/tool"
 ### `env`
 
 - `env::get(name: string) -> EnvResult`
+
+## CLI
+
+- `puff help`
+- `puff new <path>`
+- `puff init <path>`
+- `puff check [path]`
+- `puff build [path] [--target <name>]`
+- `puff run [path] [--target <name>]`
+- `puff targets [path]`
+- `puff doctor [path]`
+- `puff install [--bin-dir <path>]`
+- `puff setup [project-path] [--bin-dir <path>]`
 
 ## Intentional 1.0 Limits
 

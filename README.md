@@ -17,23 +17,41 @@ cmake -S . -B build
 cmake --build build
 ```
 
-Create and run a new project:
+Create and run a new project from the repo root:
 
 ```powershell
-.\build\pinggen.exe new .\my_app
-.\build\pinggen.exe run .\my_app
+.\puff init .\my_app
+.\puff run .\my_app
+```
+
+Check your toolchain and current project:
+
+```powershell
+.\puff doctor
+```
+
+Run the interactive setup flow:
+
+```powershell
+.\puff setup
+```
+
+Install `puff` to your user bin directory:
+
+```powershell
+.\install-puff.ps1
 ```
 
 Run the included starter example:
 
 ```powershell
-.\build\pinggen.exe run .\examples\starter
+.\puff run .\examples\starter
 ```
 
 Build a named target:
 
 ```powershell
-.\build\pinggen.exe build .\examples\multi_target --target tool
+.\puff build .\examples\multi_target --target tool
 ```
 
 Reference docs:
@@ -45,9 +63,14 @@ Editor support:
 
 - [VS Code syntax highlighting](./editors/vscode/pinggen/README.md)
 
+Launchers:
+
+- [repo-root launcher](./puff.cmd)
+- [Windows installer script](./install-puff.ps1)
+
 ## Project Layout
 
-`pinggen` projects use `pinggen.toml` plus flat modules under `src/`.
+`puff` projects use `pinggen.toml` plus flat modules under `src/`.
 
 ```toml
 [package]
@@ -67,8 +90,8 @@ output = "build/tool"
 
 - `[build]` defines the default executable target.
 - `[[target]]` defines additional named executable targets.
-- `pinggen build` and `pinggen run` use the default target.
-- `pinggen build <project> --target <name>` and `pinggen run <project> --target <name>` select a named target.
+- `puff build` and `puff run` use the default target.
+- `puff build <project> --target <name>` and `puff run <project> --target <name>` select a named target.
 
 ## Stable 1.0 Surface
 
@@ -98,10 +121,15 @@ output = "build/tool"
 
 ### CLI
 
-- `pinggen new`
-- `pinggen check`
-- `pinggen build`
-- `pinggen run`
+- `puff new`
+- `puff init`
+- `puff check`
+- `puff build`
+- `puff run`
+- `puff targets`
+- `puff doctor`
+- `puff install`
+- `puff setup`
 
 ## Examples
 
