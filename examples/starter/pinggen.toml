@@ -1,0 +1,8 @@
+[package]
+name = "starter"
+version = "0.1.0"
+
+[build]
+name = "starter"
+entry = "src/main.pg"
+output = "build/starter"

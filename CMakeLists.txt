@@ -26,12 +26,45 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/hello
     )
     add_test(
+        NAME pinggen-check-starter
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/starter
+    )
+    add_test(
+        NAME pinggen-run-starter
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/starter
+    )
+    add_test(
+        NAME pinggen-check-multi-target
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/multi_target
+    )
+    add_test(
+        NAME pinggen-run-file-process
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/file_process
+    )
+    add_test(
         NAME pinggen-build-example
         COMMAND pinggen build ${CMAKE_SOURCE_DIR}/examples/hello
     )
     add_test(
+        NAME pinggen-build-multi-target-default
+        COMMAND pinggen build ${CMAKE_SOURCE_DIR}/examples/multi_target
+    )
+    add_test(
+        NAME pinggen-build-multi-target-named
+        COMMAND pinggen build ${CMAKE_SOURCE_DIR}/examples/multi_target --target tool
+    )
+    add_test(
         NAME pinggen-run-example
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/hello
+    )
+    add_test(
+        NAME pinggen-run-multi-target-named
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/multi_target --target tool
+    )
+    add_test(
+        NAME pinggen-new-template-smoke
+        COMMAND powershell -NoProfile -Command
+                "$dir = Join-Path $env:TEMP 'pinggen_new_template_test'; if (Test-Path $dir) { Remove-Item -Recurse -Force $dir; }; & '$<TARGET_FILE:pinggen>' new $dir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $main = Get-Content -Raw (Join-Path $dir 'src/main.pg'); $helper = Get-Content -Raw (Join-Path $dir 'src/greet.pg'); $toml = Get-Content -Raw (Join-Path $dir 'pinggen.toml'); if ($main -match 'con \\{' -or $main -match 'fs::' -or $main -match 'Result::') { throw 'template is still feature-heavy'; }; if ($main -notmatch 'import greet;' -or $helper -notmatch 'func greeting') { throw 'template missing starter module'; }; if ($toml -notmatch '\\[build\\]' -or $toml -notmatch 'entry = \"src/main.pg\"') { throw 'template missing manifest v2 defaults'; }; & '$<TARGET_FILE:pinggen>' run $dir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
     )
     add_test(
         NAME pinggen-check-invalid-arity
@@ -344,6 +377,16 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-std-import-item PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-duplicate-target-name
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_duplicate_target_name
+    )
+    set_tests_properties(pinggen-check-invalid-duplicate-target-name PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-target-missing-entry
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_target_missing_entry
+    )
+    set_tests_properties(pinggen-check-invalid-target-missing-entry PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-struct-duplicate-field
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_struct_duplicate_field
     )
@@ -573,5 +616,25 @@ if(BUILD_TESTING)
         NAME pinggen-diagnostics-project-bad-entry
         COMMAND powershell -NoProfile -Command
                 "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_project_bad_entry' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*project entry file not found:*src/missing.pg*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-duplicate-target
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_duplicate_target_name' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*defines duplicate target ''app''*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-target-missing-entry
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_target_missing_entry' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notmatch '\\[\\[target\\]\\] #1\\.entry') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-unknown-target
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target missing 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*unknown build target ''missing'' in project ''multi_target''*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-build-multi-target-output-override
+        COMMAND powershell -NoProfile -Command
+                "& '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target tool; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if (-not (Test-Path '${CMAKE_SOURCE_DIR}/examples/multi_target/build/tools/ping-tool.exe')) { throw 'expected named target exe'; }"
     )
 endif()

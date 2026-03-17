@@ -1,0 +1,8 @@
+[package]
+name = "file_process"
+version = "0.1.0"
+
+[build]
+name = "file_process"
+entry = "src/main.pg"
+output = "build/file_process"

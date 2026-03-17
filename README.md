@@ -2,63 +2,30 @@
 
 # pinggen
 
-`pinggen` is a small compiled programming language MVP built in C++.
+`pinggen` is a small compiled programming language built in C++ with an LLVM IR backend.
 
 Source files use the `.pg` extension.
 
-Current features:
+## Quick Start
 
-- `import std::{ io, str, fs }`
-- project-local flat modules with `import name;`
-- `safe func` and `con { ... }` for strict task-parallel calls
-- typed top-level functions with `func name(arg: type) -> type`
-- top-level `enum` declarations with qualified variants like `State::Ready`
-- single-payload enum variants like `Result::Ok(1)`
-- payload enum binding in match arms like `Result::Ok(value) => { ... }`
-- plain `struct` declarations with named fields
-- named-field struct literals and `value.field` access
-- tuple types and values like `(int, string)` and `(1, 2)`
-- tuple destructuring like `let (a, b) = pair;`
-- `bool`, `true`, `false`
-- `if`, `else if`, and `else`
-- exhaustive enum `match` statements by variant tag
-- `while condition { ... }`
-- `for name in start..end { ... }`
-- `break` and `continue` inside loops
-- `!`, `&&`, and `||` for boolean logic
-- `<`, `<=`, `>`, and `>=` for integer comparisons
-- `%` for integer modulo
-- `+` for string concatenation
-- `str::len(value)` for byte-count string length
-- `fs::read_to_string(path)` returning `FsResult`
-- `fs::write_string(path, contents)` returning `FsWriteResult`
-- `fs::exists(path)` returning `bool`
-- `env::get(name)` returning `EnvResult`
-- fixed-size arrays with `[T; N]`, `[a, b, c]`, and `array[index]`
-- struct methods with `impl Type { ... }` and `value.method(...)`
-- mutating struct methods with `mut self`
-- `let` and `let mut`
-- integers and strings
-- `==` and `!=` for `int`, `bool`, and tag-only enums
-- integer arithmetic
-- assignment to mutable variables
-- `io::println(...)`
-- `return`
-- `pinggen.toml` project files
-- named build targets in `pinggen.toml`
-- `pinggen new`, `check`, `build`, `run`
-
-Build:
+Build the compiler:
 
 ```powershell
 cmake -S . -B build
 cmake --build build
 ```
 
-Run the example:
+Create and run a new project:
 
 ```powershell
-.\build\pinggen.exe run .\examples\hello
+.\build\pinggen.exe new .\my_app
+.\build\pinggen.exe run .\my_app
+```
+
+Run the included starter example:
+
+```powershell
+.\build\pinggen.exe run .\examples\starter
 ```
 
 Build a named target:
@@ -67,106 +34,74 @@ Build a named target:
 .\build\pinggen.exe build .\examples\multi_target --target tool
 ```
 
-Example:
+## Project Layout
 
-```pinggen
-// src/main.pg
-import std::{ io, fs }
-import model;
-import logic;
+`pinggen` projects use `pinggen.toml` plus flat modules under `src/`.
 
-func main() {
-    let job = Job { result: finish(0), label: "pinggen" };
-    let results: [Result; 3] = [Result::Pending, Result::Err("bad"), Result::Ok(9)];
-    let (left, right) = con { number_a(), job.label_len() };
+```toml
+[package]
+name = "my_app"
+version = "0.1.0"
 
-    match job.result {
-        Result::Ok(code) => {
-            io::println(job.label);
-            io::println(code);
-        }
-        Result::Err(message) => {
-            io::println(message);
-        }
-        Result::Pending => {
-            io::println("pending");
-        }
-    }
+[build]
+name = "my_app"
+entry = "src/main.pg"
+output = "build/my_app"
 
-    let written = "hello from file\n";
-    io::println(left);
-    io::println(right);
-    match fs::write_string("message.txt", written) {
-        FsWriteResult::Ok => {
-            match fs::read_to_string("message.txt") {
-                FsResult::Ok(text) => {
-                    io::println(text);
-                }
-                FsResult::Err(message) => {
-                    io::println(message);
-                }
-            }
-        }
-        FsWriteResult::Err(message) => {
-            io::println(message);
-        }
-    }
-    io::println(describe(results[2]));
-    io::println(describe(results[0]));
-}
+[[target]]
+name = "tool"
+entry = "src/tool.pg"
+output = "build/tool"
 ```
 
-```pinggen
-// src/model.pg
-import std::{ str }
+- `[build]` defines the default executable target.
+- `[[target]]` defines additional named executable targets.
+- `pinggen build` and `pinggen run` use the default target.
+- `pinggen build <project> --target <name>` and `pinggen run <project> --target <name>` select a named target.
 
-enum Result {
-    Ok(int),
-    Err(string),
-    Pending,
-}
+## Stable 1.0 Surface
 
-struct Job {
-    result: Result,
-    label: string,
-}
+### Core language
 
-impl Job {
-    safe func label_len(self) -> int {
-        return str::len(self.label);
-    }
-}
-```
+- typed top-level functions
+- flat project-local modules with `import name;`
+- `struct`, `enum`, payload enums, and exhaustive `match`
+- tuples and tuple destructuring
+- fixed-size arrays
+- `if`, `else if`, `else`, `while`, `for`, `break`, `continue`
+- methods with `impl`, `self`, and `mut self`
+- strict task-parallel `con { ... }` with `safe func`
 
-```pinggen
-// src/logic.pg
-import model;
+### Standard library
 
-safe func number_a() -> int {
-    return 11;
-}
+- `import std::{ io }`
+  - `io::println(...)`
+- `import std::{ str }`
+  - `str::len(value)`
+- `import std::{ fs }`
+  - `fs::read_to_string(path)`
+  - `fs::write_string(path, contents)`
+  - `fs::exists(path)`
+- `import std::{ env }`
+  - `env::get(name)`
 
-func finish(code: int) -> Result {
-    if code == 0 {
-        return Result::Ok(7);
-    }
-    return Result::Err("bad");
-}
+### CLI
 
-func describe(result: Result) -> string {
-    match result {
-        Result::Ok(value) => {
-            if value > 5 {
-                return "ok";
-            }
-            return "small";
-        }
-        Result::Err(message) => {
-            return message;
-        }
-        Result::Pending => {
-            return "pending";
-        }
-    }
-}
-```
+- `pinggen new`
+- `pinggen check`
+- `pinggen build`
+- `pinggen run`
+
+## Examples
+
+- [starter](./examples/starter): small multi-file starter-grade project
+- [multi_target](./examples/multi_target): manifest v2 named targets
+- [file_process](./examples/file_process): practical `fs` + `match` example
+- [hello](./examples/hello): advanced multi-feature demo
+
+## Current 1.0 Limits
+
+- arrays are fixed-size only
+- `con` is intentionally strict and only allows approved safe calls
+- build configuration is declarative; there is no programmable build scripting
+- no generics, borrow checker, package manager, formatter, or LSP in this milestone
