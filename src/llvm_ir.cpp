@@ -26,6 +26,25 @@ EnumDecl builtin_fs_result_enum() {
     return decl;
 }
 
+EnumDecl builtin_fs_write_result_enum() {
+    EnumDecl decl;
+    decl.location = {1, 1};
+    decl.name = "FsWriteResult";
+
+    EnumVariant ok;
+    ok.location = {1, 1};
+    ok.name = "Ok";
+    decl.variants.push_back(std::move(ok));
+
+    EnumVariant err;
+    err.location = {1, 1};
+    err.name = "Err";
+    err.payload_type = Type::string_type();
+    decl.variants.push_back(std::move(err));
+
+    return decl;
+}
+
 bool program_imports_std_item(const Program& program, const std::string& item) {
     for (const auto& import_decl : program.imports) {
         if (import_decl.kind != ImportKind::Std || import_decl.module_name != "std") {
@@ -134,17 +153,22 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     const bool has_fs_import = program_imports_std_item(program, "fs");
     if (has_fs_import) {
         globals_ += "@.fs.mode.rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"\n";
+        globals_ += "@.fs.mode.wb = private unnamed_addr constant [3 x i8] c\"wb\\00\"\n";
         globals_ += "@.fs.err.open = private unnamed_addr constant [20 x i8] c\"failed to open file\\00\"\n";
         globals_ += "@.fs.err.read = private unnamed_addr constant [20 x i8] c\"failed to read file\\00\"\n";
+        globals_ += "@.fs.err.write = private unnamed_addr constant [21 x i8] c\"failed to write file\\00\"\n";
     }
 
     if (has_fs_import) {
-        const auto builtin = builtin_fs_result_enum();
-        enums_[builtin.name] = builtin;
-        std::size_t payload_field_index = 1;
-        for (std::size_t i = 0; i < builtin.variants.size(); ++i) {
-            enum_variant_indices_[builtin.name][builtin.variants[i].name] = i;
-            enum_payload_field_indices_[builtin.name][builtin.variants[i].name] = payload_field_index++;
+        for (const EnumDecl builtin : {builtin_fs_result_enum(), builtin_fs_write_result_enum()}) {
+            enums_[builtin.name] = builtin;
+            std::size_t payload_field_index = 1;
+            for (std::size_t i = 0; i < builtin.variants.size(); ++i) {
+                enum_variant_indices_[builtin.name][builtin.variants[i].name] = i;
+                if (builtin.variants[i].payload_type.has_value()) {
+                    enum_payload_field_indices_[builtin.name][builtin.variants[i].name] = payload_field_index++;
+                }
+            }
         }
     }
     for (const auto& decl : program.enums) {
@@ -262,7 +286,8 @@ std::string LLVMIRGenerator::generate(const Program& program) {
         out << "declare i32 @fclose(ptr)\n";
         out << "declare i32 @fseek(ptr, i64, i32)\n";
         out << "declare i64 @ftell(ptr)\n";
-        out << "declare i64 @fread(ptr, i64, i64, ptr)\n\n";
+        out << "declare i64 @fread(ptr, i64, i64, ptr)\n";
+        out << "declare i64 @fwrite(ptr, i64, i64, ptr)\n\n";
     }
     if (!program.structs.empty() || !enum_payload_field_indices_.empty() || !extra_type_defs_.empty()) {
         out << type_defs.str();
@@ -273,6 +298,7 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     out << emit_bounds_abort_helper();
     if (has_fs_import) {
         out << emit_fs_read_helper();
+        out << emit_fs_write_helper();
     }
     out << helper_functions_;
     out << globals_ << "\n";
@@ -351,6 +377,38 @@ std::string LLVMIRGenerator::emit_fs_read_helper() const {
         "  %read_res0 = insertvalue %enum.FsResult zeroinitializer, i64 1, 0\n"
         "  %read_res1 = insertvalue %enum.FsResult %read_res0, ptr %read_msg, 2\n"
         "  ret %enum.FsResult %read_res1\n"
+        "}\n\n";
+}
+
+std::string LLVMIRGenerator::emit_fs_write_helper() const {
+    return
+        "define %enum.FsWriteResult @pinggen_fs_write_string(ptr %path, ptr %contents) {\n"
+        "entry:\n"
+        "  %mode = getelementptr inbounds [3 x i8], ptr @.fs.mode.wb, i64 0, i64 0\n"
+        "  %file = call ptr @fopen(ptr %path, ptr %mode)\n"
+        "  %file_ok = icmp ne ptr %file, null\n"
+        "  br i1 %file_ok, label %write_setup, label %open_fail\n"
+        "open_fail:\n"
+        "  %open_msg = getelementptr inbounds [20 x i8], ptr @.fs.err.open, i64 0, i64 0\n"
+        "  %open_res0 = insertvalue %enum.FsWriteResult zeroinitializer, i64 1, 0\n"
+        "  %open_res1 = insertvalue %enum.FsWriteResult %open_res0, ptr %open_msg, 1\n"
+        "  ret %enum.FsWriteResult %open_res1\n"
+        "write_setup:\n"
+        "  %len = call i64 @strlen(ptr %contents)\n"
+        "  %written = call i64 @fwrite(ptr %contents, i64 1, i64 %len, ptr %file)\n"
+        "  %close_status = call i32 @fclose(ptr %file)\n"
+        "  %write_exact = icmp eq i64 %written, %len\n"
+        "  %close_ok = icmp eq i32 %close_status, 0\n"
+        "  %all_ok = and i1 %write_exact, %close_ok\n"
+        "  br i1 %all_ok, label %ok, label %write_fail\n"
+        "ok:\n"
+        "  %ok_res = insertvalue %enum.FsWriteResult zeroinitializer, i64 0, 0\n"
+        "  ret %enum.FsWriteResult %ok_res\n"
+        "write_fail:\n"
+        "  %write_msg = getelementptr inbounds [21 x i8], ptr @.fs.err.write, i64 0, i64 0\n"
+        "  %write_res0 = insertvalue %enum.FsWriteResult zeroinitializer, i64 1, 0\n"
+        "  %write_res1 = insertvalue %enum.FsWriteResult %write_res0, ptr %write_msg, 1\n"
+        "  ret %enum.FsWriteResult %write_res1\n"
         "}\n\n";
 }
 
@@ -770,6 +828,14 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
             const std::string reg = next_register();
             body_ += "  " + reg + " = call %enum.FsResult @pinggen_fs_read_to_string(ptr " + arg.ir + ")\n";
             return {reg, Type::enum_type("FsResult")};
+        }
+        if (node->callee == "fs::write_string") {
+            const TypedIRValue path = emit_expr(*node->args[0]);
+            const TypedIRValue contents = emit_expr(*node->args[1]);
+            const std::string reg = next_register();
+            body_ += "  " + reg + " = call %enum.FsWriteResult @pinggen_fs_write_string(ptr " + path.ir + ", ptr " +
+                     contents.ir + ")\n";
+            return {reg, Type::enum_type("FsWriteResult")};
         }
 
         std::vector<TypedIRValue> args;

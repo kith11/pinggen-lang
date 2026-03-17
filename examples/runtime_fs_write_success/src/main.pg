@@ -1,0 +1,19 @@
+import std::{ io, fs }
+
+func main() {
+    match fs::write_string("out.txt", "written by pinggen") {
+        FsWriteResult::Ok => {
+            match fs::read_to_string("out.txt") {
+                FsResult::Ok(text) => {
+                    io::println(text);
+                }
+                FsResult::Err(message) => {
+                    io::println(message);
+                }
+            }
+        }
+        FsWriteResult::Err(message) => {
+            io::println(message);
+        }
+    }
+}

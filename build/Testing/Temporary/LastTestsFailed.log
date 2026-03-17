@@ -1,5 +1,6 @@
+1:pinggen-check-example
 2:pinggen-build-example
 3:pinggen-run-example
-69:pinggen-run-fs-read-success
-70:pinggen-run-fs-read-missing
-71:pinggen-run-con-success
+76:pinggen-run-fs-write-success
+77:pinggen-run-fs-write-missing
+80:pinggen-codegen-con-multi

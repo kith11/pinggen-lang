@@ -28,6 +28,25 @@ EnumDecl builtin_fs_result_enum() {
     return decl;
 }
 
+EnumDecl builtin_fs_write_result_enum() {
+    EnumDecl decl;
+    decl.location = {1, 1};
+    decl.name = "FsWriteResult";
+
+    EnumVariant ok;
+    ok.location = {1, 1};
+    ok.name = "Ok";
+    decl.variants.push_back(std::move(ok));
+
+    EnumVariant err;
+    err.location = {1, 1};
+    err.name = "Err";
+    err.payload_type = Type::string_type();
+    decl.variants.push_back(std::move(err));
+
+    return decl;
+}
+
 const VariableExpr* root_variable_expr(const Expr& expr) {
     if (const auto* variable = dynamic_cast<const VariableExpr*>(&expr)) {
         return variable;
@@ -139,6 +158,7 @@ void SemanticAnalyzer::collect_enums(const Program& program) {
     enums_.clear();
     if (imported_std_items_.contains("fs")) {
         enums_["FsResult"] = EnumInfo{};
+        enums_["FsWriteResult"] = EnumInfo{};
     }
     for (const auto& decl : program.enums) {
         if (enums_.contains(decl.name)) {
@@ -147,13 +167,20 @@ void SemanticAnalyzer::collect_enums(const Program& program) {
         enums_[decl.name] = EnumInfo{};
     }
     if (imported_std_items_.contains("fs")) {
-        const EnumDecl builtin = builtin_fs_result_enum();
-        auto& info = enums_.at(builtin.name);
-        info.variant_payload_types.clear();
-        for (std::size_t i = 0; i < builtin.variants.size(); ++i) {
-            info.variant_indices[builtin.variants[i].name] = i;
-            info.variant_payload_types.push_back(Type::string_type());
-            info.has_payload = true;
+        for (const EnumDecl builtin : {builtin_fs_result_enum(), builtin_fs_write_result_enum()}) {
+            auto& info = enums_.at(builtin.name);
+            info.variant_indices.clear();
+            info.variant_payload_types.clear();
+            info.has_payload = false;
+            for (std::size_t i = 0; i < builtin.variants.size(); ++i) {
+                info.variant_indices[builtin.variants[i].name] = i;
+                if (builtin.variants[i].payload_type.has_value()) {
+                    info.variant_payload_types.push_back(Type::string_type());
+                    info.has_payload = true;
+                } else {
+                    info.variant_payload_types.push_back(std::nullopt);
+                }
+            }
         }
     }
     for (const auto& decl : program.enums) {
@@ -611,6 +638,21 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
             }
             return Type::enum_type("FsResult");
         }
+        if (node->callee == "fs::write_string") {
+            require_std_import("fs", node->location, "fs::write_string");
+            if (node->args.size() != 2) {
+                fail(node->location, "fs::write_string expects exactly two arguments");
+            }
+            const Type path_type = analyze_expr(*node->args[0]);
+            if (path_type != Type::string_type()) {
+                fail(node->args[0]->location, "fs::write_string only supports string path arguments");
+            }
+            const Type content_type = analyze_expr(*node->args[1]);
+            if (content_type != Type::string_type()) {
+                fail(node->args[1]->location, "fs::write_string only supports string contents arguments");
+            }
+            return Type::enum_type("FsWriteResult");
+        }
 
         const auto it = functions_.find(node->callee);
         if (it == functions_.end()) {
@@ -644,7 +686,8 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         bool saw_non_void = false;
         for (const auto& item : node->items) {
             if (const auto* call = dynamic_cast<const CallExpr*>(item.get())) {
-                if (call->callee == "io::println" || call->callee == "str::len" || call->callee == "fs::read_to_string") {
+                if (call->callee == "io::println" || call->callee == "str::len" || call->callee == "fs::read_to_string" ||
+                    call->callee == "fs::write_string") {
                     inside_con_ = false;
                     fail(call->location, "builtin function '" + call->callee + "' is not supported inside con");
                 }

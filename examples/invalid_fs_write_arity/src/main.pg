@@ -1,0 +1,5 @@
+import std::{ fs }
+
+func main() {
+    let result = fs::write_string("message.txt");
+}

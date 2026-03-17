@@ -11,8 +11,10 @@ declare i32 @fclose(ptr)
 declare i32 @fseek(ptr, i64, i32)
 declare i64 @ftell(ptr)
 declare i64 @fread(ptr, i64, i64, ptr)
+declare i64 @fwrite(ptr, i64, i64, ptr)
 
 %enum.FsResult = type { i64, ptr, ptr }
+%enum.FsWriteResult = type { i64, ptr }
 
 define ptr @pinggen_concat(ptr %lhs, ptr %rhs) {
   %1 = call i64 @strlen(ptr %lhs)
@@ -79,11 +81,42 @@ read_fail:
   ret %enum.FsResult %read_res1
 }
 
+define %enum.FsWriteResult @pinggen_fs_write_string(ptr %path, ptr %contents) {
+entry:
+  %mode = getelementptr inbounds [3 x i8], ptr @.fs.mode.wb, i64 0, i64 0
+  %file = call ptr @fopen(ptr %path, ptr %mode)
+  %file_ok = icmp ne ptr %file, null
+  br i1 %file_ok, label %write_setup, label %open_fail
+open_fail:
+  %open_msg = getelementptr inbounds [20 x i8], ptr @.fs.err.open, i64 0, i64 0
+  %open_res0 = insertvalue %enum.FsWriteResult zeroinitializer, i64 1, 0
+  %open_res1 = insertvalue %enum.FsWriteResult %open_res0, ptr %open_msg, 1
+  ret %enum.FsWriteResult %open_res1
+write_setup:
+  %len = call i64 @strlen(ptr %contents)
+  %written = call i64 @fwrite(ptr %contents, i64 1, i64 %len, ptr %file)
+  %close_status = call i32 @fclose(ptr %file)
+  %write_exact = icmp eq i64 %written, %len
+  %close_ok = icmp eq i32 %close_status, 0
+  %all_ok = and i1 %write_exact, %close_ok
+  br i1 %all_ok, label %ok, label %write_fail
+ok:
+  %ok_res = insertvalue %enum.FsWriteResult zeroinitializer, i64 0, 0
+  ret %enum.FsWriteResult %ok_res
+write_fail:
+  %write_msg = getelementptr inbounds [21 x i8], ptr @.fs.err.write, i64 0, i64 0
+  %write_res0 = insertvalue %enum.FsWriteResult zeroinitializer, i64 1, 0
+  %write_res1 = insertvalue %enum.FsWriteResult %write_res0, ptr %write_msg, 1
+  ret %enum.FsWriteResult %write_res1
+}
+
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
 @.fs.mode.rb = private unnamed_addr constant [3 x i8] c"rb\00"
+@.fs.mode.wb = private unnamed_addr constant [3 x i8] c"wb\00"
 @.fs.err.open = private unnamed_addr constant [20 x i8] c"failed to open file\00"
 @.fs.err.read = private unnamed_addr constant [20 x i8] c"failed to read file\00"
+@.fs.err.write = private unnamed_addr constant [21 x i8] c"failed to write file\00"
 @.str.1 = private unnamed_addr constant [12 x i8] c"message.txt\00"
 
 define i32 @main() {

@@ -219,6 +219,31 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-fs-result-without-import PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-fs-write-missing-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_write_missing_import
+    )
+    set_tests_properties(pinggen-check-invalid-fs-write-missing-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-write-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_write_arity
+    )
+    set_tests_properties(pinggen-check-invalid-fs-write-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-write-path-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_write_path_type
+    )
+    set_tests_properties(pinggen-check-invalid-fs-write-path-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-write-content-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_write_content_type
+    )
+    set_tests_properties(pinggen-check-invalid-fs-write-content-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-write-result-without-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_write_result_without_import
+    )
+    set_tests_properties(pinggen-check-invalid-fs-write-result-without-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-con-empty
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_con_empty
     )
@@ -365,6 +390,14 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-run-fs-read-missing
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_read_missing
+    )
+    add_test(
+        NAME pinggen-run-fs-write-success
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_write_success
+    )
+    add_test(
+        NAME pinggen-run-fs-write-missing
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_write_missing
     )
     add_test(
         NAME pinggen-run-con-success

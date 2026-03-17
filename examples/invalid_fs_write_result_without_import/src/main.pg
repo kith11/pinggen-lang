@@ -1,0 +1,3 @@
+func main() {
+    let result: FsWriteResult = FsWriteResult::Ok;
+}

@@ -1,0 +1,12 @@
+import std::{ io, fs }
+
+func main() {
+    match fs::write_string("missing/out.txt", "hello") {
+        FsWriteResult::Ok => {
+            io::println("ok");
+        }
+        FsWriteResult::Err(message) => {
+            io::println(message);
+        }
+    }
+}

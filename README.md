@@ -31,6 +31,7 @@ Current features:
 - `+` for string concatenation
 - `str::len(value)` for byte-count string length
 - `fs::read_to_string(path)` returning `FsResult`
+- `fs::write_string(path, contents)` returning `FsWriteResult`
 - fixed-size arrays with `[T; N]`, `[a, b, c]`, and `array[index]`
 - struct methods with `impl Type { ... }` and `value.method(...)`
 - mutating struct methods with `mut self`
@@ -83,13 +84,21 @@ func main() {
         }
     }
 
+    let written = "hello from file\n";
     io::println(left);
     io::println(right);
-    match fs::read_to_string("message.txt") {
-        FsResult::Ok(text) => {
-            io::println(text);
+    match fs::write_string("message.txt", written) {
+        FsWriteResult::Ok => {
+            match fs::read_to_string("message.txt") {
+                FsResult::Ok(text) => {
+                    io::println(text);
+                }
+                FsResult::Err(message) => {
+                    io::println(message);
+                }
+            }
         }
-        FsResult::Err(message) => {
+        FsWriteResult::Err(message) => {
             io::println(message);
         }
     }
