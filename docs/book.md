@@ -1,65 +1,61 @@
 # Puff Language Book
 
-Puff is a small compiled language for practical native command-line programs.
+A beginner-friendly guide to writing small programs with Puff.
 
 ## Preface
 
-This book is for programmers who are new to Puff.
+This book is meant to be easy to follow.
 
-It assumes you already know the basics of programming, but not the shape of this language. The goal is to get you productive quickly, without pretending Puff is larger than it is. Every chapter in this book is based on features that exist in the repository today.
+You do not need to know Puff already. If you have written a little code in another language, that is enough. The book explains what the main parts of Puff are, how a project is laid out, and how to read and write simple programs without assuming deep compiler knowledge.
 
-Puff is the public CLI and user-facing tool. `pinggen` is still the compiler and repository name you will see in source, docs, and internal implementation paths. In practice, you create, build, and run programs with `puff`.
+Puff is the name of the CLI you use day to day. `pinggen` is still the compiler and repository name you will see in source paths and internal docs. In normal use, you create, build, and run programs with `puff`.
 
-## Who Puff Is For
+Everything in this book is based on features that exist in the repository now. It does not describe planned features as if they already work.
 
-Puff is a good fit when you want:
+## Who This Book Is For
 
-- a small compiled language with explicit project structure
-- straightforward syntax for functions, structs, enums, and modules
-- a minimal but useful standard library for CLI-style work
-- native executables without a large runtime or framework
+This book is for:
 
-Puff is not trying to be everything yet. It is strongest today for:
+- beginners who want a gentle first pass through the language
+- programmers coming from another language who want to learn Puff quickly
+- anyone who wants one document that explains both the language and the usual project workflow
 
-- command-line utilities
-- file-processing tools
+This book is not a formal language specification. It is a practical guide.
+
+## How To Use This Book
+
+If you are brand new to Puff, read the chapters in order.
+
+If you already know the basics, you can jump straight to:
+
+- modules and dependencies
+- vectors with `Vec<T>`
+- the standard library
+- the reference appendix
+
+## 1. What Puff Is
+
+Puff is a small compiled language for practical command-line programs.
+
+You write source files with the `.pg` extension. Puff reads those files, checks them, lowers them through LLVM IR, and builds a native executable.
+
+Puff is good at:
+
+- small tools
+- file-processing programs
 - code generators
-- small automation programs
-- experiments in language and compiler design
+- small utility apps
+- language experiments
 
-## A Short Learning Path
+Puff tries to stay simple:
 
-If you want the fastest route through the language, read these chapters in order:
+- explicit project files
+- explicit imports
+- explicit types
+- small standard library
+- small number of core concepts
 
-1. Installing and running Puff
-2. Your first project
-3. Functions, variables, and expressions
-4. Control flow
-5. Structs, enums, and `match`
-6. Tuples, arrays, and `Vec<T>`
-7. Modules and dependencies
-8. Standard library
-
-After that, use the reference appendix when you need exact syntax.
-
-## 1. What Puff Is and What It Is Good For
-
-Puff is a compiled language built in C++ with a textual LLVM IR backend. Source files use the `.pg` extension. A Puff project is usually a directory with a `pinggen.toml` file and a `src/` folder containing one or more `.pg` modules.
-
-The current language surface includes:
-
-- typed top-level functions
-- structs and methods
-- enums with optional single payloads
-- exhaustive `match`
-- tuples
-- fixed-size arrays
-- built-in dynamic vectors with `Vec<T>`
-- explicit modules and dependencies
-- a small namespaced standard library
-- a strict task-parallel `con { ... }` feature
-
-Puff stays deliberately narrow. You get a compact language and a direct toolchain, not a large framework or a giant ecosystem.
+That narrow design is a feature. Puff is easier to understand because it does not try to do everything at once.
 
 ## 2. Installing and Running `puff`
 
@@ -70,26 +66,26 @@ cmake -S . -B build
 cmake --build build
 ```
 
-You can use the local launcher directly from the repo:
+You can use the local launcher from the repository root:
 
 ```powershell
 .\puff help
 .\puff doctor
 ```
 
-To install `puff` into a user-local bin directory on Windows:
+To install `puff` into your user environment on Windows:
 
 ```powershell
 .\install-puff.ps1
 ```
 
-That installer places `puff` on your user `PATH`, so future shells can use:
+After that, a new terminal can usually run:
 
 ```powershell
 puff help
 ```
 
-Important CLI commands:
+The most important commands are:
 
 - `puff init <path>`
 - `puff check [path]`
@@ -107,7 +103,13 @@ Create a project:
 puff init .\my_app
 ```
 
-The generated project is intentionally small. Its manifest looks like this:
+This creates a small project with:
+
+- `pinggen.toml`
+- `src/main.pg`
+- one helper module under `src/`
+
+The manifest looks like this:
 
 ```toml
 [package]
@@ -120,13 +122,12 @@ entry = "src/main.pg"
 output = "build/my_app"
 ```
 
-The default starter has a `src/main.pg` and one helper module under `src/`.
+Read it like this:
 
-This is the shape Puff expects:
-
-- `pinggen.toml` declares the package and build target
-- `src/main.pg` is the default entrypoint
-- additional modules live under `src/`
+- `[package]` gives the project a name and version
+- `[build]` defines the default program that will be built
+- `entry` points to the first source file
+- `output` decides where the executable will go
 
 Run the project:
 
@@ -134,17 +135,19 @@ Run the project:
 puff run .\my_app
 ```
 
-From inside the project directory, just use:
+If you are already inside `my_app`, use:
 
 ```powershell
 puff run
 ```
 
-That difference matters because Puff expects the given path to point at the project root containing `pinggen.toml`.
+That difference matters because Puff expects the given path to be the project folder that contains `pinggen.toml`.
 
 ## 4. Functions, Variables, Primitive Types, and Expressions
 
-Functions are top-level and explicitly typed:
+### Functions
+
+A function is a named block of code that can take inputs and return a value.
 
 ```text
 func add(a: int, b: int) -> int {
@@ -152,7 +155,15 @@ func add(a: int, b: int) -> int {
 }
 ```
 
-The entrypoint is `main`:
+Read this as:
+
+- `func` starts a function
+- `add` is the function name
+- `a` and `b` are parameters
+- `int` is the parameter type
+- `-> int` means the function returns an `int`
+
+The entrypoint of a program is `main`:
 
 ```text
 import std::{ io }
@@ -162,35 +173,49 @@ func main() {
 }
 ```
 
-Local values use `let`:
+### Variables
+
+Use `let` to create a local value:
 
 ```text
 let count = 1;
 let name: string = "puff";
 ```
 
-Mutable locals use `let mut`:
+Use `let mut` when you want to change it later:
 
 ```text
 let mut total = 0;
 total = total + 1;
 ```
 
-Primitive types are:
+### Primitive types
+
+Puff has these built-in primitive types:
 
 - `int`
 - `bool`
 - `string`
 - `void`
 
-Expressions are conventional:
+### Expressions
 
-- arithmetic on `int`
-- boolean logic with `&&`, `||`, and `!`
-- string concatenation with `+`
-- comparisons using `==`, `!=`, `<`, `<=`, `>`, `>=`
+Expressions are pieces of code that produce a value.
 
-Example:
+Examples:
+
+- `1 + 2`
+- `count == 3`
+- `"a" + "b"`
+- `name != "done"`
+
+Common operators:
+
+- arithmetic: `+`, `-`, `*`, `/`, `%`
+- comparison: `==`, `!=`, `<`, `<=`, `>`, `>=`
+- logic: `&&`, `||`, `!`
+
+Simple example:
 
 ```text
 func label(name: string, count: int) -> string {
@@ -201,25 +226,27 @@ func label(name: string, count: int) -> string {
 }
 ```
 
-The important design choice here is that Puff prefers explicitness over magical conversions. If a builtin expects a string, you pass a string. If an operator only supports `int`, the compiler rejects mismatched operands.
+Puff prefers explicit code. It does not try to silently convert the wrong type into the right one.
 
 ## 5. Control Flow
 
-### `if`, `else if`, and `else`
+Control flow means deciding what code runs and how often it runs.
+
+### `if`
 
 ```text
 if ready {
     io::println("ready");
-} else if waiting {
-    io::println("waiting");
 } else {
-    io::println("done");
+    io::println("not ready");
 }
 ```
 
-Conditions must be `bool`.
+The condition must be a `bool`.
 
 ### `while`
+
+Use `while` when you want to repeat code until a condition becomes false.
 
 ```text
 let mut i = 0;
@@ -239,15 +266,16 @@ for i in 0..3 {
 }
 ```
 
+This runs with `i = 0`, `1`, and `2`.
+
 ### `break` and `continue`
 
-They work inside loops only, with the usual meaning.
-
-This gives you a compact control-flow surface: simple boolean branching plus integer iteration, without adding a second family of iterator-specific constructs.
+- `break` exits the loop
+- `continue` jumps to the next iteration
 
 ## 6. Structs and Methods
 
-Structs are nominal types with named fields:
+A struct is a custom type with named fields.
 
 ```text
 struct SharedLabel {
@@ -255,7 +283,7 @@ struct SharedLabel {
 }
 ```
 
-Construct them with a struct literal:
+Create a value with a struct literal:
 
 ```text
 let label = SharedLabel { count: 5 };
@@ -271,7 +299,13 @@ impl SharedLabel {
 }
 ```
 
-This exact style is used in the repository’s path-dependency example:
+Call the method like this:
+
+```text
+let size = label.width();
+```
+
+This exact style appears in the path dependency example:
 
 ```text
 struct SharedLabel {
@@ -295,16 +329,13 @@ impl Counter {
 }
 ```
 
-Puff keeps methods simple:
-
-- methods belong to structs
-- `self` is explicit
-- `mut self` is explicit
-- methods are called with `value.method()`
+That makes mutation visible in the function signature instead of hidden.
 
 ## 7. Enums and Exhaustive `match`
 
-Plain enums are tagged values:
+An enum is a value that can be one of several named cases.
+
+Simple enum:
 
 ```text
 enum State {
@@ -313,13 +344,13 @@ enum State {
 }
 ```
 
-Construction is always qualified:
+Create a value with a qualified variant:
 
 ```text
 let state = State::Ready;
 ```
 
-Payload enums carry at most one value per payload variant:
+Enums can also carry one payload value:
 
 ```text
 enum Result {
@@ -329,15 +360,15 @@ enum Result {
 }
 ```
 
-Construction:
+Create payload variants like this:
 
 ```text
-let a = Result::Ok(9);
-let b = Result::Err("bad");
-let c = Result::Pending;
+let ok = Result::Ok(9);
+let err = Result::Err("bad");
+let pending = Result::Pending;
 ```
 
-`match` is statement-only and exhaustive:
+Use `match` to handle every possible case:
 
 ```text
 match result {
@@ -353,9 +384,9 @@ match result {
 }
 ```
 
-This is one of Puff’s core strengths. You can represent explicit program states, handle them exhaustively, and bind payloads directly inside the matching arm.
+This is called exhaustive matching. Puff requires you to cover all enum variants, which helps prevent missing-case bugs.
 
-The `hello` example uses this pattern with a `Job` result:
+The `hello` example uses exactly this style:
 
 ```text
 match job.result {
@@ -376,46 +407,46 @@ match job.result {
 
 ### Tuples
 
-Tuple literals:
+A tuple is a fixed group of values.
 
 ```text
 let pair = (1, "two");
 ```
 
-Tuple destructuring:
+Take it apart with destructuring:
 
 ```text
 let (left, right) = pair();
 ```
 
-Puff uses tuples heavily for multi-result expressions, including `con`.
+Tuples are useful when one expression naturally returns more than one value.
 
-### Fixed-size arrays
+### Arrays
 
-Array literals:
+An array is a fixed-size list of values of the same type.
 
 ```text
 let values = [1, 2, 3];
 ```
 
-Indexing:
+Read by index:
 
 ```text
 let first = values[0];
 ```
 
-Mutable indexed assignment:
+Change an element if the array is mutable:
 
 ```text
 let mut values = [1, 2, 3];
 values[1] = 9;
 ```
 
-Arrays are fixed-size and bounds checked.
+Arrays are bounds checked.
 
-### Dynamic vectors
+### Vectors with `Vec<T>`
 
-Vectors are the growable collection in Puff:
+If you need a growable collection, use `Vec<T>`.
 
 ```text
 let mut values = vec[1, 2, 3];
@@ -424,13 +455,13 @@ values[1] = 9;
 io::println(values.len());
 ```
 
-An empty vector with explicit type:
+An empty vector needs an explicit element type:
 
 ```text
 let mut names: Vec<string> = vec<string>[];
 ```
 
-This is used directly in the `cli_workspace` example:
+This appears directly in the `cli_workspace` example:
 
 ```text
 let mut names: Vec<string> = vec<string>[];
@@ -440,9 +471,9 @@ names.push("todo.txt");
 io::println(count_selected(names));
 ```
 
-One important design detail: `Vec<T>` uses shared-handle semantics. If you assign a vector or pass it to a function, you copy the handle, not the contents.
+One important detail: `Vec<T>` uses shared-handle semantics. If you assign a vector to another variable, both names refer to the same underlying collection.
 
-The vector runtime example demonstrates this:
+The vector example shows that:
 
 ```text
 let mut values = vec[1, 2, 3];
@@ -451,35 +482,37 @@ values.push(4);
 values[1] = 9;
 ```
 
-After mutation, `alias_values` sees the same underlying vector contents.
+After those changes, `alias_values` sees the updated data too.
 
 ## 9. Modules, Hierarchical Imports, and Dependencies
 
-Flat module import:
+As projects grow, you split code into modules.
+
+Flat import:
 
 ```text
 import greet;
 ```
 
-Hierarchical module import:
+Hierarchical import:
 
 ```text
 import util::path;
 ```
 
-This maps to nested files under `src/`, for example:
+That maps to nested files under `src/`, for example:
 
-- `import util::path;` -> `src/util/path.pg`
-- `import util::math::ops;` -> `src/util/math/ops.pg`
+- `import util::path;` means `src/util/path.pg`
+- `import util::math::ops;` means `src/util/math/ops.pg`
 
-The hierarchical example project uses this style:
+The hierarchical modules example uses this style:
 
 ```text
 import util::path;
 import util::math::ops;
 ```
 
-Dependencies extend the same model across projects.
+Dependencies use the same import idea across projects.
 
 Local dependency in `pinggen.toml`:
 
@@ -508,13 +541,15 @@ func main() {
 }
 ```
 
-Puff also supports exact-version registry-backed dependencies. That is useful for larger multi-project work, but the mental model stays the same: dependency names become import roots.
+Puff also supports exact-version registry dependencies, but the core idea stays simple: dependency names become import roots.
 
-## 10. Standard Library: `io`, `str`, `fs`, and `env`
+## 10. Standard Library
 
-Puff’s standard library is intentionally explicit and small.
+Puff's standard library is small and explicit.
 
 ### `io`
+
+Import:
 
 ```text
 import std::{ io }
@@ -525,6 +560,8 @@ Current function:
 - `io::println(int|string)`
 
 ### `str`
+
+Import:
 
 ```text
 import std::{ str }
@@ -537,7 +574,7 @@ Current functions:
 - `str::starts_with(value, prefix)`
 - `str::ends_with(value, suffix)`
 
-The `cli_workspace` helper module uses these together:
+The `cli_workspace` helper module uses them like this:
 
 ```text
 func is_selected(name: string) -> bool {
@@ -549,6 +586,8 @@ func is_selected(name: string) -> bool {
 ```
 
 ### `fs`
+
+Import:
 
 ```text
 import std::{ fs }
@@ -563,14 +602,14 @@ Current functions:
 - `fs::create_dir(path)`
 - `fs::cwd()`
 
-Builtin result types used by filesystem operations:
+Filesystem functions use built-in result enums:
 
 ```text
 enum FsResult { Ok(string), Err(string) }
 enum FsWriteResult { Ok, Err(string) }
 ```
 
-The `file_process` example shows the simplest read flow:
+The `file_process` example shows a basic read:
 
 ```text
 match fs::read_to_string("input.txt") {
@@ -585,6 +624,8 @@ match fs::read_to_string("input.txt") {
 
 ### `env`
 
+Import:
+
 ```text
 import std::{ env }
 ```
@@ -593,25 +634,29 @@ Current function:
 
 - `env::get(name)`
 
-Builtin result type:
+Its built-in result enum is:
 
 ```text
 enum EnvResult { Ok(string), Missing }
 ```
 
-Across all std modules, the pattern is consistent: imports are explicit, fallible APIs return result-like enums, and nothing is hidden behind implicit ambient state.
+The stdlib pattern is consistent:
+
+- imports are explicit
+- each namespace is small
+- fallible operations return enum-style results
 
 ## 11. Strict Concurrency with `con`
 
-Puff’s concurrency model is intentionally narrow.
+Puff has a concurrency feature, but it is intentionally strict.
 
-`con` runs a small set of approved calls in parallel and returns a tuple of results:
+You use `con` with approved calls and get a tuple of results back:
 
 ```text
 let (left, right) = con { number_a(), job.label_len() };
 ```
 
-The current rules are strict:
+The current rules are:
 
 - each item must be a direct function call or safe non-mutating method call
 - callees must be marked safe for `con`
@@ -619,7 +664,7 @@ The current rules are strict:
 - nested `con` is rejected
 - the parent waits for all child tasks before continuing
 
-You opt in with `safe func`:
+Mark a function as safe like this:
 
 ```text
 safe func square(x: int) -> int {
@@ -627,27 +672,27 @@ safe func square(x: int) -> int {
 }
 ```
 
-Puff does this on purpose. The feature is meant to be useful for independent work units without pretending the language already has a full effect or ownership system.
+This keeps the feature useful without pretending Puff already has a full ownership or effect system.
 
 ## 12. Building Larger CLI Apps in Puff
 
-The shape of a larger Puff CLI project is already visible in the repository.
+The `cli_workspace` example is a good model for a larger Puff program.
 
-The `cli_workspace` example combines:
+It combines:
 
 - hierarchical modules
-- the `str` and `fs` std modules
 - `Vec<string>`
-- explicit helper functions
-- filesystem result handling with `match`
+- string helpers
+- filesystem helpers
+- explicit `match`-based error handling
 
-Its structure is simple:
+Its file layout is:
 
 - `src/main.pg`
 - `src/util/names.pg`
 - `src/util/workspace.pg`
 
-The main module coordinates the flow:
+The main module creates a workspace directory:
 
 ```text
 match fs::create_dir(workspace_dir()) {
@@ -660,7 +705,7 @@ match fs::create_dir(workspace_dir()) {
 }
 ```
 
-Then it uses a vector of names:
+Then it works with a vector of names:
 
 ```text
 let mut names: Vec<string> = vec<string>[];
@@ -670,39 +715,37 @@ names.push("todo.txt");
 io::println(count_selected(names));
 ```
 
-This is the current Puff model for “bigger” programs:
+This is the current Puff style for bigger programs:
 
 - keep modules small
-- keep imports explicit
-- model state with structs and enums
-- use `Vec<T>` for growable collections
-- keep filesystem work explicit with `FsResult` and `FsWriteResult`
-
-It is already enough for real CLI utilities, even though it is not yet a full general-purpose ecosystem language.
+- keep names explicit
+- use structs and enums for clear program state
+- use `Vec<T>` for growable data
+- use `match` for fallible stdlib operations
 
 ## 13. Current Limits and the Right Mental Model
 
-Puff is best understood as a small, serious language rather than a maximal one.
+Puff is intentionally small.
 
-Current important limits:
+Important current limits:
 
 - no general generics
 - no ownership or borrow checker
 - no formatter or LSP
-- no large built-in collections library beyond `Vec<T>`
+- no large collections library beyond `Vec<T>`
 - no GUI or networking standard library
-- `con` stays intentionally strict
+- `con` remains strict
 - build configuration is declarative, not programmable
 - package management is still intentionally narrow
 
-The right mental model is:
+The best mental model is:
 
-- Puff is for explicit structure
-- Puff is for small-to-medium native tools first
-- Puff values a coherent core over a broad surface
-- Puff is ready for real CLI work, not for every kind of application yet
+- Puff is a small compiled language
+- Puff is already useful for CLI tools
+- Puff is still growing
+- Puff values clarity over feature count
 
-If you approach it that way, the language feels consistent instead of limited.
+If you expect a compact, explicit language, Puff feels consistent and approachable.
 
 ## 14. Reference Appendix
 

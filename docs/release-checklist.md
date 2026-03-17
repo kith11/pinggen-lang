@@ -15,7 +15,7 @@
 - richer collections
 - borrow checker / ownership system
 - package publishing, semver ranges, multi-registry auth, and lockfile conflict UX
-- formatter / LSP
+- LSP
 - broader `con` effect analysis
 
 ## Release Examples

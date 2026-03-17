@@ -11,6 +11,7 @@
 
 #include "pinggen/diagnostics.hpp"
 #include "pinggen/dependency_resolver.hpp"
+#include "pinggen/formatter.hpp"
 #include "pinggen/lexer.hpp"
 #include "pinggen/llvm_ir.hpp"
 #include "pinggen/parser.hpp"
@@ -146,6 +147,7 @@ void print_usage(std::ostream& out, const std::string& command_name) {
     out << "  " << command_name << " new <path>\n";
     out << "  " << command_name << " init <path>\n";
     out << "  " << command_name << " check [path]\n";
+    out << "  " << command_name << " fmt [path] [--check]\n";
     out << "  " << command_name << " build [path] [--target <name>]\n";
     out << "  " << command_name << " run [path] [--target <name>]\n";
     out << "  " << command_name << " add <name>[@version] [path]\n";
@@ -158,6 +160,7 @@ void print_usage(std::ostream& out, const std::string& command_name) {
     out << "start here:\n";
     out << "  " << command_name << " doctor         check toolchain and current project\n";
     out << "  " << command_name << " init my_app     create a starter project\n";
+    out << "  " << command_name << " fmt my_app      format project source files\n";
     out << "  " << command_name << " run my_app      build and run the default target\n";
 }
 
@@ -596,6 +599,28 @@ static int command_check(const fs::path& project_dir) {
     return 0;
 }
 
+static int command_fmt(const fs::path& project_dir, bool check_only) {
+    const ProjectConfig project = load_project(project_dir);
+    const FormatterSummary summary = format_project_sources(project_dir, check_only);
+    if (check_only) {
+        if (summary.changed_files.empty()) {
+            std::cout << "formatted " << project.name << '\n';
+            return 0;
+        }
+        std::cout << "would reformat " << summary.changed_files.size() << " file(s) in " << project.name << ":\n";
+        for (const auto& path : summary.changed_files) {
+            std::cout << "  " << path.string() << '\n';
+        }
+        return 1;
+    }
+    if (summary.changed_files.empty()) {
+        std::cout << "formatted " << project.name << " (no changes)\n";
+        return 0;
+    }
+    std::cout << "formatted " << project.name << " (" << summary.changed_files.size() << " file(s) updated)\n";
+    return 0;
+}
+
 static int command_build(const fs::path& project_dir, const std::optional<std::string>& target_name) {
     const ProjectConfig project = load_project(project_dir);
     const BuildTarget& target = resolve_target(project, target_name);
@@ -704,6 +729,7 @@ int main(int argc, char** argv) {
         fs::path path = fs::current_path();
         std::optional<std::string> target_name;
         std::optional<fs::path> bin_dir;
+        bool check_only = false;
         bool path_set = false;
         for (int i = 2; i < argc; ++i) {
             const std::string arg = argv[i];
@@ -719,6 +745,10 @@ int main(int argc, char** argv) {
                     throw std::runtime_error("missing path after --bin-dir");
                 }
                 bin_dir = fs::path(argv[++i]);
+                continue;
+            }
+            if (arg == "--check") {
+                check_only = true;
                 continue;
             }
             if (path_set) {
@@ -745,44 +775,50 @@ int main(int argc, char** argv) {
             return pinggen::command_new(path);
         }
         if (command == "check") {
-            if (target_name.has_value() || bin_dir.has_value()) {
-                throw std::runtime_error("check does not support --target or --bin-dir");
+            if (target_name.has_value() || bin_dir.has_value() || check_only) {
+                throw std::runtime_error("check does not support --target, --bin-dir, or --check");
             }
             return pinggen::command_check(path);
         }
+        if (command == "fmt") {
+            if (target_name.has_value() || bin_dir.has_value()) {
+                throw std::runtime_error("fmt does not support --target or --bin-dir");
+            }
+            return pinggen::command_fmt(path, check_only);
+        }
         if (command == "build") {
-            if (bin_dir.has_value()) {
-                throw std::runtime_error("build does not support --bin-dir");
+            if (bin_dir.has_value() || check_only) {
+                throw std::runtime_error("build does not support --bin-dir or --check");
             }
             return pinggen::command_build(path, target_name);
         }
         if (command == "run") {
-            if (bin_dir.has_value()) {
-                throw std::runtime_error("run does not support --bin-dir");
+            if (bin_dir.has_value() || check_only) {
+                throw std::runtime_error("run does not support --bin-dir or --check");
             }
             return pinggen::command_run(path, target_name);
         }
         if (command == "targets") {
-            if (target_name.has_value() || bin_dir.has_value()) {
-                throw std::runtime_error("targets does not support --target or --bin-dir");
+            if (target_name.has_value() || bin_dir.has_value() || check_only) {
+                throw std::runtime_error("targets does not support --target, --bin-dir, or --check");
             }
             return pinggen::command_targets(path);
         }
         if (command == "doctor") {
-            if (target_name.has_value() || bin_dir.has_value()) {
-                throw std::runtime_error("doctor does not support --target or --bin-dir");
+            if (target_name.has_value() || bin_dir.has_value() || check_only) {
+                throw std::runtime_error("doctor does not support --target, --bin-dir, or --check");
             }
             return pinggen::command_doctor(path, executable_path, command_name);
         }
         if (command == "install") {
-            if (target_name.has_value()) {
-                throw std::runtime_error("install does not support --target");
+            if (target_name.has_value() || check_only) {
+                throw std::runtime_error("install does not support --target or --check");
             }
             return pinggen::command_install(executable_path, bin_dir, command_name);
         }
         if (command == "setup") {
-            if (target_name.has_value()) {
-                throw std::runtime_error("setup does not support --target");
+            if (target_name.has_value() || check_only) {
+                throw std::runtime_error("setup does not support --target or --check");
             }
             return pinggen::command_setup(path_set ? path : fs::path(), executable_path, bin_dir, command_name);
         }

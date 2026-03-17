@@ -10,145 +10,145 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
 endobj
 4 0 obj
-<< /Length 380 >>
+<< /Length 366 >>
 stream
 BT /F3 26 Tf 1 0 0 1 56 730 Tm (Puff Language Book) Tj ET
-BT /F1 14 Tf 1 0 0 1 56 696 Tm (Puff is a small compiled language for practical native command-line programs.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 648 Tm (A guided book for programmers new to Puff) Tj ET
+BT /F1 14 Tf 1 0 0 1 56 696 Tm (A beginner-friendly guide to writing small programs with Puff.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 648 Tm (A beginner-friendly guide to learning Puff) Tj ET
 BT /F1 11 Tf 1 0 0 1 56 628 Tm (Generated from the current repository surface) Tj ET
 BT /F1 10 Tf 1 0 0 1 56 32 Tm (1) Tj ET
 endstream
 endobj
 5 0 obj
-<< /Length 3610 >>
+<< /Length 4022 >>
 stream
 BT /F3 18 Tf 1 0 0 1 56 730 Tm (Contents) Tj ET
 BT /F1 11 Tf 1 0 0 1 56 696 Tm (Preface ..................................................... 3) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 682 Tm (Who Puff Is For ............................................. 3) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 668 Tm (A Short Learning Path ....................................... 3) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 654 Tm (1. What Puff Is and What It Is Good For ..................... 4) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 682 Tm (Who This Book Is For ........................................ 3) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 668 Tm (How To Use This Book ........................................ 3) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 654 Tm (1. What Puff Is ............................................. 3) Tj ET
 BT /F1 11 Tf 1 0 0 1 56 640 Tm (2. Installing and Running `puff` ............................ 4) Tj ET
 BT /F1 11 Tf 1 0 0 1 56 626 Tm (3. Your First Project ....................................... 5) Tj ET
 BT /F1 11 Tf 1 0 0 1 56 612 Tm (4. Functions, Variables, Primitive Types, and Expressions ... 6) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 598 Tm (5. Control Flow ............................................. 7) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 584 Tm (`if`, `else if`, and `else` ................................. 7) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 570 Tm (`while` ..................................................... 7) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 556 Tm (`for` ....................................................... 7) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 542 Tm (`break` and `continue` ...................................... 7) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 528 Tm (6. Structs and Methods ...................................... 8) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 514 Tm (7. Enums and Exhaustive `match` ............................. 9) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 500 Tm (8. Tuples, Arrays, and `Vec<T>` ............................. 10) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 486 Tm (Tuples ...................................................... 10) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 472 Tm (Fixed-size arrays ........................................... 10) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 458 Tm (Dynamic vectors ............................................. 11) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 444 Tm (9. Modules, Hierarchical Imports, and Dependencies .......... 12) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 430 Tm (10. Standard Library: `io`, `str`, `fs`, and `env` .......... 13) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 416 Tm (`io` ........................................................ 13) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 402 Tm (`str` ....................................................... 13) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 388 Tm (`fs` ........................................................ 13) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 374 Tm (`env` ....................................................... 14) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 360 Tm (11. Strict Concurrency with `con` ........................... 15) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 346 Tm (12. Building Larger CLI Apps in Puff ........................ 15) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 332 Tm (13. Current Limits and the Right Mental Model ............... 16) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 318 Tm (14. Reference Appendix ...................................... 17) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 304 Tm (Manifest summary ............................................ 17) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 290 Tm (Syntax summary .............................................. 17) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 276 Tm (Standard library summary .................................... 18) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 262 Tm (Builtin result enums ........................................ 18) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 248 Tm (CLI commands ................................................ 18) Tj ET
-BT /F1 11 Tf 1 0 0 1 74 234 Tm (Example projects ............................................ 19) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 598 Tm (Functions ................................................... 6) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 584 Tm (Variables ................................................... 6) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 570 Tm (Primitive types ............................................. 6) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 556 Tm (Expressions ................................................. 7) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 542 Tm (5. Control Flow ............................................. 7) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 528 Tm (`if` ........................................................ 7) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 514 Tm (`while` ..................................................... 8) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 500 Tm (`for` ....................................................... 8) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 486 Tm (`break` and `continue` ...................................... 8) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 472 Tm (6. Structs and Methods ...................................... 8) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 458 Tm (7. Enums and Exhaustive `match` ............................. 9) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 444 Tm (8. Tuples, Arrays, and `Vec<T>` ............................. 11) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 430 Tm (Tuples ...................................................... 11) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 416 Tm (Arrays ...................................................... 11) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 402 Tm (Vectors with `Vec<T>` ....................................... 11) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 388 Tm (9. Modules, Hierarchical Imports, and Dependencies .......... 12) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 374 Tm (10. Standard Library ........................................ 13) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 360 Tm (`io` ........................................................ 13) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 346 Tm (`str` ....................................................... 14) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 332 Tm (`fs` ........................................................ 14) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 318 Tm (`env` ....................................................... 15) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 304 Tm (11. Strict Concurrency with `con` ........................... 15) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 290 Tm (12. Building Larger CLI Apps in Puff ........................ 16) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 276 Tm (13. Current Limits and the Right Mental Model ............... 17) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 262 Tm (14. Reference Appendix ...................................... 17) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 248 Tm (Manifest summary ............................................ 17) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 234 Tm (Syntax summary .............................................. 18) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 220 Tm (Standard library summary .................................... 18) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 206 Tm (Builtin result enums ........................................ 19) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 192 Tm (CLI commands ................................................ 19) Tj ET
+BT /F1 11 Tf 1 0 0 1 74 178 Tm (Example projects ............................................ 19) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (2) Tj ET
 endstream
 endobj
 6 0 obj
-<< /Length 2669 >>
+<< /Length 2670 >>
 stream
 BT /F3 18 Tf 1 0 0 1 56 730 Tm (Preface) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 696 Tm (This book is for programmers who are new to Puff.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 682 Tm (It assumes you already know the basics of programming, but not the shape of ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 668 Tm (this language. The goal is to get you productive quickly, without pretending ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 654 Tm (Puff is larger than it is. Every chapter in this book is based on features ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 640 Tm (that exist in the repository today.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 626 Tm (Puff is the public CLI and user-facing tool. `pinggen` is still the compiler ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 612 Tm (and repository name you will see in source, docs, and internal implementation ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 598 Tm (paths. In practice, you create, build, and run programs with `puff`.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 584 Tm (Who Puff Is For) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 550 Tm (Puff is a good fit when you want:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 536 Tm (- a small compiled language with explicit project structure) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 522 Tm (- straightforward syntax for functions, structs, enums, and modules) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 508 Tm (- a minimal but useful standard library for CLI-style work) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 494 Tm (- native executables without a large runtime or framework) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 480 Tm (Puff is not trying to be everything yet. It is strongest today for:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 466 Tm (- command-line utilities) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 452 Tm (- file-processing tools) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 438 Tm (- code generators) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 424 Tm (- small automation programs) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 410 Tm (- experiments in language and compiler design) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 396 Tm (A Short Learning Path) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 362 Tm (If you want the fastest route through the language, read these chapters in ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 348 Tm (order:) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 334 Tm (1. Installing and running Puff) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 320 Tm (2. Your first project) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 306 Tm (3. Functions, variables, and expressions) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 292 Tm (4. Control flow) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 278 Tm (5. Structs, enums, and `match`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 264 Tm (6. Tuples, arrays, and `Vec<T>`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 250 Tm (7. Modules and dependencies) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 236 Tm (8. Standard library) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 696 Tm (This book is meant to be easy to follow.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 682 Tm (You do not need to know Puff already. If you have written a little code in ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 668 Tm (another language, that is enough. The book explains what the main parts of ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 654 Tm (Puff are, how a project is laid out, and how to read and write simple programs) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 640 Tm ( without assuming deep compiler knowledge.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 626 Tm (Puff is the name of the CLI you use day to day. `pinggen` is still the ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 612 Tm (compiler and repository name you will see in source paths and internal docs. ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 598 Tm (In normal use, you create, build, and run programs with `puff`.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 584 Tm (Everything in this book is based on features that exist in the repository now.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 570 Tm ( It does not describe planned features as if they already work.) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 556 Tm (Who This Book Is For) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 522 Tm (This book is for:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 508 Tm (- beginners who want a gentle first pass through the language) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 494 Tm (- programmers coming from another language who want to learn Puff quickly) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 480 Tm (- anyone who wants one document that explains both the language and the usual ) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 466 Tm (  project workflow) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 452 Tm (This book is not a formal language specification. It is a practical guide.) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 438 Tm (How To Use This Book) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 404 Tm (If you are brand new to Puff, read the chapters in order.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 390 Tm (If you already know the basics, you can jump straight to:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 376 Tm (- modules and dependencies) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 362 Tm (- vectors with `Vec<T>`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 348 Tm (- the standard library) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 334 Tm (- the reference appendix) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 320 Tm (1. What Puff Is) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 286 Tm (Puff is a small compiled language for practical command-line programs.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 272 Tm (You write source files with the `.pg` extension. Puff reads those files, ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 258 Tm (checks them, lowers them through LLVM IR, and builds a native executable.) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (3) Tj ET
 endstream
 endobj
 7 0 obj
-<< /Length 2402 >>
+<< /Length 1993 >>
 stream
-BT /F1 11 Tf 1 0 0 1 56 730 Tm (After that, use the reference appendix when you need exact syntax.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 716 Tm (1. What Puff Is and What It Is Good For) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 682 Tm (Puff is a compiled language built in C++ with a textual LLVM IR backend. ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 668 Tm (Source files use the `.pg` extension. A Puff project is usually a directory ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 654 Tm (with a `pinggen.toml` file and a `src/` folder containing one or more `.pg` ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 640 Tm (modules.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 626 Tm (The current language surface includes:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 612 Tm (- typed top-level functions) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 598 Tm (- structs and methods) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 584 Tm (- enums with optional single payloads) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 570 Tm (- exhaustive `match`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 556 Tm (- tuples) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 542 Tm (- fixed-size arrays) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 528 Tm (- built-in dynamic vectors with `Vec<T>`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 514 Tm (- explicit modules and dependencies) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 500 Tm (- a small namespaced standard library) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 486 Tm (- a strict task-parallel `con { ... }` feature) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 472 Tm (Puff stays deliberately narrow. You get a compact language and a direct ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 458 Tm (toolchain, not a large framework or a giant ecosystem.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 444 Tm (2. Installing and Running `puff`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 410 Tm (From the repository root, build the compiler with CMake:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 396 Tm (cmake -S . -B build) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 383 Tm (cmake --build build) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 370 Tm (You can use the local launcher directly from the repo:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 356 Tm (.\\puff help) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 343 Tm (.\\puff doctor) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 330 Tm (To install `puff` into a user-local bin directory on Windows:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 316 Tm (.\\install-puff.ps1) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 303 Tm (That installer places `puff` on your user `PATH`, so future shells can use:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 289 Tm (puff help) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 730 Tm (Puff is good at:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 716 Tm (- small tools) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 702 Tm (- file-processing programs) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 688 Tm (- code generators) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 674 Tm (- small utility apps) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 660 Tm (- language experiments) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 646 Tm (Puff tries to stay simple:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 632 Tm (- explicit project files) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 618 Tm (- explicit imports) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 604 Tm (- explicit types) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 590 Tm (- small standard library) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 576 Tm (- small number of core concepts) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 562 Tm (That narrow design is a feature. Puff is easier to understand because it does ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 548 Tm (not try to do everything at once.) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 534 Tm (2. Installing and Running `puff`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 500 Tm (From the repository root, build the compiler with CMake:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 486 Tm (cmake -S . -B build) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 473 Tm (cmake --build build) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 460 Tm (You can use the local launcher from the repository root:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 446 Tm (.\\puff help) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 433 Tm (.\\puff doctor) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 420 Tm (To install `puff` into your user environment on Windows:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 406 Tm (.\\install-puff.ps1) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 393 Tm (After that, a new terminal can usually run:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 379 Tm (puff help) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 366 Tm (The most important commands are:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 352 Tm (- `puff init <path>`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 338 Tm (- `puff check [path]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 324 Tm (- `puff build [path]`) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (4) Tj ET
 endstream
 endobj
 8 0 obj
-<< /Length 1927 >>
+<< /Length 2058 >>
 stream
-BT /F1 11 Tf 1 0 0 1 56 730 Tm (Important CLI commands:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 716 Tm (- `puff init <path>`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 702 Tm (- `puff check [path]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 688 Tm (- `puff build [path]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 674 Tm (- `puff run [path]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 660 Tm (- `puff targets [path]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 646 Tm (- `puff doctor [path]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 632 Tm (- `puff setup`) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 618 Tm (3. Your First Project) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 584 Tm (Create a project:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 570 Tm (puff init .\\my_app) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 557 Tm (The generated project is intentionally small. Its manifest looks like this:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 730 Tm (- `puff run [path]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 716 Tm (- `puff targets [path]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 702 Tm (- `puff doctor [path]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 688 Tm (- `puff setup`) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 674 Tm (3. Your First Project) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 640 Tm (Create a project:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 626 Tm (puff init .\\my_app) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 613 Tm (This creates a small project with:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 599 Tm (- `pinggen.toml`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 585 Tm (- `src/main.pg`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 571 Tm (- one helper module under `src/`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 557 Tm (The manifest looks like this:) Tj ET
 BT /F2 10 Tf 1 0 0 1 68 543 Tm ([package]) Tj ET
 BT /F2 10 Tf 1 0 0 1 68 530 Tm (name = "my_app") Tj ET
 BT /F2 10 Tf 1 0 0 1 68 517 Tm (version = "0.1.0") Tj ET
@@ -157,515 +157,527 @@ BT /F2 10 Tf 1 0 0 1 68 491 Tm ([build]) Tj ET
 BT /F2 10 Tf 1 0 0 1 68 478 Tm (name = "my_app") Tj ET
 BT /F2 10 Tf 1 0 0 1 68 465 Tm (entry = "src/main.pg") Tj ET
 BT /F2 10 Tf 1 0 0 1 68 452 Tm (output = "build/my_app") Tj ET
-BT /F1 11 Tf 1 0 0 1 56 439 Tm (The default starter has a `src/main.pg` and one helper module under `src/`.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 425 Tm (This is the shape Puff expects:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 411 Tm (- `pinggen.toml` declares the package and build target) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 397 Tm (- `src/main.pg` is the default entrypoint) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 383 Tm (- additional modules live under `src/`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 439 Tm (Read it like this:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 425 Tm (- `[package]` gives the project a name and version) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 411 Tm (- `[build]` defines the default program that will be built) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 397 Tm (- `entry` points to the first source file) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 383 Tm (- `output` decides where the executable will go) Tj ET
 BT /F1 11 Tf 1 0 0 1 56 369 Tm (Run the project:) Tj ET
 BT /F2 10 Tf 1 0 0 1 68 355 Tm (puff run .\\my_app) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 342 Tm (From inside the project directory, just use:) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 342 Tm (If you are already inside `my_app`, use:) Tj ET
 BT /F2 10 Tf 1 0 0 1 68 328 Tm (puff run) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 315 Tm (That difference matters because Puff expects the given path to be the project ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 301 Tm (folder that contains `pinggen.toml`.) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (5) Tj ET
 endstream
 endobj
 9 0 obj
-<< /Length 1958 >>
+<< /Length 1805 >>
 stream
-BT /F1 11 Tf 1 0 0 1 56 730 Tm (That difference matters because Puff expects the given path to point at the ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 716 Tm (project root containing `pinggen.toml`.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 702 Tm (4. Functions, Variables, Primitive Types, and Expressions) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 668 Tm (Functions are top-level and explicitly typed:) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 730 Tm (4. Functions, Variables, Primitive Types, and Expressions) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 696 Tm (Functions) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 668 Tm (A function is a named block of code that can take inputs and return a value.) Tj ET
 BT /F2 10 Tf 1 0 0 1 68 654 Tm (func add\(a: int, b: int\) -> int {) Tj ET
 BT /F2 10 Tf 1 0 0 1 68 641 Tm (    return a + b;) Tj ET
 BT /F2 10 Tf 1 0 0 1 68 628 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 615 Tm (The entrypoint is `main`:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 601 Tm (import std::{ io }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 588 Tm () Tj ET
-BT /F2 10 Tf 1 0 0 1 68 575 Tm (func main\(\) {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 562 Tm (    io::println\("hello"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 549 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 536 Tm (Local values use `let`:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 522 Tm (let count = 1;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 509 Tm (let name: string = "puff";) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 496 Tm (Mutable locals use `let mut`:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 482 Tm (let mut total = 0;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 469 Tm (total = total + 1;) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 456 Tm (Primitive types are:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 442 Tm (- `int`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 428 Tm (- `bool`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 414 Tm (- `string`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 400 Tm (- `void`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 386 Tm (Expressions are conventional:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 372 Tm (- arithmetic on `int`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 358 Tm (- boolean logic with `&&`, `||`, and `!`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 344 Tm (- string concatenation with `+`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 330 Tm (- comparisons using `==`, `!=`, `<`, `<=`, `>`, `>=`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 316 Tm (Example:) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 615 Tm (Read this as:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 601 Tm (- `func` starts a function) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 587 Tm (- `add` is the function name) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 573 Tm (- `a` and `b` are parameters) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 559 Tm (- `int` is the parameter type) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 545 Tm (- `-> int` means the function returns an `int`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 531 Tm (The entrypoint of a program is `main`:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 517 Tm (import std::{ io }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 504 Tm () Tj ET
+BT /F2 10 Tf 1 0 0 1 68 491 Tm (func main\(\) {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 478 Tm (    io::println\("hello"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 465 Tm (}) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 452 Tm (Variables) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 424 Tm (Use `let` to create a local value:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 410 Tm (let count = 1;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 397 Tm (let name: string = "puff";) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 384 Tm (Use `let mut` when you want to change it later:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 370 Tm (let mut total = 0;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 357 Tm (total = total + 1;) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 344 Tm (Primitive types) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 316 Tm (Puff has these built-in primitive types:) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (6) Tj ET
 endstream
 endobj
 10 0 obj
-<< /Length 1921 >>
+<< /Length 2009 >>
 stream
-BT /F2 10 Tf 1 0 0 1 68 730 Tm (func label\(name: string, count: int\) -> string {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 717 Tm (    if count == 1 {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 704 Tm (        return name + " item";) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 691 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 678 Tm (    return name + " items";) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 665 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 652 Tm (The important design choice here is that Puff prefers explicitness over ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 638 Tm (magical conversions. If a builtin expects a string, you pass a string. If an ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 624 Tm (operator only supports `int`, the compiler rejects mismatched operands.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 610 Tm (5. Control Flow) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 576 Tm (`if`, `else if`, and `else`) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 548 Tm (if ready {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 535 Tm (    io::println\("ready"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 522 Tm (} else if waiting {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 509 Tm (    io::println\("waiting"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 496 Tm (} else {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 483 Tm (    io::println\("done"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 470 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 457 Tm (Conditions must be `bool`.) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 443 Tm (`while`) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 415 Tm (let mut i = 0;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 402 Tm (while i < 3 {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 389 Tm (    io::println\(i\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 376 Tm (    i = i + 1;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 363 Tm (}) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 350 Tm (`for`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 322 Tm (Puff supports integer ranges:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 308 Tm (for i in 0..3 {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 295 Tm (    io::println\(i\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 282 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 730 Tm (- `int`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 716 Tm (- `bool`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 702 Tm (- `string`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 688 Tm (- `void`) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 674 Tm (Expressions) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 646 Tm (Expressions are pieces of code that produce a value.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 632 Tm (Examples:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 618 Tm (- `1 + 2`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 604 Tm (- `count == 3`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 590 Tm (- `"a" + "b"`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 576 Tm (- `name != "done"`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 562 Tm (Common operators:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 548 Tm (- arithmetic: `+`, `-`, `*`, `/`, `%`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 534 Tm (- comparison: `==`, `!=`, `<`, `<=`, `>`, `>=`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 520 Tm (- logic: `&&`, `||`, `!`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 506 Tm (Simple example:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 492 Tm (func label\(name: string, count: int\) -> string {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 479 Tm (    if count == 1 {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 466 Tm (        return name + " item";) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 453 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 440 Tm (    return name + " items";) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 427 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 414 Tm (Puff prefers explicit code. It does not try to silently convert the wrong type) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 400 Tm ( into the right one.) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 386 Tm (5. Control Flow) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 352 Tm (Control flow means deciding what code runs and how often it runs.) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 338 Tm (`if`) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 310 Tm (if ready {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 297 Tm (    io::println\("ready"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 284 Tm (} else {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 271 Tm (    io::println\("not ready"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 258 Tm (}) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (7) Tj ET
 endstream
 endobj
 11 0 obj
-<< /Length 1994 >>
+<< /Length 1616 >>
 stream
-BT /F3 13 Tf 1 0 0 1 56 730 Tm (`break` and `continue`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 702 Tm (They work inside loops only, with the usual meaning.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 688 Tm (This gives you a compact control-flow surface: simple boolean branching plus ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 674 Tm (integer iteration, without adding a second family of iterator-specific ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 660 Tm (constructs.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 646 Tm (6. Structs and Methods) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 612 Tm (Structs are nominal types with named fields:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 598 Tm (struct SharedLabel {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 585 Tm (    count: int,) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 572 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 559 Tm (Construct them with a struct literal:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 545 Tm (let label = SharedLabel { count: 5 };) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 532 Tm (Methods live in an `impl` block:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 518 Tm (impl SharedLabel {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 505 Tm (    func width\(self\) -> int {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 492 Tm (        return self.count;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 479 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 466 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 453 Tm (This exact style is used in the repository?s path-dependency example:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 439 Tm (struct SharedLabel {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 426 Tm (    count: int,) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 413 Tm (}) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 400 Tm () Tj ET
-BT /F2 10 Tf 1 0 0 1 68 387 Tm (impl SharedLabel {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 374 Tm (    func width\(self\) -> int {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 361 Tm (        return self.count;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 348 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 335 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 322 Tm (Mutating methods use `mut self`:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 308 Tm (impl Counter {) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 730 Tm (The condition must be a `bool`.) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 716 Tm (`while`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 688 Tm (Use `while` when you want to repeat code until a condition becomes false.) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 674 Tm (let mut i = 0;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 661 Tm (while i < 3 {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 648 Tm (    io::println\(i\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 635 Tm (    i = i + 1;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 622 Tm (}) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 609 Tm (`for`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 581 Tm (Puff supports integer ranges:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 567 Tm (for i in 0..3 {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 554 Tm (    io::println\(i\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 541 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 528 Tm (This runs with `i = 0`, `1`, and `2`.) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 514 Tm (`break` and `continue`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 486 Tm (- `break` exits the loop) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 472 Tm (- `continue` jumps to the next iteration) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 458 Tm (6. Structs and Methods) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 424 Tm (A struct is a custom type with named fields.) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 410 Tm (struct SharedLabel {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 397 Tm (    count: int,) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 384 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 371 Tm (Create a value with a struct literal:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 357 Tm (let label = SharedLabel { count: 5 };) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 344 Tm (Methods live in an `impl` block:) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (8) Tj ET
 endstream
 endobj
 12 0 obj
-<< /Length 1957 >>
+<< /Length 1987 >>
 stream
-BT /F2 10 Tf 1 0 0 1 68 730 Tm (    func bump\(mut self\) {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 717 Tm (        self.value = self.value + 1;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 704 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 691 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 678 Tm (Puff keeps methods simple:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 664 Tm (- methods belong to structs) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 650 Tm (- `self` is explicit) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 636 Tm (- `mut self` is explicit) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 622 Tm (- methods are called with `value.method\(\)`) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 608 Tm (7. Enums and Exhaustive `match`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 574 Tm (Plain enums are tagged values:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 560 Tm (enum State {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 547 Tm (    Ready,) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 534 Tm (    Done,) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 521 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 508 Tm (Construction is always qualified:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 494 Tm (let state = State::Ready;) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 481 Tm (Payload enums carry at most one value per payload variant:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 467 Tm (enum Result {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 454 Tm (    Ok\(int\),) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 441 Tm (    Err\(string\),) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 428 Tm (    Pending,) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 415 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 402 Tm (Construction:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 388 Tm (let a = Result::Ok\(9\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 375 Tm (let b = Result::Err\("bad"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 362 Tm (let c = Result::Pending;) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 349 Tm (`match` is statement-only and exhaustive:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 335 Tm (match result {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 322 Tm (    Result::Ok\(code\) => {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 309 Tm (        io::println\(code\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 730 Tm (impl SharedLabel {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 717 Tm (    func width\(self\) -> int {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 704 Tm (        return self.count;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 691 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 678 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 665 Tm (Call the method like this:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 651 Tm (let size = label.width\(\);) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 638 Tm (This exact style appears in the path dependency example:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 624 Tm (struct SharedLabel {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 611 Tm (    count: int,) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 598 Tm (}) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 585 Tm () Tj ET
+BT /F2 10 Tf 1 0 0 1 68 572 Tm (impl SharedLabel {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 559 Tm (    func width\(self\) -> int {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 546 Tm (        return self.count;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 533 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 520 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 507 Tm (Mutating methods use `mut self`:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 493 Tm (impl Counter {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 480 Tm (    func bump\(mut self\) {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 467 Tm (        self.value = self.value + 1;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 454 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 441 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 428 Tm (That makes mutation visible in the function signature instead of hidden.) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 414 Tm (7. Enums and Exhaustive `match`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 380 Tm (An enum is a value that can be one of several named cases.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 366 Tm (Simple enum:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 352 Tm (enum State {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 339 Tm (    Ready,) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 326 Tm (    Done,) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 313 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 300 Tm (Create a value with a qualified variant:) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (9) Tj ET
 endstream
 endobj
 13 0 obj
-<< /Length 2128 >>
+<< /Length 2368 >>
 stream
-BT /F2 10 Tf 1 0 0 1 68 730 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 717 Tm (    Result::Err\(message\) => {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 704 Tm (        io::println\(message\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 691 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 678 Tm (    Result::Pending => {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 665 Tm (        io::println\("pending"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 652 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 639 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 626 Tm (This is one of Puff?s core strengths. You can represent explicit program ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 612 Tm (states, handle them exhaustively, and bind payloads directly inside the ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 598 Tm (matching arm.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 584 Tm (The `hello` example uses this pattern with a `Job` result:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 570 Tm (match job.result {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 557 Tm (    Result::Ok\(code\) => {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 544 Tm (        io::println\(job.label\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 531 Tm (        io::println\(code\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 518 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 505 Tm (    Result::Err\(message\) => {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 492 Tm (        io::println\(message\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 479 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 466 Tm (    Result::Pending => {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 453 Tm (        io::println\("pending"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 440 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 427 Tm (}) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 414 Tm (8. Tuples, Arrays, and `Vec<T>`) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 380 Tm (Tuples) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 352 Tm (Tuple literals:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 338 Tm (let pair = \(1, "two"\);) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 325 Tm (Tuple destructuring:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 311 Tm (let \(left, right\) = pair\(\);) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 298 Tm (Puff uses tuples heavily for multi-result expressions, including `con`.) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 284 Tm (Fixed-size arrays) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 730 Tm (let state = State::Ready;) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 717 Tm (Enums can also carry one payload value:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 703 Tm (enum Result {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 690 Tm (    Ok\(int\),) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 677 Tm (    Err\(string\),) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 664 Tm (    Pending,) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 651 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 638 Tm (Create payload variants like this:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 624 Tm (let ok = Result::Ok\(9\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 611 Tm (let err = Result::Err\("bad"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 598 Tm (let pending = Result::Pending;) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 585 Tm (Use `match` to handle every possible case:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 571 Tm (match result {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 558 Tm (    Result::Ok\(code\) => {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 545 Tm (        io::println\(code\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 532 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 519 Tm (    Result::Err\(message\) => {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 506 Tm (        io::println\(message\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 493 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 480 Tm (    Result::Pending => {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 467 Tm (        io::println\("pending"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 454 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 441 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 428 Tm (This is called exhaustive matching. Puff requires you to cover all enum ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 414 Tm (variants, which helps prevent missing-case bugs.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 400 Tm (The `hello` example uses exactly this style:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 386 Tm (match job.result {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 373 Tm (    Result::Ok\(code\) => {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 360 Tm (        io::println\(job.label\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 347 Tm (        io::println\(code\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 334 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 321 Tm (    Result::Err\(message\) => {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 308 Tm (        io::println\(message\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 295 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 282 Tm (    Result::Pending => {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 269 Tm (        io::println\("pending"\);) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (10) Tj ET
 endstream
 endobj
 14 0 obj
-<< /Length 1897 >>
+<< /Length 1510 >>
 stream
-BT /F1 11 Tf 1 0 0 1 56 730 Tm (Array literals:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 716 Tm (let values = [1, 2, 3];) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 703 Tm (Indexing:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 689 Tm (let first = values[0];) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 676 Tm (Mutable indexed assignment:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 662 Tm (let mut values = [1, 2, 3];) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 649 Tm (values[1] = 9;) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 636 Tm (Arrays are fixed-size and bounds checked.) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 622 Tm (Dynamic vectors) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 594 Tm (Vectors are the growable collection in Puff:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 580 Tm (let mut values = vec[1, 2, 3];) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 567 Tm (values.push\(4\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 554 Tm (values[1] = 9;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 541 Tm (io::println\(values.len\(\)\);) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 528 Tm (An empty vector with explicit type:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 514 Tm (let mut names: Vec<string> = vec<string>[];) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 501 Tm (This is used directly in the `cli_workspace` example:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 487 Tm (let mut names: Vec<string> = vec<string>[];) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 474 Tm (names.push\("note.txt"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 461 Tm (names.push\("note.log"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 448 Tm (names.push\("todo.txt"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 435 Tm (io::println\(count_selected\(names\)\);) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 422 Tm (One important design detail: `Vec<T>` uses shared-handle semantics. If you ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 408 Tm (assign a vector or pass it to a function, you copy the handle, not the ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 394 Tm (contents.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 380 Tm (The vector runtime example demonstrates this:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 730 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 717 Tm (}) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 704 Tm (8. Tuples, Arrays, and `Vec<T>`) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 670 Tm (Tuples) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 642 Tm (A tuple is a fixed group of values.) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 628 Tm (let pair = \(1, "two"\);) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 615 Tm (Take it apart with destructuring:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 601 Tm (let \(left, right\) = pair\(\);) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 588 Tm (Tuples are useful when one expression naturally returns more than one value.) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 574 Tm (Arrays) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 546 Tm (An array is a fixed-size list of values of the same type.) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 532 Tm (let values = [1, 2, 3];) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 519 Tm (Read by index:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 505 Tm (let first = values[0];) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 492 Tm (Change an element if the array is mutable:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 478 Tm (let mut values = [1, 2, 3];) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 465 Tm (values[1] = 9;) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 452 Tm (Arrays are bounds checked.) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 438 Tm (Vectors with `Vec<T>`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 410 Tm (If you need a growable collection, use `Vec<T>`.) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 396 Tm (let mut values = vec[1, 2, 3];) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 383 Tm (values.push\(4\);) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (11) Tj ET
 endstream
 endobj
 15 0 obj
-<< /Length 1898 >>
+<< /Length 2058 >>
 stream
-BT /F2 10 Tf 1 0 0 1 68 730 Tm (let mut values = vec[1, 2, 3];) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 717 Tm (let alias_values = values;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 704 Tm (values.push\(4\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 691 Tm (values[1] = 9;) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 678 Tm (After mutation, `alias_values` sees the same underlying vector contents.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 664 Tm (9. Modules, Hierarchical Imports, and Dependencies) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 630 Tm (Flat module import:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 616 Tm (import greet;) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 603 Tm (Hierarchical module import:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 589 Tm (import util::path;) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 576 Tm (This maps to nested files under `src/`, for example:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 562 Tm (- `import util::path;` -> `src/util/path.pg`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 548 Tm (- `import util::math::ops;` -> `src/util/math/ops.pg`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 534 Tm (The hierarchical example project uses this style:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 520 Tm (import util::path;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 507 Tm (import util::math::ops;) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 494 Tm (Dependencies extend the same model across projects.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 480 Tm (Local dependency in `pinggen.toml`:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 466 Tm ([[dependency]]) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 453 Tm (name = "shared") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 440 Tm (path = "../shared_lib") Tj ET
-BT /F1 11 Tf 1 0 0 1 56 427 Tm (Then import from that dependency:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 413 Tm (import shared::util::text;) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 400 Tm (The `path_dependency_app` example does exactly this:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 386 Tm (import std::{ io }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 373 Tm (import shared::util::text;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 730 Tm (values[1] = 9;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 717 Tm (io::println\(values.len\(\)\);) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 704 Tm (An empty vector needs an explicit element type:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 690 Tm (let mut names: Vec<string> = vec<string>[];) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 677 Tm (This appears directly in the `cli_workspace` example:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 663 Tm (let mut names: Vec<string> = vec<string>[];) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 650 Tm (names.push\("note.txt"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 637 Tm (names.push\("note.log"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 624 Tm (names.push\("todo.txt"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 611 Tm (io::println\(count_selected\(names\)\);) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 598 Tm (One important detail: `Vec<T>` uses shared-handle semantics. If you assign a ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 584 Tm (vector to another variable, both names refer to the same underlying ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 570 Tm (collection.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 556 Tm (The vector example shows that:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 542 Tm (let mut values = vec[1, 2, 3];) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 529 Tm (let alias_values = values;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 516 Tm (values.push\(4\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 503 Tm (values[1] = 9;) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 490 Tm (After those changes, `alias_values` sees the updated data too.) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 476 Tm (9. Modules, Hierarchical Imports, and Dependencies) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 442 Tm (As projects grow, you split code into modules.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 428 Tm (Flat import:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 414 Tm (import greet;) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 401 Tm (Hierarchical import:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 387 Tm (import util::path;) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 374 Tm (That maps to nested files under `src/`, for example:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 360 Tm (- `import util::path;` means `src/util/path.pg`) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (12) Tj ET
 endstream
 endobj
 16 0 obj
-<< /Length 2072 >>
+<< /Length 1902 >>
 stream
-BT /F2 10 Tf 1 0 0 1 68 730 Tm () Tj ET
-BT /F2 10 Tf 1 0 0 1 68 717 Tm (func main\(\) {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 704 Tm (    let label = shared_label\(\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 691 Tm (    io::println\(label.width\(\)\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 678 Tm (    io::println\(shared_value\(\)\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 665 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 652 Tm (Puff also supports exact-version registry-backed dependencies. That is useful ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 638 Tm (for larger multi-project work, but the mental model stays the same: dependency) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 624 Tm ( names become import roots.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 610 Tm (10. Standard Library: `io`, `str`, `fs`, and `env`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 576 Tm (Puff?s standard library is intentionally explicit and small.) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 562 Tm (`io`) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 534 Tm (import std::{ io }) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 521 Tm (Current function:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 507 Tm (- `io::println\(int|string\)`) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 493 Tm (`str`) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 465 Tm (import std::{ str }) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 452 Tm (Current functions:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 438 Tm (- `str::len\(value\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 424 Tm (- `str::eq\(a, b\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 410 Tm (- `str::starts_with\(value, prefix\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 396 Tm (- `str::ends_with\(value, suffix\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 382 Tm (The `cli_workspace` helper module uses these together:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 368 Tm (func is_selected\(name: string\) -> bool {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 355 Tm (    if str::eq\(name, "todo.txt"\) {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 342 Tm (        return true;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 329 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 316 Tm (    return str::starts_with\(name, "note"\) && str::ends_with\(name, ".txt"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 303 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 730 Tm (- `import util::math::ops;` means `src/util/math/ops.pg`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 716 Tm (The hierarchical modules example uses this style:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 702 Tm (import util::path;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 689 Tm (import util::math::ops;) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 676 Tm (Dependencies use the same import idea across projects.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 662 Tm (Local dependency in `pinggen.toml`:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 648 Tm ([[dependency]]) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 635 Tm (name = "shared") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 622 Tm (path = "../shared_lib") Tj ET
+BT /F1 11 Tf 1 0 0 1 56 609 Tm (Then import from that dependency:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 595 Tm (import shared::util::text;) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 582 Tm (The `path_dependency_app` example does exactly this:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 568 Tm (import std::{ io }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 555 Tm (import shared::util::text;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 542 Tm () Tj ET
+BT /F2 10 Tf 1 0 0 1 68 529 Tm (func main\(\) {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 516 Tm (    let label = shared_label\(\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 503 Tm (    io::println\(label.width\(\)\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 490 Tm (    io::println\(shared_value\(\)\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 477 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 464 Tm (Puff also supports exact-version registry dependencies, but the core idea ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 450 Tm (stays simple: dependency names become import roots.) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 436 Tm (10. Standard Library) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 402 Tm (Puff's standard library is small and explicit.) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 388 Tm (`io`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 360 Tm (Import:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 346 Tm (import std::{ io }) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (13) Tj ET
 endstream
 endobj
 17 0 obj
-<< /Length 2031 >>
+<< /Length 2016 >>
 stream
-BT /F3 13 Tf 1 0 0 1 56 730 Tm (`fs`) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 702 Tm (import std::{ fs }) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 689 Tm (Current functions:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 675 Tm (- `fs::read_to_string\(path\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 661 Tm (- `fs::write_string\(path, contents\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 647 Tm (- `fs::exists\(path\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 633 Tm (- `fs::remove\(path\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 619 Tm (- `fs::create_dir\(path\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 605 Tm (- `fs::cwd\(\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 591 Tm (Builtin result types used by filesystem operations:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 577 Tm (enum FsResult { Ok\(string\), Err\(string\) }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 564 Tm (enum FsWriteResult { Ok, Err\(string\) }) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 551 Tm (The `file_process` example shows the simplest read flow:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 537 Tm (match fs::read_to_string\("input.txt"\) {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 524 Tm (    FsResult::Ok\(text\) => {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 511 Tm (        io::println\(text\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 498 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 485 Tm (    FsResult::Err\(message\) => {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 472 Tm (        io::println\(message\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 459 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 446 Tm (}) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 433 Tm (`env`) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 405 Tm (import std::{ env }) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 392 Tm (Current function:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 378 Tm (- `env::get\(name\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 364 Tm (Builtin result type:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 350 Tm (enum EnvResult { Ok\(string\), Missing }) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 337 Tm (Across all std modules, the pattern is consistent: imports are explicit, ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 323 Tm (fallible APIs return result-like enums, and nothing is hidden behind implicit ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 730 Tm (Current function:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 716 Tm (- `io::println\(int|string\)`) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 702 Tm (`str`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 674 Tm (Import:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 660 Tm (import std::{ str }) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 647 Tm (Current functions:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 633 Tm (- `str::len\(value\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 619 Tm (- `str::eq\(a, b\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 605 Tm (- `str::starts_with\(value, prefix\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 591 Tm (- `str::ends_with\(value, suffix\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 577 Tm (The `cli_workspace` helper module uses them like this:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 563 Tm (func is_selected\(name: string\) -> bool {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 550 Tm (    if str::eq\(name, "todo.txt"\) {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 537 Tm (        return true;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 524 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 511 Tm (    return str::starts_with\(name, "note"\) && str::ends_with\(name, ".txt"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 498 Tm (}) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 485 Tm (`fs`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 457 Tm (Import:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 443 Tm (import std::{ fs }) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 430 Tm (Current functions:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 416 Tm (- `fs::read_to_string\(path\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 402 Tm (- `fs::write_string\(path, contents\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 388 Tm (- `fs::exists\(path\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 374 Tm (- `fs::remove\(path\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 360 Tm (- `fs::create_dir\(path\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 346 Tm (- `fs::cwd\(\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 332 Tm (Filesystem functions use built-in result enums:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 318 Tm (enum FsResult { Ok\(string\), Err\(string\) }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 305 Tm (enum FsWriteResult { Ok, Err\(string\) }) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (14) Tj ET
 endstream
 endobj
 18 0 obj
-<< /Length 2414 >>
+<< /Length 1963 >>
 stream
-BT /F1 11 Tf 1 0 0 1 56 730 Tm (ambient state.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 716 Tm (11. Strict Concurrency with `con`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 682 Tm (Puff?s concurrency model is intentionally narrow.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 668 Tm (`con` runs a small set of approved calls in parallel and returns a tuple of ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 654 Tm (results:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 640 Tm (let \(left, right\) = con { number_a\(\), job.label_len\(\) };) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 627 Tm (The current rules are strict:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 613 Tm (- each item must be a direct function call or safe non-mutating method call) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 599 Tm (- callees must be marked safe for `con`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 585 Tm (- builtin functions are not allowed inside `con`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 571 Tm (- nested `con` is rejected) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 557 Tm (- the parent waits for all child tasks before continuing) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 543 Tm (You opt in with `safe func`:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 529 Tm (safe func square\(x: int\) -> int {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 516 Tm (    return x * x;) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 503 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 490 Tm (Puff does this on purpose. The feature is meant to be useful for independent ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 476 Tm (work units without pretending the language already has a full effect or ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 462 Tm (ownership system.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 448 Tm (12. Building Larger CLI Apps in Puff) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 414 Tm (The shape of a larger Puff CLI project is already visible in the repository.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 400 Tm (The `cli_workspace` example combines:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 386 Tm (- hierarchical modules) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 372 Tm (- the `str` and `fs` std modules) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 358 Tm (- `Vec<string>`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 344 Tm (- explicit helper functions) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 330 Tm (- filesystem result handling with `match`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 316 Tm (Its structure is simple:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 302 Tm (- `src/main.pg`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 288 Tm (- `src/util/names.pg`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 274 Tm (- `src/util/workspace.pg`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 730 Tm (The `file_process` example shows a basic read:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 716 Tm (match fs::read_to_string\("input.txt"\) {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 703 Tm (    FsResult::Ok\(text\) => {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 690 Tm (        io::println\(text\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 677 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 664 Tm (    FsResult::Err\(message\) => {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 651 Tm (        io::println\(message\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 638 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 625 Tm (}) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 612 Tm (`env`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 584 Tm (Import:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 570 Tm (import std::{ env }) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 557 Tm (Current function:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 543 Tm (- `env::get\(name\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 529 Tm (Its built-in result enum is:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 515 Tm (enum EnvResult { Ok\(string\), Missing }) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 502 Tm (The stdlib pattern is consistent:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 488 Tm (- imports are explicit) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 474 Tm (- each namespace is small) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 460 Tm (- fallible operations return enum-style results) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 446 Tm (11. Strict Concurrency with `con`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 412 Tm (Puff has a concurrency feature, but it is intentionally strict.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 398 Tm (You use `con` with approved calls and get a tuple of results back:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 384 Tm (let \(left, right\) = con { number_a\(\), job.label_len\(\) };) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 371 Tm (The current rules are:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 357 Tm (- each item must be a direct function call or safe non-mutating method call) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 343 Tm (- callees must be marked safe for `con`) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (15) Tj ET
 endstream
 endobj
 19 0 obj
-<< /Length 2650 >>
+<< /Length 2382 >>
 stream
-BT /F1 11 Tf 1 0 0 1 56 730 Tm (The main module coordinates the flow:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 716 Tm (match fs::create_dir\(workspace_dir\(\)\) {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 703 Tm (    FsWriteResult::Ok => {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 690 Tm (        io::println\("dir"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 677 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 664 Tm (    FsWriteResult::Err\(message\) => {) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 651 Tm (        io::println\(message\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 638 Tm (    }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 625 Tm (}) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 612 Tm (Then it uses a vector of names:) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 598 Tm (let mut names: Vec<string> = vec<string>[];) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 585 Tm (names.push\("note.txt"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 572 Tm (names.push\("note.log"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 559 Tm (names.push\("todo.txt"\);) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 546 Tm (io::println\(count_selected\(names\)\);) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 533 Tm (This is the current Puff model for ?bigger? programs:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 519 Tm (- keep modules small) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 505 Tm (- keep imports explicit) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 491 Tm (- model state with structs and enums) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 477 Tm (- use `Vec<T>` for growable collections) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 463 Tm (- keep filesystem work explicit with `FsResult` and `FsWriteResult`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 449 Tm (It is already enough for real CLI utilities, even though it is not yet a full ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 435 Tm (general-purpose ecosystem language.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 421 Tm (13. Current Limits and the Right Mental Model) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 387 Tm (Puff is best understood as a small, serious language rather than a maximal ) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 373 Tm (one.) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 359 Tm (Current important limits:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 345 Tm (- no general generics) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 331 Tm (- no ownership or borrow checker) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 317 Tm (- no formatter or LSP) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 303 Tm (- no large built-in collections library beyond `Vec<T>`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 289 Tm (- no GUI or networking standard library) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 275 Tm (- `con` stays intentionally strict) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 261 Tm (- build configuration is declarative, not programmable) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 247 Tm (- package management is still intentionally narrow) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 730 Tm (- builtin functions are not allowed inside `con`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 716 Tm (- nested `con` is rejected) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 702 Tm (- the parent waits for all child tasks before continuing) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 688 Tm (Mark a function as safe like this:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 674 Tm (safe func square\(x: int\) -> int {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 661 Tm (    return x * x;) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 648 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 635 Tm (This keeps the feature useful without pretending Puff already has a full ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 621 Tm (ownership or effect system.) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 607 Tm (12. Building Larger CLI Apps in Puff) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 573 Tm (The `cli_workspace` example is a good model for a larger Puff program.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 559 Tm (It combines:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 545 Tm (- hierarchical modules) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 531 Tm (- `Vec<string>`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 517 Tm (- string helpers) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 503 Tm (- filesystem helpers) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 489 Tm (- explicit `match`-based error handling) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 475 Tm (Its file layout is:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 461 Tm (- `src/main.pg`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 447 Tm (- `src/util/names.pg`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 433 Tm (- `src/util/workspace.pg`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 419 Tm (The main module creates a workspace directory:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 405 Tm (match fs::create_dir\(workspace_dir\(\)\) {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 392 Tm (    FsWriteResult::Ok => {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 379 Tm (        io::println\("dir"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 366 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 353 Tm (    FsWriteResult::Err\(message\) => {) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 340 Tm (        io::println\(message\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 327 Tm (    }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 314 Tm (}) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 301 Tm (Then it works with a vector of names:) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 287 Tm (let mut names: Vec<string> = vec<string>[];) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 274 Tm (names.push\("note.txt"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 261 Tm (names.push\("note.log"\);) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (16) Tj ET
 endstream
 endobj
 20 0 obj
-<< /Length 2458 >>
+<< /Length 2441 >>
 stream
-BT /F1 11 Tf 1 0 0 1 56 730 Tm (The right mental model is:) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 716 Tm (- Puff is for explicit structure) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 702 Tm (- Puff is for small-to-medium native tools first) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 688 Tm (- Puff values a coherent core over a broad surface) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 674 Tm (- Puff is ready for real CLI work, not for every kind of application yet) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 660 Tm (If you approach it that way, the language feels consistent instead of limited.) Tj ET
-BT /F3 18 Tf 1 0 0 1 56 646 Tm (14. Reference Appendix) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 612 Tm (Manifest summary) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 584 Tm ([package]) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 571 Tm (name = "my_app") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 558 Tm (version = "0.1.0") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 545 Tm () Tj ET
-BT /F2 10 Tf 1 0 0 1 68 532 Tm ([registry]) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 519 Tm (index = "file:///path/to/registry/index.toml") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 506 Tm () Tj ET
-BT /F2 10 Tf 1 0 0 1 68 493 Tm ([build]) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 480 Tm (name = "my_app") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 467 Tm (entry = "src/main.pg") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 454 Tm (output = "build/my_app") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 441 Tm () Tj ET
-BT /F2 10 Tf 1 0 0 1 68 428 Tm ([[target]]) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 415 Tm (name = "tool") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 402 Tm (entry = "src/tool.pg") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 389 Tm (output = "build/tool") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 376 Tm () Tj ET
-BT /F2 10 Tf 1 0 0 1 68 363 Tm ([[dependency]]) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 350 Tm (name = "shared") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 337 Tm (path = "../shared_lib") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 324 Tm () Tj ET
-BT /F2 10 Tf 1 0 0 1 68 311 Tm ([[dependency]]) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 298 Tm (name = "http") Tj ET
-BT /F2 10 Tf 1 0 0 1 68 285 Tm (version = "1.2.0") Tj ET
-BT /F3 13 Tf 1 0 0 1 56 272 Tm (Syntax summary) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 244 Tm (- `func name\(arg: type\) -> type { ... }`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 230 Tm (- `import name;`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 216 Tm (- `import util::path;`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 202 Tm (- `import shared::util::text;`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 188 Tm (- `import std::{ io, str, fs, env }`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 174 Tm (- `struct Name { field: type }`) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 730 Tm (names.push\("todo.txt"\);) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 717 Tm (io::println\(count_selected\(names\)\);) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 704 Tm (This is the current Puff style for bigger programs:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 690 Tm (- keep modules small) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 676 Tm (- keep names explicit) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 662 Tm (- use structs and enums for clear program state) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 648 Tm (- use `Vec<T>` for growable data) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 634 Tm (- use `match` for fallible stdlib operations) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 620 Tm (13. Current Limits and the Right Mental Model) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 586 Tm (Puff is intentionally small.) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 572 Tm (Important current limits:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 558 Tm (- no general generics) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 544 Tm (- no ownership or borrow checker) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 530 Tm (- no formatter or LSP) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 516 Tm (- no large collections library beyond `Vec<T>`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 502 Tm (- no GUI or networking standard library) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 488 Tm (- `con` remains strict) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 474 Tm (- build configuration is declarative, not programmable) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 460 Tm (- package management is still intentionally narrow) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 446 Tm (The best mental model is:) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 432 Tm (- Puff is a small compiled language) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 418 Tm (- Puff is already useful for CLI tools) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 404 Tm (- Puff is still growing) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 390 Tm (- Puff values clarity over feature count) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 376 Tm (If you expect a compact, explicit language, Puff feels consistent and ) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 362 Tm (approachable.) Tj ET
+BT /F3 18 Tf 1 0 0 1 56 348 Tm (14. Reference Appendix) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 314 Tm (Manifest summary) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 286 Tm ([package]) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 273 Tm (name = "my_app") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 260 Tm (version = "0.1.0") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 247 Tm () Tj ET
+BT /F2 10 Tf 1 0 0 1 68 234 Tm ([registry]) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 221 Tm (index = "file:///path/to/registry/index.toml") Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (17) Tj ET
 endstream
 endobj
 21 0 obj
-<< /Length 2462 >>
+<< /Length 2545 >>
 stream
-BT /F1 11 Tf 1 0 0 1 70 730 Tm (- `impl Name { func method\(self\) -> int { ... } }`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 716 Tm (- `enum State { Ready, Done }`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 702 Tm (- `enum Result { Ok\(int\), Err\(string\) }`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 688 Tm (- `match value { ... }`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 674 Tm (- `let value = expr;`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 660 Tm (- `let mut value = expr;`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 646 Tm (- `\(a, b\)` tuples and destructuring) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 632 Tm (- `[1, 2, 3]` arrays) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 618 Tm (- `vec[1, 2, 3]` and `vec<int>[]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 604 Tm (- `con { call_a\(\), call_b\(\) }`) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 590 Tm (Standard library summary) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 562 Tm (`io`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 548 Tm (- `io::println\(int|string\)`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 534 Tm (`str`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 520 Tm (- `str::len\(string\) -> int`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 506 Tm (- `str::eq\(string, string\) -> bool`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 492 Tm (- `str::starts_with\(string, string\) -> bool`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 478 Tm (- `str::ends_with\(string, string\) -> bool`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 464 Tm (`fs`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 450 Tm (- `fs::read_to_string\(path: string\) -> FsResult`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 436 Tm (- `fs::write_string\(path: string, contents: string\) -> FsWriteResult`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 422 Tm (- `fs::exists\(path: string\) -> bool`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 408 Tm (- `fs::remove\(path: string\) -> FsWriteResult`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 394 Tm (- `fs::create_dir\(path: string\) -> FsWriteResult`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 380 Tm (- `fs::cwd\(\) -> FsResult`) Tj ET
-BT /F1 11 Tf 1 0 0 1 56 366 Tm (`env`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 352 Tm (- `env::get\(name: string\) -> EnvResult`) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 338 Tm (Builtin result enums) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 310 Tm (enum FsResult { Ok\(string\), Err\(string\) }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 297 Tm (enum FsWriteResult { Ok, Err\(string\) }) Tj ET
-BT /F2 10 Tf 1 0 0 1 68 284 Tm (enum EnvResult { Ok\(string\), Missing }) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 271 Tm (CLI commands) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 243 Tm (- `puff help`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 229 Tm (- `puff init <path>`) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 730 Tm () Tj ET
+BT /F2 10 Tf 1 0 0 1 68 717 Tm ([build]) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 704 Tm (name = "my_app") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 691 Tm (entry = "src/main.pg") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 678 Tm (output = "build/my_app") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 665 Tm () Tj ET
+BT /F2 10 Tf 1 0 0 1 68 652 Tm ([[target]]) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 639 Tm (name = "tool") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 626 Tm (entry = "src/tool.pg") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 613 Tm (output = "build/tool") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 600 Tm () Tj ET
+BT /F2 10 Tf 1 0 0 1 68 587 Tm ([[dependency]]) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 574 Tm (name = "shared") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 561 Tm (path = "../shared_lib") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 548 Tm () Tj ET
+BT /F2 10 Tf 1 0 0 1 68 535 Tm ([[dependency]]) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 522 Tm (name = "http") Tj ET
+BT /F2 10 Tf 1 0 0 1 68 509 Tm (version = "1.2.0") Tj ET
+BT /F3 13 Tf 1 0 0 1 56 496 Tm (Syntax summary) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 468 Tm (- `func name\(arg: type\) -> type { ... }`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 454 Tm (- `import name;`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 440 Tm (- `import util::path;`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 426 Tm (- `import shared::util::text;`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 412 Tm (- `import std::{ io, str, fs, env }`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 398 Tm (- `struct Name { field: type }`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 384 Tm (- `impl Name { func method\(self\) -> int { ... } }`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 370 Tm (- `enum State { Ready, Done }`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 356 Tm (- `enum Result { Ok\(int\), Err\(string\) }`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 342 Tm (- `match value { ... }`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 328 Tm (- `let value = expr;`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 314 Tm (- `let mut value = expr;`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 300 Tm (- `\(a, b\)` tuples and destructuring) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 286 Tm (- `[1, 2, 3]` arrays) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 272 Tm (- `vec[1, 2, 3]` and `vec<int>[]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 258 Tm (- `con { call_a\(\), call_b\(\) }`) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 244 Tm (Standard library summary) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 216 Tm (`io`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 202 Tm (- `io::println\(int|string\)`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 188 Tm (`str`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 174 Tm (- `str::len\(string\) -> int`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 160 Tm (- `str::eq\(string, string\) -> bool`) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (18) Tj ET
 endstream
 endobj
 22 0 obj
-<< /Length 1002 >>
+<< /Length 2336 >>
 stream
-BT /F1 11 Tf 1 0 0 1 70 730 Tm (- `puff check [path]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 716 Tm (- `puff build [path] [--target <name>]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 702 Tm (- `puff run [path] [--target <name>]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 688 Tm (- `puff targets [path]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 674 Tm (- `puff doctor [path]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 660 Tm (- `puff install [--bin-dir <path>]`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 646 Tm (- `puff setup [project-path] [--bin-dir <path>]`) Tj ET
-BT /F3 13 Tf 1 0 0 1 56 632 Tm (Example projects) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 604 Tm (- `examples/starter`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 590 Tm (- `examples/file_process`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 576 Tm (- `examples/hierarchical_modules`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 562 Tm (- `examples/path_dependency_app`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 548 Tm (- `examples/runtime_vec_success`) Tj ET
-BT /F1 11 Tf 1 0 0 1 70 534 Tm (- `examples/hello`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 730 Tm (- `str::starts_with\(string, string\) -> bool`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 716 Tm (- `str::ends_with\(string, string\) -> bool`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 702 Tm (`fs`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 688 Tm (- `fs::read_to_string\(path: string\) -> FsResult`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 674 Tm (- `fs::write_string\(path: string, contents: string\) -> FsWriteResult`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 660 Tm (- `fs::exists\(path: string\) -> bool`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 646 Tm (- `fs::remove\(path: string\) -> FsWriteResult`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 632 Tm (- `fs::create_dir\(path: string\) -> FsWriteResult`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 618 Tm (- `fs::cwd\(\) -> FsResult`) Tj ET
+BT /F1 11 Tf 1 0 0 1 56 604 Tm (`env`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 590 Tm (- `env::get\(name: string\) -> EnvResult`) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 576 Tm (Builtin result enums) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 548 Tm (enum FsResult { Ok\(string\), Err\(string\) }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 535 Tm (enum FsWriteResult { Ok, Err\(string\) }) Tj ET
+BT /F2 10 Tf 1 0 0 1 68 522 Tm (enum EnvResult { Ok\(string\), Missing }) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 509 Tm (CLI commands) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 481 Tm (- `puff help`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 467 Tm (- `puff init <path>`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 453 Tm (- `puff check [path]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 439 Tm (- `puff build [path] [--target <name>]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 425 Tm (- `puff run [path] [--target <name>]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 411 Tm (- `puff targets [path]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 397 Tm (- `puff doctor [path]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 383 Tm (- `puff install [--bin-dir <path>]`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 369 Tm (- `puff setup [project-path] [--bin-dir <path>]`) Tj ET
+BT /F3 13 Tf 1 0 0 1 56 355 Tm (Example projects) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 327 Tm (- `examples/starter`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 313 Tm (- `examples/file_process`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 299 Tm (- `examples/hierarchical_modules`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 285 Tm (- `examples/path_dependency_app`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 271 Tm (- `examples/runtime_vec_success`) Tj ET
+BT /F1 11 Tf 1 0 0 1 70 257 Tm (- `examples/hello`) Tj ET
 BT /F1 10 Tf 1 0 0 1 298 32 Tm (19) Tj ET
 endstream
 endobj
@@ -739,47 +751,47 @@ xref
 0000000085 00000 n 
 0000000153 00000 n 
 0000000228 00000 n 
-0000000659 00000 n 
-0000004321 00000 n 
-0000007042 00000 n 
-0000009496 00000 n 
-0000011475 00000 n 
-0000013485 00000 n 
-0000015459 00000 n 
-0000017506 00000 n 
-0000019516 00000 n 
-0000021697 00000 n 
-0000023647 00000 n 
-0000025598 00000 n 
-0000027723 00000 n 
-0000029807 00000 n 
-0000032274 00000 n 
-0000034977 00000 n 
-0000037488 00000 n 
-0000040003 00000 n 
-0000041058 00000 n 
-0000041244 00000 n 
-0000041392 00000 n 
-0000041540 00000 n 
-0000041688 00000 n 
-0000041836 00000 n 
-0000041984 00000 n 
-0000042132 00000 n 
-0000042281 00000 n 
-0000042430 00000 n 
-0000042579 00000 n 
-0000042728 00000 n 
-0000042877 00000 n 
-0000043026 00000 n 
-0000043175 00000 n 
-0000043324 00000 n 
-0000043473 00000 n 
-0000043622 00000 n 
-0000043771 00000 n 
-0000043920 00000 n 
-0000044069 00000 n 
+0000000645 00000 n 
+0000004719 00000 n 
+0000007441 00000 n 
+0000009486 00000 n 
+0000011596 00000 n 
+0000013453 00000 n 
+0000015515 00000 n 
+0000017184 00000 n 
+0000019224 00000 n 
+0000021645 00000 n 
+0000023208 00000 n 
+0000025319 00000 n 
+0000027274 00000 n 
+0000029343 00000 n 
+0000031359 00000 n 
+0000033794 00000 n 
+0000036288 00000 n 
+0000038886 00000 n 
+0000041275 00000 n 
+0000041461 00000 n 
+0000041609 00000 n 
+0000041757 00000 n 
+0000041905 00000 n 
+0000042053 00000 n 
+0000042201 00000 n 
+0000042349 00000 n 
+0000042498 00000 n 
+0000042647 00000 n 
+0000042796 00000 n 
+0000042945 00000 n 
+0000043094 00000 n 
+0000043243 00000 n 
+0000043392 00000 n 
+0000043541 00000 n 
+0000043690 00000 n 
+0000043839 00000 n 
+0000043988 00000 n 
+0000044137 00000 n 
+0000044286 00000 n 
 trailer
 << /Size 44 /Root 43 0 R >>
 startxref
-44120
+44337
 %%EOF

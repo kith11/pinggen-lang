@@ -10,6 +10,7 @@ add_executable(pinggen
     src/token.cpp
     src/diagnostics.cpp
     src/dependency_resolver.cpp
+    src/formatter.cpp
     src/lexer.cpp
     src/parser.cpp
     src/sema.cpp
@@ -30,6 +31,10 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-check-starter
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/starter
+    )
+    add_test(
+        NAME pinggen-fmt-check-starter
+        COMMAND pinggen fmt ${CMAKE_SOURCE_DIR}/examples/starter --check
     )
     add_test(
         NAME pinggen-run-starter
@@ -95,7 +100,59 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-help
         COMMAND powershell -NoProfile -Command
-                "$text = (& '$<TARGET_FILE:pinggen>' help 2>&1 | Out-String); if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if ($text -notlike '*puff commands:*' -or $text -notlike '*doctor*' -or $text -notlike '*setup*') { throw $text; }"
+                "$text = (& '$<TARGET_FILE:pinggen>' help 2>&1 | Out-String); if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if ($text -notlike '*puff commands:*' -or $text -notlike '*doctor*' -or $text -notlike '*setup*' -or $text -notlike '*fmt*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-fmt-rewrites-project
+        COMMAND powershell -NoProfile -Command
+                [=[
+$dir = Join-Path $env:TEMP 'puff_fmt_rewrite_test'
+if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }
+& '$<TARGET_FILE:pinggen>' new $dir
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$main = Join-Path $dir 'src/main.pg'
+$source = @'
+import std::{io}
+import greet;
+func main(){
+io::println(greeting("pinggen"));
+}
+'@
+Set-Content -Path $main -Value $source -NoNewline
+& '$<TARGET_FILE:pinggen>' fmt $dir
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$text = Get-Content -Raw $main
+if ($text -notmatch 'import std::\{ io \}' -or $text -notmatch 'func main\(\) \{' -or $text -notmatch '    io::println') { throw $text }
+]=]
+    )
+    add_test(
+        NAME pinggen-fmt-check-fails-on-unformatted-project
+        COMMAND powershell -NoProfile -Command
+                [=[
+$dir = Join-Path $env:TEMP 'puff_fmt_check_test'
+if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }
+& '$<TARGET_FILE:pinggen>' new $dir
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$main = Join-Path $dir 'src/main.pg'
+$original = @'
+import std::{io}
+import greet;
+func main(){
+io::println(greeting("pinggen"));
+}
+'@
+Set-Content -Path $main -Value $original -NoNewline
+$out = (& '$<TARGET_FILE:pinggen>' fmt $dir --check 2>&1 | Out-String)
+if ($LASTEXITCODE -eq 0) { throw 'expected failure' }
+$after = Get-Content -Raw $main
+if ($after -ne $original) { throw 'fmt --check rewrote source' }
+if ($out -notmatch 'would reformat') { throw $out }
+]=]
+    )
+    add_test(
+        NAME pinggen-fmt-invalid-source-keeps-file
+        COMMAND powershell -NoProfile -Command
+                "$dir = Join-Path $env:TEMP 'puff_fmt_invalid_test'; if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }; & '$<TARGET_FILE:pinggen>' new $dir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $main = Join-Path $dir 'src/main.pg'; $original = 'func main( {`n}`n'; Set-Content -Path $main -Value $original -NoNewline; $out = (& '$<TARGET_FILE:pinggen>' fmt $dir 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; $after = Get-Content -Raw $main; if ($after -ne $original) { throw 'formatter rewrote invalid source'; }; if ($out -notmatch 'compile error:') { throw $out; }"
     )
     add_test(
         NAME pinggen-doctor-starter

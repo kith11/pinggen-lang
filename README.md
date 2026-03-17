@@ -30,6 +30,13 @@ Check your toolchain and current project:
 .\puff doctor
 ```
 
+Format project source files:
+
+```powershell
+.\puff fmt .\my_app
+.\puff fmt .\my_app --check
+```
+
 Run the interactive setup flow:
 
 ```powershell
@@ -150,6 +157,7 @@ version = "1.2.0"
 - `puff new`
 - `puff init`
 - `puff check`
+- `puff fmt`
 - `puff build`
 - `puff run`
 - `puff add`
@@ -184,5 +192,6 @@ A minimal VS Code extension for `.pg` syntax highlighting lives at [editors/vsco
 - `con` is intentionally strict and only allows approved safe calls
 - build configuration is declarative; there is no programmable build scripting
 - package management uses one registry per project, exact or caret version requirements, a generated `puff.lock`, and a user-local cache
-- no generics, borrow checker, formatter, or LSP in this milestone
+- no generics, borrow checker, or LSP in this milestone
+- `puff fmt` currently formats `.pg` source files only and does not support source comments yet
 - post-1.0 work is documented in [docs/release-checklist.md](./docs/release-checklist.md)

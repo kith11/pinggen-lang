@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-import math
 import textwrap
 
 
@@ -217,7 +216,7 @@ def render_page(lines: list[StyledLine], page_number: int, title: str | None = N
         commands.append(f"BT /F3 26 Tf 1 0 0 1 {LEFT} {TOP} Tm ({escape_pdf_text(title)}) Tj ET")
         if subtitle:
             commands.append(f"BT /F1 14 Tf 1 0 0 1 {LEFT} {TOP - 34} Tm ({escape_pdf_text(subtitle)}) Tj ET")
-        commands.append(f"BT /F1 11 Tf 1 0 0 1 {LEFT} {TOP - 82} Tm ({escape_pdf_text('A guided book for programmers new to Puff')}) Tj ET")
+        commands.append(f"BT /F1 11 Tf 1 0 0 1 {LEFT} {TOP - 82} Tm ({escape_pdf_text('A beginner-friendly guide to learning Puff')}) Tj ET")
         commands.append(f"BT /F1 11 Tf 1 0 0 1 {LEFT} {TOP - 102} Tm ({escape_pdf_text('Generated from the current repository surface')}) Tj ET")
         commands.append(f"BT /F1 10 Tf 1 0 0 1 {LEFT} {FOOTER_Y} Tm ({escape_pdf_text(str(page_number))}) Tj ET")
         return "\n".join(commands)

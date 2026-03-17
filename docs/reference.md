@@ -47,6 +47,7 @@ version = "1.2.0"
 - `puff build` and `puff run` use the default target.
 - `puff build <project> --target <name>` and `puff run <project> --target <name>` select a named target.
 - `puff targets <project>` prints the available targets.
+- `puff fmt [project] [--check]` formats `.pg` source files under `src/`.
 - `puff.lock` is generated automatically for registry-backed projects and reused on later builds.
 
 ## Editor Support
@@ -128,6 +129,7 @@ version = "1.2.0"
 - `puff new <path>`
 - `puff init <path>`
 - `puff check [path]`
+- `puff fmt [path] [--check]`
 - `puff build [path] [--target <name>]`
 - `puff run [path] [--target <name>]`
 - `puff add <name>[@version] [path]`
@@ -145,4 +147,5 @@ version = "1.2.0"
 - package management uses one registry per project with exact or caret requirements only; no full solver or publishing flow
 - strict `con` restrictions
 - no generics
-- no formatter or LSP
+- `puff fmt` currently formats `.pg` source files only and does not support source comments yet
+- no LSP
