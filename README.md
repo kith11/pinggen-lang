@@ -33,6 +33,7 @@ Current features:
 - `fs::read_to_string(path)` returning `FsResult`
 - `fs::write_string(path, contents)` returning `FsWriteResult`
 - `fs::exists(path)` returning `bool`
+- `env::get(name)` returning `EnvResult`
 - fixed-size arrays with `[T; N]`, `[a, b, c]`, and `array[index]`
 - struct methods with `impl Type { ... }` and `value.method(...)`
 - mutating struct methods with `mut self`

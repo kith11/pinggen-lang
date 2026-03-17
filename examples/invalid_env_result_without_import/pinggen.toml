@@ -1,0 +1,7 @@
+[package]
+name = "invalid_env_result_without_import"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_env_result_without_import"

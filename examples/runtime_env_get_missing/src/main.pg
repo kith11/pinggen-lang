@@ -1,0 +1,12 @@
+import std::{ io, env }
+
+func main() {
+    match env::get("PINGGEN_ENV_DOES_NOT_EXIST") {
+        EnvResult::Ok(value) => {
+            io::println(value);
+        }
+        EnvResult::Missing => {
+            io::println("missing");
+        }
+    }
+}

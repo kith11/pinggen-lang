@@ -1,0 +1,5 @@
+import std::{ env }
+
+func main() {
+    let result = env::get("PATH", "EXTRA");
+}

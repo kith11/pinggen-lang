@@ -1,0 +1,7 @@
+[package]
+name = "runtime_env_get_success"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/runtime_env_get_success"

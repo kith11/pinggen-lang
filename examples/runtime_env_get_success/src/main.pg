@@ -1,0 +1,12 @@
+import std::{ io, str, env }
+
+func main() {
+    match env::get("PATH") {
+        EnvResult::Ok(value) => {
+            io::println(str::len(value));
+        }
+        EnvResult::Missing => {
+            io::println("missing");
+        }
+    }
+}

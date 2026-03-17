@@ -45,6 +45,25 @@ EnumDecl builtin_fs_write_result_enum() {
     return decl;
 }
 
+EnumDecl builtin_env_result_enum() {
+    EnumDecl decl;
+    decl.location = {1, 1};
+    decl.name = "EnvResult";
+
+    EnumVariant ok;
+    ok.location = {1, 1};
+    ok.name = "Ok";
+    ok.payload_type = Type::string_type();
+    decl.variants.push_back(std::move(ok));
+
+    EnumVariant missing;
+    missing.location = {1, 1};
+    missing.name = "Missing";
+    decl.variants.push_back(std::move(missing));
+
+    return decl;
+}
+
 bool program_imports_std_item(const Program& program, const std::string& item) {
     for (const auto& import_decl : program.imports) {
         if (import_decl.kind != ImportKind::Std || import_decl.module_name != "std") {
@@ -151,6 +170,7 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     globals_ += "@.fmt.int = private unnamed_addr constant [6 x i8] c\"%lld\\0A\\00\"\n";
     globals_ += "@.fmt.str = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"\n";
     const bool has_fs_import = program_imports_std_item(program, "fs");
+    const bool has_env_import = program_imports_std_item(program, "env");
     if (has_fs_import) {
         globals_ += "@.fs.mode.rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"\n";
         globals_ += "@.fs.mode.wb = private unnamed_addr constant [3 x i8] c\"wb\\00\"\n";
@@ -168,6 +188,17 @@ std::string LLVMIRGenerator::generate(const Program& program) {
                 if (builtin.variants[i].payload_type.has_value()) {
                     enum_payload_field_indices_[builtin.name][builtin.variants[i].name] = payload_field_index++;
                 }
+            }
+        }
+    }
+    if (has_env_import) {
+        const EnumDecl builtin = builtin_env_result_enum();
+        enums_[builtin.name] = builtin;
+        std::size_t payload_field_index = 1;
+        for (std::size_t i = 0; i < builtin.variants.size(); ++i) {
+            enum_variant_indices_[builtin.name][builtin.variants[i].name] = i;
+            if (builtin.variants[i].payload_type.has_value()) {
+                enum_payload_field_indices_[builtin.name][builtin.variants[i].name] = payload_field_index++;
             }
         }
     }
@@ -289,6 +320,9 @@ std::string LLVMIRGenerator::generate(const Program& program) {
         out << "declare i64 @fread(ptr, i64, i64, ptr)\n";
         out << "declare i64 @fwrite(ptr, i64, i64, ptr)\n\n";
     }
+    if (has_env_import) {
+        out << "declare ptr @getenv(ptr)\n\n";
+    }
     if (!program.structs.empty() || !enum_payload_field_indices_.empty() || !extra_type_defs_.empty()) {
         out << type_defs.str();
         out << extra_type_defs_;
@@ -300,6 +334,9 @@ std::string LLVMIRGenerator::generate(const Program& program) {
         out << emit_fs_read_helper();
         out << emit_fs_write_helper();
         out << emit_fs_exists_helper();
+    }
+    if (has_env_import) {
+        out << emit_env_get_helper();
     }
     out << helper_functions_;
     out << globals_ << "\n";
@@ -426,6 +463,23 @@ std::string LLVMIRGenerator::emit_fs_exists_helper() const {
         "  br label %done\n"
         "done:\n"
         "  ret i1 %exists\n"
+        "}\n\n";
+}
+
+std::string LLVMIRGenerator::emit_env_get_helper() const {
+    return
+        "define %enum.EnvResult @pinggen_env_get(ptr %name) {\n"
+        "entry:\n"
+        "  %value = call ptr @getenv(ptr %name)\n"
+        "  %exists = icmp ne ptr %value, null\n"
+        "  br i1 %exists, label %found, label %missing\n"
+        "found:\n"
+        "  %ok_res0 = insertvalue %enum.EnvResult zeroinitializer, i64 0, 0\n"
+        "  %ok_res1 = insertvalue %enum.EnvResult %ok_res0, ptr %value, 1\n"
+        "  ret %enum.EnvResult %ok_res1\n"
+        "missing:\n"
+        "  %missing_res = insertvalue %enum.EnvResult zeroinitializer, i64 1, 0\n"
+        "  ret %enum.EnvResult %missing_res\n"
         "}\n\n";
 }
 
@@ -859,6 +913,12 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
             const std::string reg = next_register();
             body_ += "  " + reg + " = call i1 @pinggen_fs_exists(ptr " + path.ir + ")\n";
             return {reg, Type::bool_type()};
+        }
+        if (node->callee == "env::get") {
+            const TypedIRValue name = emit_expr(*node->args[0]);
+            const std::string reg = next_register();
+            body_ += "  " + reg + " = call %enum.EnvResult @pinggen_env_get(ptr " + name.ir + ")\n";
+            return {reg, Type::enum_type("EnvResult")};
         }
 
         std::vector<TypedIRValue> args;

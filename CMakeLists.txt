@@ -259,6 +259,26 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-fs-exists-type PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-env-get-missing-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_env_get_missing_import
+    )
+    set_tests_properties(pinggen-check-invalid-env-get-missing-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-env-get-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_env_get_arity
+    )
+    set_tests_properties(pinggen-check-invalid-env-get-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-env-get-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_env_get_type
+    )
+    set_tests_properties(pinggen-check-invalid-env-get-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-env-result-without-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_env_result_without_import
+    )
+    set_tests_properties(pinggen-check-invalid-env-result-without-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-con-empty
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_con_empty
     )
@@ -421,6 +441,14 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-run-fs-exists-missing
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_exists_missing
+    )
+    add_test(
+        NAME pinggen-run-env-get-success
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_env_get_success
+    )
+    add_test(
+        NAME pinggen-run-env-get-missing
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_env_get_missing
     )
     add_test(
         NAME pinggen-run-con-success

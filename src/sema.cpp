@@ -47,6 +47,25 @@ EnumDecl builtin_fs_write_result_enum() {
     return decl;
 }
 
+EnumDecl builtin_env_result_enum() {
+    EnumDecl decl;
+    decl.location = {1, 1};
+    decl.name = "EnvResult";
+
+    EnumVariant ok;
+    ok.location = {1, 1};
+    ok.name = "Ok";
+    ok.payload_type = Type::string_type();
+    decl.variants.push_back(std::move(ok));
+
+    EnumVariant missing;
+    missing.location = {1, 1};
+    missing.name = "Missing";
+    decl.variants.push_back(std::move(missing));
+
+    return decl;
+}
+
 const VariableExpr* root_variable_expr(const Expr& expr) {
     if (const auto* variable = dynamic_cast<const VariableExpr*>(&expr)) {
         return variable;
@@ -146,7 +165,7 @@ void SemanticAnalyzer::collect_imports(const Program& program) {
             fail(decl.location, "unknown import namespace '" + decl.module_name + "'");
         }
         for (const auto& item : decl.items) {
-            if (item != "io" && item != "str" && item != "fs") {
+            if (item != "io" && item != "str" && item != "fs" && item != "env") {
                 fail(decl.location, "unknown std import '" + item + "'");
             }
             imported_std_items_.insert(item);
@@ -159,6 +178,9 @@ void SemanticAnalyzer::collect_enums(const Program& program) {
     if (imported_std_items_.contains("fs")) {
         enums_["FsResult"] = EnumInfo{};
         enums_["FsWriteResult"] = EnumInfo{};
+    }
+    if (imported_std_items_.contains("env")) {
+        enums_["EnvResult"] = EnumInfo{};
     }
     for (const auto& decl : program.enums) {
         if (enums_.contains(decl.name)) {
@@ -180,6 +202,22 @@ void SemanticAnalyzer::collect_enums(const Program& program) {
                 } else {
                     info.variant_payload_types.push_back(std::nullopt);
                 }
+            }
+        }
+    }
+    if (imported_std_items_.contains("env")) {
+        const EnumDecl builtin = builtin_env_result_enum();
+        auto& info = enums_.at(builtin.name);
+        info.variant_indices.clear();
+        info.variant_payload_types.clear();
+        info.has_payload = false;
+        for (std::size_t i = 0; i < builtin.variants.size(); ++i) {
+            info.variant_indices[builtin.variants[i].name] = i;
+            if (builtin.variants[i].payload_type.has_value()) {
+                info.variant_payload_types.push_back(Type::string_type());
+                info.has_payload = true;
+            } else {
+                info.variant_payload_types.push_back(std::nullopt);
             }
         }
     }
@@ -664,6 +702,17 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
             }
             return Type::bool_type();
         }
+        if (node->callee == "env::get") {
+            require_std_import("env", node->location, "env::get");
+            if (node->args.size() != 1) {
+                fail(node->location, "env::get expects exactly one argument");
+            }
+            const Type name_type = analyze_expr(*node->args[0]);
+            if (name_type != Type::string_type()) {
+                fail(node->args[0]->location, "env::get only supports string variable names");
+            }
+            return Type::enum_type("EnvResult");
+        }
 
         const auto it = functions_.find(node->callee);
         if (it == functions_.end()) {
@@ -698,7 +747,7 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         for (const auto& item : node->items) {
             if (const auto* call = dynamic_cast<const CallExpr*>(item.get())) {
                 if (call->callee == "io::println" || call->callee == "str::len" || call->callee == "fs::read_to_string" ||
-                    call->callee == "fs::write_string" || call->callee == "fs::exists") {
+                    call->callee == "fs::write_string" || call->callee == "fs::exists" || call->callee == "env::get") {
                     inside_con_ = false;
                     fail(call->location, "builtin function '" + call->callee + "' is not supported inside con");
                 }

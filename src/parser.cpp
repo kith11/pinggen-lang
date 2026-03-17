@@ -511,7 +511,7 @@ std::unique_ptr<Expr> Parser::parse_primary() {
                 }
                 consume(TokenKind::RParen, "expected ')' after arguments");
                 if (name == "io::println" || name == "str::len" || name == "fs::read_to_string" || name == "fs::write_string" ||
-                    name == "fs::exists") {
+                    name == "fs::exists" || name == "env::get") {
                     return parse_postfix(std::make_unique<CallExpr>(first.location, name, std::move(args)));
                 }
                 if (name.find("::", name.find("::") + 2) != std::string::npos) {
