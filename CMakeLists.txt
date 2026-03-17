@@ -184,10 +184,15 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-payload-enum-equality PROPERTIES WILL_FAIL TRUE)
     add_test(
-        NAME pinggen-check-invalid-payload-match-binding
-        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_payload_match_binding
+        NAME pinggen-check-invalid-payload-match-missing-binding
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_payload_match_missing_binding
     )
-    set_tests_properties(pinggen-check-invalid-payload-match-binding PROPERTIES WILL_FAIL TRUE)
+    set_tests_properties(pinggen-check-invalid-payload-match-missing-binding PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-plain-match-binding
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_plain_match_binding
+    )
+    set_tests_properties(pinggen-check-invalid-plain-match-binding PROPERTIES WILL_FAIL TRUE)
     add_test(
         NAME pinggen-check-invalid-str-len-missing-import
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_str_len_missing_import

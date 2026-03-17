@@ -13,6 +13,7 @@ Current features:
 - typed top-level functions with `func name(arg: type) -> type`
 - top-level `enum` declarations with qualified variants like `State::Ready`
 - single-payload enum variants like `Result::Ok(1)`
+- payload enum binding in match arms like `Result::Ok(value) => { ... }`
 - plain `struct` declarations with named fields
 - named-field struct literals and `value.field` access
 - `bool`, `true`, `false`
@@ -65,11 +66,12 @@ func main() {
     let results: [Result; 3] = [Result::Pending, Result::Err("bad"), Result::Ok(9)];
 
     match job.result {
-        Result::Ok => {
+        Result::Ok(code) => {
             io::println(job.label);
+            io::println(code);
         }
-        Result::Err => {
-            io::println("err");
+        Result::Err(message) => {
+            io::println(message);
         }
         Result::Pending => {
             io::println("pending");
@@ -113,5 +115,22 @@ func finish(code: int) -> Result {
         return Result::Ok(7);
     }
     return Result::Err("bad");
+}
+
+func describe(result: Result) -> string {
+    match result {
+        Result::Ok(value) => {
+            if value > 5 {
+                return "ok";
+            }
+            return "small";
+        }
+        Result::Err(message) => {
+            return message;
+        }
+        Result::Pending => {
+            return "pending";
+        }
+    }
 }
 ```

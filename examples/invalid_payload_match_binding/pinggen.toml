@@ -1,7 +1,0 @@
-[package]
-name = "invalid_payload_match_binding"
-version = "0.1.0"
-
-[build]
-entry = "src/main.pg"
-output = "build/invalid_payload_match_binding"

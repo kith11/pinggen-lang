@@ -251,6 +251,7 @@ struct MatchArm {
     SourceLocation location;
     std::string enum_name;
     std::string variant;
+    std::optional<std::string> binding_name;
     std::vector<std::unique_ptr<Stmt>> body;
 };
 

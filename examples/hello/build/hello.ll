@@ -32,12 +32,11 @@ define void @pinggen_bounds_abort() {
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
 @.str.1 = private unnamed_addr constant [4 x i8] c"bad\00"
 @.str.2 = private unnamed_addr constant [3 x i8] c"ok\00"
-@.str.3 = private unnamed_addr constant [4 x i8] c"err\00"
+@.str.3 = private unnamed_addr constant [6 x i8] c"small\00"
 @.str.4 = private unnamed_addr constant [8 x i8] c"pending\00"
 @.str.5 = private unnamed_addr constant [8 x i8] c"pinggen\00"
 @.str.6 = private unnamed_addr constant [4 x i8] c"bad\00"
-@.str.7 = private unnamed_addr constant [4 x i8] c"err\00"
-@.str.8 = private unnamed_addr constant [8 x i8] c"pending\00"
+@.str.7 = private unnamed_addr constant [8 x i8] c"pending\00"
 
 define i64 @Job__label_len(%struct.Job %arg0) {
   %1 = alloca %struct.Job
@@ -85,20 +84,35 @@ define ptr @describe(%enum.Result %arg0) {
   %4 = icmp eq i64 %3, 0
   br i1 %4, label %match_arm.6, label %match_check.7
 match_arm.6:
-  %5 = getelementptr inbounds [3 x i8], ptr @.str.2, i64 0, i64 0
-  ret ptr %5
-match_check.7:
-  %6 = icmp eq i64 %3, 1
-  br i1 %6, label %match_arm.8, label %match_check.9
-match_arm.8:
-  %7 = getelementptr inbounds [4 x i8], ptr @.str.3, i64 0, i64 0
-  ret ptr %7
-match_check.9:
-  %8 = icmp eq i64 %3, 2
-  br i1 %8, label %match_arm.10, label %match_unreachable.5
-match_arm.10:
-  %9 = getelementptr inbounds [8 x i8], ptr @.str.4, i64 0, i64 0
+  %5 = extractvalue %enum.Result %2, 1
+  %6 = alloca i64
+  store i64 %5, ptr %6
+  %7 = load i64, ptr %6
+  %8 = icmp sgt i64 %7, 5
+  br i1 %8, label %if_then.11, label %if_else.12
+if_then.11:
+  %9 = getelementptr inbounds [3 x i8], ptr @.str.2, i64 0, i64 0
   ret ptr %9
+if_else.12:
+  br label %if_end.13
+if_end.13:
+  %10 = getelementptr inbounds [6 x i8], ptr @.str.3, i64 0, i64 0
+  ret ptr %10
+match_check.7:
+  %11 = icmp eq i64 %3, 1
+  br i1 %11, label %match_arm.8, label %match_check.9
+match_arm.8:
+  %12 = extractvalue %enum.Result %2, 2
+  %13 = alloca ptr
+  store ptr %12, ptr %13
+  %14 = load ptr, ptr %13
+  ret ptr %14
+match_check.9:
+  %15 = icmp eq i64 %3, 2
+  br i1 %15, label %match_arm.10, label %match_unreachable.5
+match_arm.10:
+  %16 = getelementptr inbounds [8 x i8], ptr @.str.4, i64 0, i64 0
+  ret ptr %16
 match_unreachable.5:
   unreachable
 }
@@ -148,62 +162,71 @@ define i32 @main() {
   %27 = load %enum.Result, ptr %26
   %28 = extractvalue %enum.Result %27, 0
   %29 = icmp eq i64 %28, 0
-  br i1 %29, label %match_arm.13, label %match_check.14
-match_arm.13:
-  %30 = getelementptr inbounds %struct.Job, ptr %7, i32 0, i32 1
-  %31 = load ptr, ptr %30
-  %32 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %33 = call i32 (ptr, ...) @printf(ptr %32, ptr %31)
-  br label %match_end.11
-match_check.14:
-  %34 = icmp eq i64 %28, 1
-  br i1 %34, label %match_arm.15, label %match_check.16
-match_arm.15:
-  %35 = getelementptr inbounds [4 x i8], ptr @.str.7, i64 0, i64 0
-  %36 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %37 = call i32 (ptr, ...) @printf(ptr %36, ptr %35)
-  br label %match_end.11
-match_check.16:
-  %38 = icmp eq i64 %28, 2
-  br i1 %38, label %match_arm.17, label %match_unreachable.12
-match_arm.17:
-  %39 = getelementptr inbounds [8 x i8], ptr @.str.8, i64 0, i64 0
-  %40 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %41 = call i32 (ptr, ...) @printf(ptr %40, ptr %39)
-  br label %match_end.11
-match_unreachable.12:
+  br i1 %29, label %match_arm.16, label %match_check.17
+match_arm.16:
+  %30 = extractvalue %enum.Result %27, 1
+  %31 = alloca i64
+  store i64 %30, ptr %31
+  %32 = getelementptr inbounds %struct.Job, ptr %7, i32 0, i32 1
+  %33 = load ptr, ptr %32
+  %34 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %35 = call i32 (ptr, ...) @printf(ptr %34, ptr %33)
+  %36 = load i64, ptr %31
+  %37 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %38 = call i32 (ptr, ...) @printf(ptr %37, i64 %36)
+  br label %match_end.14
+match_check.17:
+  %39 = icmp eq i64 %28, 1
+  br i1 %39, label %match_arm.18, label %match_check.19
+match_arm.18:
+  %40 = extractvalue %enum.Result %27, 2
+  %41 = alloca ptr
+  store ptr %40, ptr %41
+  %42 = load ptr, ptr %41
+  %43 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %44 = call i32 (ptr, ...) @printf(ptr %43, ptr %42)
+  br label %match_end.14
+match_check.19:
+  %45 = icmp eq i64 %28, 2
+  br i1 %45, label %match_arm.20, label %match_unreachable.15
+match_arm.20:
+  %46 = getelementptr inbounds [8 x i8], ptr @.str.7, i64 0, i64 0
+  %47 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %48 = call i32 (ptr, ...) @printf(ptr %47, ptr %46)
+  br label %match_end.14
+match_unreachable.15:
   unreachable
-match_end.11:
-  %42 = load %struct.Job, ptr %7
-  %43 = call i64 @Job__label_len(%struct.Job %42)
-  %44 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %45 = call i32 (ptr, ...) @printf(ptr %44, i64 %43)
-  %46 = icmp sge i64 2, 0
-  %47 = icmp slt i64 2, 3
-  %48 = and i1 %46, %47
-  br i1 %48, label %bounds_ok.19, label %bounds_fail.18
-bounds_fail.18:
+match_end.14:
+  %49 = load %struct.Job, ptr %7
+  %50 = call i64 @Job__label_len(%struct.Job %49)
+  %51 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %52 = call i32 (ptr, ...) @printf(ptr %51, i64 %50)
+  %53 = icmp sge i64 2, 0
+  %54 = icmp slt i64 2, 3
+  %55 = and i1 %53, %54
+  br i1 %55, label %bounds_ok.22, label %bounds_fail.21
+bounds_fail.21:
   call void @pinggen_bounds_abort()
   unreachable
-bounds_ok.19:
-  %49 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 2
-  %50 = load %enum.Result, ptr %49
-  %51 = call ptr @describe(%enum.Result %50)
-  %52 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %53 = call i32 (ptr, ...) @printf(ptr %52, ptr %51)
-  %54 = icmp sge i64 0, 0
-  %55 = icmp slt i64 0, 3
-  %56 = and i1 %54, %55
-  br i1 %56, label %bounds_ok.21, label %bounds_fail.20
-bounds_fail.20:
+bounds_ok.22:
+  %56 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 2
+  %57 = load %enum.Result, ptr %56
+  %58 = call ptr @describe(%enum.Result %57)
+  %59 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %60 = call i32 (ptr, ...) @printf(ptr %59, ptr %58)
+  %61 = icmp sge i64 0, 0
+  %62 = icmp slt i64 0, 3
+  %63 = and i1 %61, %62
+  br i1 %63, label %bounds_ok.24, label %bounds_fail.23
+bounds_fail.23:
   call void @pinggen_bounds_abort()
   unreachable
-bounds_ok.21:
-  %57 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 0
-  %58 = load %enum.Result, ptr %57
-  %59 = call ptr @describe(%enum.Result %58)
-  %60 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %61 = call i32 (ptr, ...) @printf(ptr %60, ptr %59)
+bounds_ok.24:
+  %64 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 0
+  %65 = load %enum.Result, ptr %64
+  %66 = call ptr @describe(%enum.Result %65)
+  %67 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %68 = call i32 (ptr, ...) @printf(ptr %67, ptr %66)
   ret i32 0
 }
 

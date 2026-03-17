@@ -7,11 +7,12 @@ func main() {
     let results: [Result; 3] = [Result::Pending, Result::Err("bad"), Result::Ok(9)];
 
     match job.result {
-        Result::Ok => {
+        Result::Ok(code) => {
             io::println(job.label);
+            io::println(code);
         }
-        Result::Err => {
-            io::println("err");
+        Result::Err(message) => {
+            io::println(message);
         }
         Result::Pending => {
             io::println("pending");

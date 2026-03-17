@@ -622,7 +622,42 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
             body_ += "  " + cmp_reg + " = icmp eq i64 " + subject_tag + ", " + std::to_string(ordinal) + "\n";
             body_ += "  br i1 " + cmp_reg + ", label %" + arm_labels[i] + ", label %" + next_label_name + "\n";
             body_ += arm_labels[i] + ":\n";
+
+            const auto previous_var = arm.binding_name.has_value() ? variables_.find(*arm.binding_name) : variables_.end();
+            const auto previous_type = arm.binding_name.has_value() ? variable_types_.find(*arm.binding_name) : variable_types_.end();
+            const bool had_previous_var = arm.binding_name.has_value() && previous_var != variables_.end();
+            const bool had_previous_type = arm.binding_name.has_value() && previous_type != variable_types_.end();
+            const std::string previous_storage = had_previous_var ? previous_var->second : "";
+            const Type previous_type_value = had_previous_type ? previous_type->second : Type::void_type();
+
+            if (arm.binding_name.has_value()) {
+                const Type payload_type = *enum_payload_type(arm.enum_name, arm.variant);
+                const std::size_t payload_field_index = enum_payload_field_indices_.at(arm.enum_name).at(arm.variant);
+                const std::string payload_reg = next_register();
+                body_ += "  " + payload_reg + " = extractvalue " + llvm_type(subject.type) + " " + subject.ir + ", " +
+                         std::to_string(payload_field_index) + "\n";
+                const std::string payload_storage = next_register();
+                body_ += "  " + payload_storage + " = alloca " + llvm_type(payload_type) + "\n";
+                body_ += "  store " + llvm_type(payload_type) + " " + payload_reg + ", ptr " + payload_storage + "\n";
+                variables_[*arm.binding_name] = payload_storage;
+                variable_types_[*arm.binding_name] = payload_type;
+            }
+
             const bool arm_returns = emit_block(arm.body);
+
+            if (arm.binding_name.has_value()) {
+                if (had_previous_var) {
+                    variables_[*arm.binding_name] = previous_storage;
+                } else {
+                    variables_.erase(*arm.binding_name);
+                }
+                if (had_previous_type) {
+                    variable_types_[*arm.binding_name] = previous_type_value;
+                } else {
+                    variable_types_.erase(*arm.binding_name);
+                }
+            }
+
             arm_return_flags.push_back(arm_returns);
             if (!arm_returns) {
                 body_ += "  br label %" + end_label + "\n";

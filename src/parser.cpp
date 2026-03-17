@@ -288,6 +288,10 @@ std::unique_ptr<Stmt> Parser::parse_match_statement() {
         arm.enum_name = consume(TokenKind::Identifier, "expected enum type in match arm").lexeme;
         consume(TokenKind::ColonColon, "expected '::' in match arm");
         arm.variant = consume(TokenKind::Identifier, "expected enum variant in match arm").lexeme;
+        if (match(TokenKind::LParen)) {
+            arm.binding_name = consume(TokenKind::Identifier, "expected payload binding name").lexeme;
+            consume(TokenKind::RParen, "expected ')' after payload binding");
+        }
         consume(TokenKind::FatArrow, "expected '=>' after match arm pattern");
         consume(TokenKind::LBrace, "expected '{' before match arm body");
         arm.body = parse_block();

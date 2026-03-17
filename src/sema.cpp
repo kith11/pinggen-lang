@@ -672,13 +672,46 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
             if (arm.enum_name != subject_type.name) {
                 fail(arm.location, "match arm must use variants of enum '" + subject_type.name + "'");
             }
-            if (!enum_it->second.variant_indices.contains(arm.variant)) {
+            const auto variant_it = enum_it->second.variant_indices.find(arm.variant);
+            if (variant_it == enum_it->second.variant_indices.end()) {
                 fail(arm.location, "unknown variant '" + arm.variant + "' for enum '" + arm.enum_name + "'");
             }
             if (!seen_variants.insert(arm.variant).second) {
                 fail(arm.location, "duplicate match arm for variant '" + arm.variant + "'");
             }
-            if (!analyze_block(arm.body)) {
+            const auto& payload_type = enum_it->second.variant_payload_types[variant_it->second];
+            if (payload_type.has_value()) {
+                if (!arm.binding_name.has_value()) {
+                    fail(arm.location, "payload variant '" + arm.variant + "' must bind a payload in match");
+                }
+                if (*arm.binding_name == "self") {
+                    fail(arm.location, "'self' is reserved for method receivers");
+                }
+            } else if (arm.binding_name.has_value()) {
+                fail(arm.location, "plain variant '" + arm.variant + "' cannot bind a payload in match");
+            }
+
+            const auto previous = arm.binding_name.has_value() ? symbols_.find(*arm.binding_name) : symbols_.end();
+            const bool had_previous = arm.binding_name.has_value() && previous != symbols_.end();
+            Symbol previous_symbol;
+            if (had_previous) {
+                previous_symbol = previous->second;
+            }
+            if (arm.binding_name.has_value()) {
+                symbols_[*arm.binding_name] = Symbol{*payload_type, false, true};
+            }
+
+            const bool arm_returns = analyze_block(arm.body);
+
+            if (arm.binding_name.has_value()) {
+                if (had_previous) {
+                    symbols_[*arm.binding_name] = previous_symbol;
+                } else {
+                    symbols_.erase(*arm.binding_name);
+                }
+            }
+
+            if (!arm_returns) {
                 all_return = false;
             }
         }

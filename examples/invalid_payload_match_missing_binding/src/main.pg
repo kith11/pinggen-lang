@@ -1,0 +1,17 @@
+enum Result {
+    Ok(int),
+    Err(string),
+    Pending,
+}
+
+func main() {
+    let result = Result::Ok(1);
+    match result {
+        Result::Ok => {
+        }
+        Result::Err(message) => {
+        }
+        Result::Pending => {
+        }
+    }
+}

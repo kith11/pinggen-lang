@@ -9,11 +9,14 @@ func finish(code: int) -> Result {
 
 func describe(result: Result) -> string {
     match result {
-        Result::Ok => {
-            return "ok";
+        Result::Ok(value) => {
+            if value > 5 {
+                return "ok";
+            }
+            return "small";
         }
-        Result::Err => {
-            return "err";
+        Result::Err(message) => {
+            return message;
         }
         Result::Pending => {
             return "pending";
