@@ -1,0 +1,16 @@
+import std::{ io, fs, str }
+
+func main() {
+    match fs::cwd() {
+        FsResult::Ok(path) => {
+            if str::ends_with(path, "runtime_fs_cwd_success") {
+                io::println("cwd");
+            } else {
+                io::println(path);
+            }
+        }
+        FsResult::Err(message) => {
+            io::println(message);
+        }
+    }
+}

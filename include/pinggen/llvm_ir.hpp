@@ -54,6 +54,9 @@ class LLVMIRGenerator {
     std::string emit_fs_read_helper() const;
     std::string emit_fs_write_helper() const;
     std::string emit_fs_exists_helper() const;
+    std::string emit_fs_remove_helper() const;
+    std::string emit_fs_create_dir_helper() const;
+    std::string emit_fs_cwd_helper() const;
     std::string emit_env_get_helper() const;
     std::string emit_vec_create_helper() const;
     std::string emit_vec_push_helper() const;

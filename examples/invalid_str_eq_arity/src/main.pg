@@ -1,0 +1,5 @@
+import std::{ str }
+
+func main() {
+    str::eq("a");
+}

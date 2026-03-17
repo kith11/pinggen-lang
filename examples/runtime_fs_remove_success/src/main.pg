@@ -1,0 +1,23 @@
+import std::{ io, fs }
+
+func main() {
+    match fs::write_string("delete-me.txt", "temp") {
+        FsWriteResult::Ok => {
+            match fs::remove("delete-me.txt") {
+                FsWriteResult::Ok => {
+                    if fs::exists("delete-me.txt") {
+                        io::println("still-there");
+                    } else {
+                        io::println("removed");
+                    }
+                }
+                FsWriteResult::Err(message) => {
+                    io::println(message);
+                }
+            }
+        }
+        FsWriteResult::Err(message) => {
+            io::println(message);
+        }
+    }
+}

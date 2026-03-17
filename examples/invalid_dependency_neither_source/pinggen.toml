@@ -1,0 +1,11 @@
+[package]
+name = "invalid_dependency_neither_source"
+version = "0.1.0"
+
+[build]
+name = "invalid_dependency_neither_source"
+entry = "src/main.pg"
+output = "build/invalid_dependency_neither_source"
+
+[[dependency]]
+name = "shared"

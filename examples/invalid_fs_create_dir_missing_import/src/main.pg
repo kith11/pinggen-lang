@@ -1,0 +1,3 @@
+func main() {
+    fs::create_dir("a");
+}

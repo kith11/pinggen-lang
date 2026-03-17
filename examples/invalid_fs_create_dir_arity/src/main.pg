@@ -1,0 +1,5 @@
+import std::{ fs }
+
+func main() {
+    fs::create_dir("a", "b");
+}

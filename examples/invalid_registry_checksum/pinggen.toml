@@ -1,0 +1,15 @@
+[package]
+name = "invalid_registry_checksum"
+version = "0.1.0"
+
+[registry]
+index = "../registry_fixture_bad_checksum/index.toml"
+
+[build]
+name = "invalid_registry_checksum"
+entry = "src/main.pg"
+output = "build/invalid_registry_checksum"
+
+[[dependency]]
+name = "shared"
+version = "1.0.0"

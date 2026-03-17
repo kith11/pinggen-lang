@@ -1,0 +1,13 @@
+import std::{ str }
+
+func workspace_dir() -> string {
+    return "workspace-data";
+}
+
+func note_path() -> string {
+    return workspace_dir() + "/note.txt";
+}
+
+func is_workspace_path(path: string) -> bool {
+    return str::ends_with(path, "cli_workspace");
+}

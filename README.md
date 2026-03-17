@@ -79,6 +79,9 @@ Launchers:
 name = "my_app"
 version = "0.1.0"
 
+[registry]
+index = "file:///path/to/registry/index.toml"
+
 [build]
 name = "my_app"
 entry = "src/main.pg"
@@ -92,11 +95,17 @@ output = "build/tool"
 [[dependency]]
 name = "shared"
 path = "../shared_lib"
+
+[[dependency]]
+name = "http"
+version = "1.2.0"
 ```
 
 - `[build]` defines the default executable target.
 - `[[target]]` defines additional named executable targets.
-- `[[dependency]]` defines a local path dependency imported by its `name`.
+- `[[dependency]]` defines either a local path dependency or an exact-version registry dependency imported by its `name`.
+- `[registry].index` configures the package registry used by versioned dependencies.
+- `puff.lock` is generated automatically for registry-backed projects and reused on later builds.
 - `puff build` and `puff run` use the default target.
 - `puff build <project> --target <name>` and `puff run <project> --target <name>` select a named target.
 
@@ -106,7 +115,7 @@ path = "../shared_lib"
 
 - typed top-level functions
 - flat and hierarchical project-local modules with `import name;` and `import util::path;`
-- local path dependencies with `[[dependency]]` plus imports like `import shared::math;`
+- local and registry-backed dependencies with `[[dependency]]` plus imports like `import shared::util::text;`
 - `struct`, `enum`, payload enums, and exhaustive `match`
 - tuples and tuple destructuring
 - fixed-size arrays and dynamic `Vec<T>`
@@ -145,7 +154,8 @@ path = "../shared_lib"
 - [multi_target](./examples/multi_target): manifest v2 named targets
 - [file_process](./examples/file_process): practical `fs` + `match` example
 - [hierarchical_modules](./examples/hierarchical_modules): nested project modules with `import util::path;`
-- [path_dependency_app](./examples/path_dependency_app): local package dependency imported with `import shared::math;`
+- [path_dependency_app](./examples/path_dependency_app): local package dependency imported with `import shared::util::text;`
+- [registry_app](./examples/registry_app): exact-version registry dependency with generated `puff.lock`
 - [runtime_vec_success](./examples/runtime_vec_success): dynamic `Vec<T>` with aliasing, struct fields, params, returns, and enum payloads
 - [hello](./examples/hello): advanced multi-feature demo
 
@@ -160,6 +170,6 @@ A minimal VS Code extension for `.pg` syntax highlighting lives at [editors/vsco
 - arrays are fixed-size; growable collections use built-in `Vec<T>`
 - `con` is intentionally strict and only allows approved safe calls
 - build configuration is declarative; there is no programmable build scripting
-- local path dependencies only; no remote registry, lockfile, or package manager in this milestone
+- package management is exact-version only in 1.0: one registry per project, a generated `puff.lock`, and a user-local cache
 - no generics, borrow checker, formatter, or LSP in this milestone
 - post-1.0 work is documented in [docs/release-checklist.md](./docs/release-checklist.md)

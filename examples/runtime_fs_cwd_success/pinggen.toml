@@ -1,0 +1,8 @@
+[package]
+name = "runtime_fs_cwd_success"
+version = "0.1.0"
+
+[build]
+name = "runtime_fs_cwd_success"
+entry = "src/main.pg"
+output = "build/runtime_fs_cwd_success"

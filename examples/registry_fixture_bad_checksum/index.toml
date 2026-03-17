@@ -1,0 +1,10 @@
+[[package]]
+name = "numbers"
+version = "1.0.0"
+url = "../registry_fixture/packages/numbers-1.0.0.zip"
+checksum = "fe8bfddf5206ac87dece0f35cfbf587f85c68b9a6d7478a6747d10ca11a650bb"
+[[package]]
+name = "shared"
+version = "1.0.0"
+url = "../registry_fixture/packages/shared-1.0.0.zip"
+checksum = "0000000000000000000000000000000000000000000000000000000000000000"

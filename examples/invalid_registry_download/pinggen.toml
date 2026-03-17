@@ -1,0 +1,15 @@
+[package]
+name = "invalid_registry_download"
+version = "0.1.0"
+
+[registry]
+index = "../registry_fixture_missing_archive/index.toml"
+
+[build]
+name = "invalid_registry_download"
+entry = "src/main.pg"
+output = "build/invalid_registry_download"
+
+[[dependency]]
+name = "shared"
+version = "1.0.0"

@@ -183,6 +183,9 @@ std::string LLVMIRGenerator::generate(const Program& program) {
         globals_ += "@.fs.err.open = private unnamed_addr constant [20 x i8] c\"failed to open file\\00\"\n";
         globals_ += "@.fs.err.read = private unnamed_addr constant [20 x i8] c\"failed to read file\\00\"\n";
         globals_ += "@.fs.err.write = private unnamed_addr constant [21 x i8] c\"failed to write file\\00\"\n";
+        globals_ += "@.fs.err.remove = private unnamed_addr constant [22 x i8] c\"failed to remove file\\00\"\n";
+        globals_ += "@.fs.err.mkdir = private unnamed_addr constant [21 x i8] c\"failed to create dir\\00\"\n";
+        globals_ += "@.fs.err.cwd = private unnamed_addr constant [23 x i8] c\"failed to get cwd path\\00\"\n";
     }
 
     if (has_fs_import) {
@@ -310,6 +313,9 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     out << "declare i32 @printf(ptr, ...)\n\n";
     out << "declare void @exit(i32)\n";
     out << "declare i64 @strlen(ptr)\n";
+    out << "declare i32 @strcmp(ptr, ptr)\n";
+    out << "declare i32 @pinggen_str_starts_with(ptr, ptr)\n";
+    out << "declare i32 @pinggen_str_ends_with(ptr, ptr)\n";
     out << "declare ptr @malloc(i64)\n";
     out << "declare ptr @memcpy(ptr, ptr, i64)\n";
     out << emit_vec_create_helper();
@@ -329,6 +335,9 @@ std::string LLVMIRGenerator::generate(const Program& program) {
         out << "declare i64 @ftell(ptr)\n";
         out << "declare i64 @fread(ptr, i64, i64, ptr)\n";
         out << "declare i64 @fwrite(ptr, i64, i64, ptr)\n\n";
+        out << "declare ptr @pinggen_fs_remove_error(ptr)\n";
+        out << "declare ptr @pinggen_fs_create_dir_error(ptr)\n";
+        out << "declare ptr @pinggen_fs_cwd_raw()\n\n";
     }
     if (has_env_import) {
         out << "declare ptr @getenv(ptr)\n\n";
@@ -344,6 +353,9 @@ std::string LLVMIRGenerator::generate(const Program& program) {
         out << emit_fs_read_helper();
         out << emit_fs_write_helper();
         out << emit_fs_exists_helper();
+        out << emit_fs_remove_helper();
+        out << emit_fs_create_dir_helper();
+        out << emit_fs_cwd_helper();
     }
     if (has_env_import) {
         out << emit_env_get_helper();
@@ -481,6 +493,59 @@ std::string LLVMIRGenerator::emit_fs_exists_helper() const {
         "  br label %done\n"
         "done:\n"
         "  ret i1 %exists\n"
+        "}\n\n";
+}
+
+std::string LLVMIRGenerator::emit_fs_remove_helper() const {
+    return
+        "define %enum.FsWriteResult @pinggen_fs_remove(ptr %path) {\n"
+        "entry:\n"
+        "  %error = call ptr @pinggen_fs_remove_error(ptr %path)\n"
+        "  %ok = icmp eq ptr %error, null\n"
+        "  br i1 %ok, label %success, label %fail\n"
+        "success:\n"
+        "  %ok_res = insertvalue %enum.FsWriteResult zeroinitializer, i64 0, 0\n"
+        "  ret %enum.FsWriteResult %ok_res\n"
+        "fail:\n"
+        "  %err_res0 = insertvalue %enum.FsWriteResult zeroinitializer, i64 1, 0\n"
+        "  %err_res1 = insertvalue %enum.FsWriteResult %err_res0, ptr %error, 1\n"
+        "  ret %enum.FsWriteResult %err_res1\n"
+        "}\n\n";
+}
+
+std::string LLVMIRGenerator::emit_fs_create_dir_helper() const {
+    return
+        "define %enum.FsWriteResult @pinggen_fs_create_dir(ptr %path) {\n"
+        "entry:\n"
+        "  %error = call ptr @pinggen_fs_create_dir_error(ptr %path)\n"
+        "  %ok = icmp eq ptr %error, null\n"
+        "  br i1 %ok, label %success, label %fail\n"
+        "success:\n"
+        "  %ok_res = insertvalue %enum.FsWriteResult zeroinitializer, i64 0, 0\n"
+        "  ret %enum.FsWriteResult %ok_res\n"
+        "fail:\n"
+        "  %err_res0 = insertvalue %enum.FsWriteResult zeroinitializer, i64 1, 0\n"
+        "  %err_res1 = insertvalue %enum.FsWriteResult %err_res0, ptr %error, 1\n"
+        "  ret %enum.FsWriteResult %err_res1\n"
+        "}\n\n";
+}
+
+std::string LLVMIRGenerator::emit_fs_cwd_helper() const {
+    return
+        "define %enum.FsResult @pinggen_fs_cwd() {\n"
+        "entry:\n"
+        "  %value = call ptr @pinggen_fs_cwd_raw()\n"
+        "  %ok = icmp ne ptr %value, null\n"
+        "  br i1 %ok, label %success, label %fail\n"
+        "success:\n"
+        "  %ok_res0 = insertvalue %enum.FsResult zeroinitializer, i64 0, 0\n"
+        "  %ok_res1 = insertvalue %enum.FsResult %ok_res0, ptr %value, 1\n"
+        "  ret %enum.FsResult %ok_res1\n"
+        "fail:\n"
+        "  %err_msg = getelementptr inbounds [23 x i8], ptr @.fs.err.cwd, i64 0, i64 0\n"
+        "  %err_res0 = insertvalue %enum.FsResult zeroinitializer, i64 1, 0\n"
+        "  %err_res1 = insertvalue %enum.FsResult %err_res0, ptr %err_msg, 2\n"
+        "  ret %enum.FsResult %err_res1\n"
         "}\n\n";
 }
 
@@ -962,6 +1027,33 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
             body_ += "  " + reg + " = call i64 @strlen(ptr " + arg.ir + ")\n";
             return {reg, Type::int_type()};
         }
+        if (node->callee == "str::eq") {
+            const TypedIRValue lhs = emit_expr(*node->args[0]);
+            const TypedIRValue rhs = emit_expr(*node->args[1]);
+            const std::string cmp_reg = next_register();
+            const std::string bool_reg = next_register();
+            body_ += "  " + cmp_reg + " = call i32 @strcmp(ptr " + lhs.ir + ", ptr " + rhs.ir + ")\n";
+            body_ += "  " + bool_reg + " = icmp eq i32 " + cmp_reg + ", 0\n";
+            return {bool_reg, Type::bool_type()};
+        }
+        if (node->callee == "str::starts_with") {
+            const TypedIRValue value = emit_expr(*node->args[0]);
+            const TypedIRValue prefix = emit_expr(*node->args[1]);
+            const std::string raw_reg = next_register();
+            const std::string bool_reg = next_register();
+            body_ += "  " + raw_reg + " = call i32 @pinggen_str_starts_with(ptr " + value.ir + ", ptr " + prefix.ir + ")\n";
+            body_ += "  " + bool_reg + " = icmp ne i32 " + raw_reg + ", 0\n";
+            return {bool_reg, Type::bool_type()};
+        }
+        if (node->callee == "str::ends_with") {
+            const TypedIRValue value = emit_expr(*node->args[0]);
+            const TypedIRValue suffix = emit_expr(*node->args[1]);
+            const std::string raw_reg = next_register();
+            const std::string bool_reg = next_register();
+            body_ += "  " + raw_reg + " = call i32 @pinggen_str_ends_with(ptr " + value.ir + ", ptr " + suffix.ir + ")\n";
+            body_ += "  " + bool_reg + " = icmp ne i32 " + raw_reg + ", 0\n";
+            return {bool_reg, Type::bool_type()};
+        }
         if (node->callee == "fs::read_to_string") {
             const TypedIRValue arg = emit_expr(*node->args[0]);
             const std::string reg = next_register();
@@ -981,6 +1073,23 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
             const std::string reg = next_register();
             body_ += "  " + reg + " = call i1 @pinggen_fs_exists(ptr " + path.ir + ")\n";
             return {reg, Type::bool_type()};
+        }
+        if (node->callee == "fs::remove") {
+            const TypedIRValue path = emit_expr(*node->args[0]);
+            const std::string reg = next_register();
+            body_ += "  " + reg + " = call %enum.FsWriteResult @pinggen_fs_remove(ptr " + path.ir + ")\n";
+            return {reg, Type::enum_type("FsWriteResult")};
+        }
+        if (node->callee == "fs::create_dir") {
+            const TypedIRValue path = emit_expr(*node->args[0]);
+            const std::string reg = next_register();
+            body_ += "  " + reg + " = call %enum.FsWriteResult @pinggen_fs_create_dir(ptr " + path.ir + ")\n";
+            return {reg, Type::enum_type("FsWriteResult")};
+        }
+        if (node->callee == "fs::cwd") {
+            const std::string reg = next_register();
+            body_ += "  " + reg + " = call %enum.FsResult @pinggen_fs_cwd()\n";
+            return {reg, Type::enum_type("FsResult")};
         }
         if (node->callee == "env::get") {
             const TypedIRValue name = emit_expr(*node->args[0]);

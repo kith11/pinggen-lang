@@ -1,0 +1,12 @@
+import std::{ io, fs }
+
+func main() {
+    match fs::remove("not-here.txt") {
+        FsWriteResult::Ok => {
+            io::println("removed");
+        }
+        FsWriteResult::Err(message) => {
+            io::println(message);
+        }
+    }
+}

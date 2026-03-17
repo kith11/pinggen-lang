@@ -1,0 +1,10 @@
+registry_index = "C:\Users\keith\Documents\projects\pinggen-programming-language\examples\registry_fixture\index.toml"
+
+[[registry_dependency]]
+name = "shared"
+package = "shared"
+version = "1.0.0"
+registry_index = "C:\Users\keith\Documents\projects\pinggen-programming-language\examples\registry_fixture\index.toml"
+checksum = "5d4651ce2d6f9ddf69cd07b43a2503bde3fc50d0e0000842d3e815e3e9ea651d"
+path = "C:\Users\keith\AppData\Local\puff\cache\registry\cd136172d8497ab4\shared\1.0.0\package"
+

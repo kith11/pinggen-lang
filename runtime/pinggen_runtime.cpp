@@ -246,4 +246,56 @@ void pinggen_con_wait(void* raw_group) {
     free(group);
 }
 
+int32_t pinggen_str_starts_with(const char* value, const char* prefix) {
+    const size_t value_len = strlen(value);
+    const size_t prefix_len = strlen(prefix);
+    if (prefix_len > value_len) {
+        return 0;
+    }
+    return strncmp(value, prefix, prefix_len) == 0 ? 1 : 0;
+}
+
+int32_t pinggen_str_ends_with(const char* value, const char* suffix) {
+    const size_t value_len = strlen(value);
+    const size_t suffix_len = strlen(suffix);
+    if (suffix_len > value_len) {
+        return 0;
+    }
+    return strcmp(value + (value_len - suffix_len), suffix) == 0 ? 1 : 0;
+}
+
+void* pinggen_fs_remove_error(const char* path) {
+    if (DeleteFileA(path) != 0) {
+        return nullptr;
+    }
+    return const_cast<char*>("failed to remove file");
+}
+
+void* pinggen_fs_create_dir_error(const char* path) {
+    if (CreateDirectoryA(path, nullptr) != 0) {
+        return nullptr;
+    }
+    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+        return nullptr;
+    }
+    return const_cast<char*>("failed to create dir");
+}
+
+void* pinggen_fs_cwd_raw() {
+    DWORD required = GetCurrentDirectoryA(0, nullptr);
+    if (required == 0) {
+        return nullptr;
+    }
+    char* buffer = static_cast<char*>(malloc(static_cast<size_t>(required)));
+    if (buffer == nullptr) {
+        return nullptr;
+    }
+    DWORD written = GetCurrentDirectoryA(required, buffer);
+    if (written == 0 || written >= required) {
+        free(buffer);
+        return nullptr;
+    }
+    return buffer;
+}
+
 }

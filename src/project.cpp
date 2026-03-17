@@ -1,5 +1,6 @@
 #include "pinggen/project.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
@@ -21,6 +22,7 @@ struct RawTargetConfig {
 struct RawDependencyConfig {
     std::string name;
     std::string path;
+    std::string version;
 };
 
 std::string trim(const std::string& value) {
@@ -65,7 +67,7 @@ BuildTarget normalize_target(const std::filesystem::path& root, const RawTargetC
 
 }  // namespace
 
-ProjectConfig load_project(const std::filesystem::path& project_dir) {
+ProjectConfig load_project(const std::filesystem::path& project_dir, bool allow_inherited_registry) {
     const auto config_path = project_dir / "pinggen.toml";
     std::ifstream input(config_path);
     if (!input) {
@@ -102,6 +104,8 @@ ProjectConfig load_project(const std::filesystem::path& project_dir) {
         const std::string value = unquote(trim(line.substr(eq + 1)));
         if (section == "package" && key == "name") {
             config.name = value;
+        } else if (section == "registry" && key == "index") {
+            config.registry.index = value;
         } else if (section == "build" && key == "name") {
             build_section.name = value;
         } else if (section == "build" && key == "entry") {
@@ -123,6 +127,8 @@ ProjectConfig load_project(const std::filesystem::path& project_dir) {
                 dependency.name = value;
             } else if (key == "path") {
                 dependency.path = value;
+            } else if (key == "version") {
+                dependency.version = value;
             }
         }
     }
@@ -159,8 +165,11 @@ ProjectConfig load_project(const std::filesystem::path& project_dir) {
         if (raw_dependency.name.empty()) {
             throw std::runtime_error("project config '" + config_path.string() + "' is missing " + section_name + ".name");
         }
-        if (raw_dependency.path.empty()) {
-            throw std::runtime_error("project config '" + config_path.string() + "' is missing " + section_name + ".path");
+        const bool has_path = !raw_dependency.path.empty();
+        const bool has_version = !raw_dependency.version.empty();
+        if (has_path == has_version) {
+            throw std::runtime_error("project config '" + config_path.string() + "' must define exactly one of " +
+                                     section_name + ".path or " + section_name + ".version");
         }
         if (raw_dependency.name == "std") {
             throw std::runtime_error("project config '" + config_path.string() +
@@ -177,13 +186,27 @@ ProjectConfig load_project(const std::filesystem::path& project_dir) {
 
         DependencyConfig dependency;
         dependency.name = raw_dependency.name;
-        dependency.path = std::filesystem::absolute(config.root / raw_dependency.path);
-        const auto dependency_config_path = dependency.path / "pinggen.toml";
-        if (!std::filesystem::exists(dependency_config_path)) {
-            throw std::runtime_error("dependency '" + dependency.name + "' config not found at '" +
-                                     dependency_config_path.string() + "'");
+        if (has_path) {
+            dependency.source_kind = DependencySourceKind::Path;
+            dependency.path = std::filesystem::absolute(config.root / raw_dependency.path);
+            dependency.resolved_path = *dependency.path;
+            const auto dependency_config_path = dependency.resolved_path / "pinggen.toml";
+            if (!std::filesystem::exists(dependency_config_path)) {
+                throw std::runtime_error("dependency '" + dependency.name + "' config not found at '" +
+                                         dependency_config_path.string() + "'");
+            }
+        } else {
+            dependency.source_kind = DependencySourceKind::Registry;
+            dependency.version = raw_dependency.version;
         }
         config.dependencies.push_back(std::move(dependency));
+    }
+    const bool has_registry_dependencies = std::any_of(
+        config.dependencies.begin(), config.dependencies.end(),
+        [](const DependencyConfig& dependency) { return dependency.source_kind == DependencySourceKind::Registry; });
+    if (has_registry_dependencies && !config.registry.index.has_value() && !allow_inherited_registry) {
+        throw std::runtime_error("project config '" + config_path.string() +
+                                 "' must define [registry].index when any dependency uses .version");
     }
     return config;
 }

@@ -1,0 +1,8 @@
+[package]
+name = "cli_workspace"
+version = "0.1.0"
+
+[build]
+name = "cli_workspace"
+entry = "src/main.pg"
+output = "build/cli_workspace"

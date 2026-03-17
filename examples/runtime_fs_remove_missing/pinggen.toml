@@ -1,0 +1,8 @@
+[package]
+name = "runtime_fs_remove_missing"
+version = "0.1.0"
+
+[build]
+name = "runtime_fs_remove_missing"
+entry = "src/main.pg"
+output = "build/runtime_fs_remove_missing"

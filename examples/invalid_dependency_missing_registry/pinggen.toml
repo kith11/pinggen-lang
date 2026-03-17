@@ -1,0 +1,12 @@
+[package]
+name = "invalid_dependency_missing_registry"
+version = "0.1.0"
+
+[build]
+name = "invalid_dependency_missing_registry"
+entry = "src/main.pg"
+output = "build/invalid_dependency_missing_registry"
+
+[[dependency]]
+name = "shared"
+version = "1.0.0"

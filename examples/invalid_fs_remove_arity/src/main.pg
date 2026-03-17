@@ -1,0 +1,5 @@
+import std::{ fs }
+
+func main() {
+    fs::remove("a.txt", "b.txt");
+}

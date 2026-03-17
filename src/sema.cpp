@@ -813,6 +813,27 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
             require_builtin_arg_type(*node, 0, Type::string_type());
             return Type::int_type();
         }
+        if (node->callee == "str::eq") {
+            require_std_import("str", node->location, "str::eq");
+            require_builtin_arity(*node, 2);
+            require_builtin_arg_type(*node, 0, Type::string_type());
+            require_builtin_arg_type(*node, 1, Type::string_type());
+            return Type::bool_type();
+        }
+        if (node->callee == "str::starts_with") {
+            require_std_import("str", node->location, "str::starts_with");
+            require_builtin_arity(*node, 2);
+            require_builtin_arg_type(*node, 0, Type::string_type());
+            require_builtin_arg_type(*node, 1, Type::string_type());
+            return Type::bool_type();
+        }
+        if (node->callee == "str::ends_with") {
+            require_std_import("str", node->location, "str::ends_with");
+            require_builtin_arity(*node, 2);
+            require_builtin_arg_type(*node, 0, Type::string_type());
+            require_builtin_arg_type(*node, 1, Type::string_type());
+            return Type::bool_type();
+        }
         if (node->callee == "fs::read_to_string") {
             require_std_import("fs", node->location, "fs::read_to_string");
             require_builtin_arity(*node, 1);
@@ -831,6 +852,23 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
             require_builtin_arity(*node, 1);
             require_builtin_arg_type(*node, 0, Type::string_type());
             return Type::bool_type();
+        }
+        if (node->callee == "fs::remove") {
+            require_std_import("fs", node->location, "fs::remove");
+            require_builtin_arity(*node, 1);
+            require_builtin_arg_type(*node, 0, Type::string_type());
+            return Type::enum_type("FsWriteResult");
+        }
+        if (node->callee == "fs::create_dir") {
+            require_std_import("fs", node->location, "fs::create_dir");
+            require_builtin_arity(*node, 1);
+            require_builtin_arg_type(*node, 0, Type::string_type());
+            return Type::enum_type("FsWriteResult");
+        }
+        if (node->callee == "fs::cwd") {
+            require_std_import("fs", node->location, "fs::cwd");
+            require_builtin_arity(*node, 0);
+            return Type::enum_type("FsResult");
         }
         if (node->callee == "env::get") {
             require_std_import("env", node->location, "env::get");
@@ -871,8 +909,11 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         bool saw_non_void = false;
         for (const auto& item : node->items) {
             if (const auto* call = dynamic_cast<const CallExpr*>(item.get())) {
-                if (call->callee == "io::println" || call->callee == "str::len" || call->callee == "fs::read_to_string" ||
-                    call->callee == "fs::write_string" || call->callee == "fs::exists" || call->callee == "env::get") {
+                if (call->callee == "io::println" || call->callee == "str::len" || call->callee == "str::eq" ||
+                    call->callee == "str::starts_with" || call->callee == "str::ends_with" ||
+                    call->callee == "fs::read_to_string" || call->callee == "fs::write_string" ||
+                    call->callee == "fs::exists" || call->callee == "fs::remove" ||
+                    call->callee == "fs::create_dir" || call->callee == "fs::cwd" || call->callee == "env::get") {
                     inside_con_ = false;
                     fail(call->location, "builtin function '" + call->callee + "' is not supported inside con");
                 }

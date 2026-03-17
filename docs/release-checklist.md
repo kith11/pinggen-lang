@@ -5,6 +5,7 @@
 - core language: functions, modules, structs, enums, payload `match`, tuples, fixed-size arrays, loops, methods, and strict `con`
 - std modules: `io`, `str`, `fs`, `env`
 - manifest v2 targets in `pinggen.toml`
+- package dependencies via local paths or exact-version registry entries with `puff.lock`
 - CLI: `puff help`, `puff init`, `puff check`, `puff build`, `puff run`, `puff targets`, `puff doctor`, `puff install`, `puff setup`
 
 ## Intentionally Deferred
@@ -13,7 +14,7 @@
 - generics
 - richer collections
 - borrow checker / ownership system
-- package manager
+- package publishing, semver ranges, multi-registry auth, and lockfile conflict UX
 - formatter / LSP
 - broader `con` effect analysis
 
@@ -27,6 +28,8 @@
   - `fs` + `match` workflow
 - `examples/path_dependency_app`
   - local path dependency flow
+- `examples/registry_app`
+  - registry dependency resolution plus lockfile generation
 - `examples/hello`
   - advanced multi-feature demo
 
@@ -51,6 +54,7 @@ Key acceptance coverage:
 - `puff init` generates a runnable minimal starter
 - named target build/run works
 - file-processing example runs
+- registry dependency example resolves and runs
 - advanced demo still builds and runs
 - `puff doctor` reports toolchain and project status
 - diagnostics checks still cover the main failure classes

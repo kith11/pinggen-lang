@@ -1,0 +1,3 @@
+func main() {
+    fs::remove("a.txt");
+}

@@ -1,0 +1,8 @@
+[package]
+name = "invalid_fs_create_dir_arity"
+version = "0.1.0"
+
+[build]
+name = "invalid_fs_create_dir_arity"
+entry = "src/main.pg"
+output = "build/invalid_fs_create_dir_arity"

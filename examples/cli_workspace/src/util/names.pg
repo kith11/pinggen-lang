@@ -1,0 +1,20 @@
+import std::{ str }
+
+func is_selected(name: string) -> bool {
+    if str::eq(name, "todo.txt") {
+        return true;
+    }
+    return str::starts_with(name, "note") && str::ends_with(name, ".txt");
+}
+
+func count_selected(names: Vec<string>) -> int {
+    let mut total = 0;
+    let mut index = 0;
+    while index < names.len() {
+        if is_selected(names[index]) {
+            total = total + 1;
+        }
+        index = index + 1;
+    }
+    return total;
+}

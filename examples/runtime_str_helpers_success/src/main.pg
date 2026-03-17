@@ -1,0 +1,31 @@
+import std::{ io, str }
+
+struct Item {
+    name: string,
+}
+
+func label() -> string {
+    return "note.txt";
+}
+
+func main() {
+    let item = Item { name: "note.txt" };
+
+    if str::eq(item.name, label()) {
+        io::println("eq");
+    } else {
+        io::println("no");
+    }
+
+    if str::starts_with(item.name, "note") {
+        io::println("prefix");
+    } else {
+        io::println("none");
+    }
+
+    if str::ends_with(item.name, ".txt") {
+        io::println("suffix");
+    } else {
+        io::println("none");
+    }
+}

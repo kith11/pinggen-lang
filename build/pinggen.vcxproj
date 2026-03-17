@@ -367,6 +367,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\main.cpp" />
     <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\token.cpp" />
     <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\diagnostics.cpp" />
+    <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\dependency_resolver.cpp" />
     <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\lexer.cpp" />
     <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\parser.cpp" />
     <ClCompile Include="C:\Users\keith\Documents\projects\pinggen-programming-language\src\sema.cpp" />

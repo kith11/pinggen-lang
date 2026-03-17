@@ -17,6 +17,9 @@
 name = "my_app"
 version = "0.1.0"
 
+[registry]
+index = "file:///path/to/registry/index.toml"
+
 [build]
 name = "my_app"
 entry = "src/main.pg"
@@ -30,14 +33,20 @@ output = "build/tool"
 [[dependency]]
 name = "shared"
 path = "../shared_lib"
+
+[[dependency]]
+name = "http"
+version = "1.2.0"
 ```
 
 - `[build]` defines the default executable target.
 - `[[target]]` defines additional named executable targets.
-- `[[dependency]]` defines a local path dependency imported by its `name`.
+- `[[dependency]]` defines either a local path dependency or an exact-version registry dependency imported by its `name`.
+- `[registry].index` is required when any dependency uses `version = "..."`
 - `puff build` and `puff run` use the default target.
 - `puff build <project> --target <name>` and `puff run <project> --target <name>` select a named target.
 - `puff targets <project>` prints the available targets.
+- `puff.lock` is generated automatically for registry-backed projects and reused on later builds.
 
 ## Editor Support
 
@@ -51,7 +60,8 @@ path = "../shared_lib"
 - `func name(arg: type) -> type { ... }`
 - `import name;`
 - `import util::path;`
-- `import shared::math;`
+- `import shared::util::text;`
+- `import http::client;`
 - `import std::{ io, str, fs, env }`
 
 ### Data types
@@ -128,8 +138,7 @@ path = "../shared_lib"
 
 - fixed arrays plus built-in `Vec<T>` only; no general generics
 - declarative build configuration only
-- local path dependencies only; no registry or lockfile
+- package management uses one registry per project with exact versions only; no semver ranges or publishing flow
 - strict `con` restrictions
 - no generics
-- no package manager
 - no formatter or LSP

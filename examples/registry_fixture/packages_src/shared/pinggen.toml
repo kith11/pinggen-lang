@@ -1,0 +1,12 @@
+[package]
+name = "shared"
+version = "1.0.0"
+
+[build]
+name = "shared"
+entry = "src/util/text.pg"
+output = "build/shared"
+
+[[dependency]]
+name = "numbers"
+version = "1.0.0"

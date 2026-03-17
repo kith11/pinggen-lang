@@ -1,6 +1,7 @@
 C:\Users\keith\Documents\projects\pinggen-programming-language\src\main.cpp;C:\Users\keith\Documents\projects\pinggen-programming-language\build\pinggen.dir\Debug\main.obj
 C:\Users\keith\Documents\projects\pinggen-programming-language\src\token.cpp;C:\Users\keith\Documents\projects\pinggen-programming-language\build\pinggen.dir\Debug\token.obj
 C:\Users\keith\Documents\projects\pinggen-programming-language\src\diagnostics.cpp;C:\Users\keith\Documents\projects\pinggen-programming-language\build\pinggen.dir\Debug\diagnostics.obj
+C:\Users\keith\Documents\projects\pinggen-programming-language\src\dependency_resolver.cpp;C:\Users\keith\Documents\projects\pinggen-programming-language\build\pinggen.dir\Debug\dependency_resolver.obj
 C:\Users\keith\Documents\projects\pinggen-programming-language\src\lexer.cpp;C:\Users\keith\Documents\projects\pinggen-programming-language\build\pinggen.dir\Debug\lexer.obj
 C:\Users\keith\Documents\projects\pinggen-programming-language\src\parser.cpp;C:\Users\keith\Documents\projects\pinggen-programming-language\build\pinggen.dir\Debug\parser.obj
 C:\Users\keith\Documents\projects\pinggen-programming-language\src\sema.cpp;C:\Users\keith\Documents\projects\pinggen-programming-language\build\pinggen.dir\Debug\sema.obj

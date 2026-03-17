@@ -1,0 +1,19 @@
+import std::{ io, fs }
+
+func main() {
+    match fs::create_dir("made-dir") {
+        FsWriteResult::Ok => {
+            match fs::write_string("made-dir/note.txt", "inside") {
+                FsWriteResult::Ok => {
+                    io::println("dir-ready");
+                }
+                FsWriteResult::Err(message) => {
+                    io::println(message);
+                }
+            }
+        }
+        FsWriteResult::Err(message) => {
+            io::println(message);
+        }
+    }
+}

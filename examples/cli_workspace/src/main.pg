@@ -1,0 +1,51 @@
+import std::{ io, fs }
+import util::names;
+import util::workspace;
+
+func main() {
+    match fs::cwd() {
+        FsResult::Ok(path) => {
+            if is_workspace_path(path) {
+                io::println("cwd");
+            } else {
+                io::println(path);
+            }
+        }
+        FsResult::Err(message) => {
+            io::println(message);
+        }
+    }
+
+    match fs::create_dir(workspace_dir()) {
+        FsWriteResult::Ok => {
+            io::println("dir");
+        }
+        FsWriteResult::Err(message) => {
+            io::println(message);
+        }
+    }
+
+    let mut names: Vec<string> = vec<string>[];
+    names.push("note.txt");
+    names.push("note.log");
+    names.push("todo.txt");
+    io::println(count_selected(names));
+
+    match fs::write_string(note_path(), "workspace note") {
+        FsWriteResult::Ok => {
+            io::println("write");
+        }
+        FsWriteResult::Err(message) => {
+            io::println(message);
+        }
+    }
+
+    match fs::remove(note_path()) {
+        FsWriteResult::Ok => {
+            io::println("remove");
+        }
+        FsWriteResult::Err(message) => {
+            io::println(message);
+        }
+    }
+}

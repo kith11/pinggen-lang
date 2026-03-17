@@ -1,0 +1,19 @@
+import numbers::seed;
+
+struct SharedLabel {
+    value: int,
+}
+
+impl SharedLabel {
+    func width(self) -> int {
+        return self.value;
+    }
+}
+
+func shared_label() -> SharedLabel {
+    return SharedLabel { value: base() };
+}
+
+func shared_value() -> int {
+    return base() + 4;
+}

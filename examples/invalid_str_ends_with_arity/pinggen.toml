@@ -1,0 +1,8 @@
+[package]
+name = "invalid_str_ends_with_arity"
+version = "0.1.0"
+
+[build]
+name = "invalid_str_ends_with_arity"
+entry = "src/main.pg"
+output = "build/invalid_str_ends_with_arity"

@@ -1,0 +1,8 @@
+import std::{ io }
+import shared::util::text;
+
+func main() {
+    let label = shared_label();
+    io::println(label.width());
+    io::println(shared_value());
+}

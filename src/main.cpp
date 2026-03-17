@@ -10,6 +10,7 @@
 #include <unordered_set>
 
 #include "pinggen/diagnostics.hpp"
+#include "pinggen/dependency_resolver.hpp"
 #include "pinggen/lexer.hpp"
 #include "pinggen/llvm_ir.hpp"
 #include "pinggen/parser.hpp"
@@ -293,7 +294,8 @@ static std::string module_name_from_source_path(const LoadedProject& project, co
 static std::shared_ptr<LoadedProject> load_project_graph(
     const fs::path& project_dir,
     std::unordered_map<std::string, std::shared_ptr<LoadedProject>>& cache,
-    std::unordered_set<std::string>& active_roots) {
+    std::unordered_set<std::string>& active_roots,
+    const std::optional<std::string>& inherited_registry_index = std::nullopt) {
     const std::string canonical_root = fs::weakly_canonical(project_dir).string();
     if (active_roots.contains(canonical_root)) {
         throw std::runtime_error("circular project dependency detected at '" + canonical_root + "'");
@@ -304,12 +306,15 @@ static std::shared_ptr<LoadedProject> load_project_graph(
 
     active_roots.insert(canonical_root);
     auto loaded = std::make_shared<LoadedProject>();
-    loaded->config = load_project(project_dir);
+    loaded->config =
+        resolve_registry_dependencies(load_project(project_dir, inherited_registry_index.has_value()), inherited_registry_index);
     cache.emplace(canonical_root, loaded);
 
+    const std::optional<std::string> effective_registry =
+        loaded->config.registry.index.has_value() ? loaded->config.registry.index : inherited_registry_index;
     for (const auto& dependency : loaded->config.dependencies) {
         loaded->dependencies.emplace(
-            dependency.name, load_project_graph(dependency.path, cache, active_roots));
+            dependency.name, load_project_graph(dependency.resolved_path, cache, active_roots, effective_registry));
     }
 
     active_roots.erase(canonical_root);

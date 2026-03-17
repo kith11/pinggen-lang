@@ -9,6 +9,7 @@ add_executable(pinggen
     src/main.cpp
     src/token.cpp
     src/diagnostics.cpp
+    src/dependency_resolver.cpp
     src/lexer.cpp
     src/parser.cpp
     src/sema.cpp
@@ -47,6 +48,10 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/path_dependency_app
     )
     add_test(
+        NAME pinggen-check-registry-app
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/registry_app
+    )
+    add_test(
         NAME pinggen-run-file-process
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/file_process
     )
@@ -57,6 +62,10 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-run-path-dependency-app
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/path_dependency_app
+    )
+    add_test(
+        NAME pinggen-run-registry-app
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/registry_app
     )
     add_test(
         NAME pinggen-build-example
@@ -334,6 +343,46 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-fs-exists-type PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-fs-remove-missing-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_remove_missing_import
+    )
+    set_tests_properties(pinggen-check-invalid-fs-remove-missing-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-remove-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_remove_arity
+    )
+    set_tests_properties(pinggen-check-invalid-fs-remove-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-remove-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_remove_type
+    )
+    set_tests_properties(pinggen-check-invalid-fs-remove-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-create-dir-missing-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_create_dir_missing_import
+    )
+    set_tests_properties(pinggen-check-invalid-fs-create-dir-missing-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-create-dir-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_create_dir_arity
+    )
+    set_tests_properties(pinggen-check-invalid-fs-create-dir-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-create-dir-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_create_dir_type
+    )
+    set_tests_properties(pinggen-check-invalid-fs-create-dir-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-cwd-missing-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_cwd_missing_import
+    )
+    set_tests_properties(pinggen-check-invalid-fs-cwd-missing-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-fs-cwd-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_fs_cwd_arity
+    )
+    set_tests_properties(pinggen-check-invalid-fs-cwd-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-env-get-missing-import
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_env_get_missing_import
     )
@@ -404,6 +453,26 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-str-len-type PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-str-eq-missing-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_str_eq_missing_import
+    )
+    set_tests_properties(pinggen-check-invalid-str-eq-missing-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-str-eq-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_str_eq_arity
+    )
+    set_tests_properties(pinggen-check-invalid-str-eq-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-str-starts-with-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_str_starts_with_type
+    )
+    set_tests_properties(pinggen-check-invalid-str-starts-with-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-str-ends-with-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_str_ends_with_arity
+    )
+    set_tests_properties(pinggen-check-invalid-str-ends-with-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-missing-module
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_missing_module
     )
@@ -444,20 +513,55 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-dependency-missing-config PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-dependency-both-sources
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_dependency_both_sources
+    )
+    set_tests_properties(pinggen-check-invalid-dependency-both-sources PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-dependency-neither-source
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_dependency_neither_source
+    )
+    set_tests_properties(pinggen-check-invalid-dependency-neither-source PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-dependency-missing-registry
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_dependency_missing_registry
+    )
+    set_tests_properties(pinggen-check-invalid-dependency-missing-registry PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-dependency-duplicate-name
-        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_duplicate_dependency_name
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_dependency_duplicate_name
     )
     set_tests_properties(pinggen-check-invalid-dependency-duplicate-name PROPERTIES WILL_FAIL TRUE)
     add_test(
         NAME pinggen-check-invalid-dependency-root-import
-        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_dependency_import_root
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_dependency_root_import
     )
     set_tests_properties(pinggen-check-invalid-dependency-root-import PROPERTIES WILL_FAIL TRUE)
     add_test(
         NAME pinggen-check-invalid-dependency-cycle-app
-        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_dependency_cycle_root
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_dependency_cycle_app
     )
     set_tests_properties(pinggen-check-invalid-dependency-cycle-app PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-registry-unknown-package
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_registry_unknown_package
+    )
+    set_tests_properties(pinggen-check-invalid-registry-unknown-package PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-registry-unknown-version
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_registry_unknown_version
+    )
+    set_tests_properties(pinggen-check-invalid-registry-unknown-version PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-registry-checksum
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_registry_checksum
+    )
+    set_tests_properties(pinggen-check-invalid-registry-checksum PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-registry-download
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_registry_download
+    )
+    set_tests_properties(pinggen-check-invalid-registry-download PROPERTIES WILL_FAIL TRUE)
     add_test(
         NAME pinggen-check-invalid-std-import-item
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_std_import_item
@@ -622,6 +726,30 @@ if(BUILD_TESTING)
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_exists_missing
     )
     add_test(
+        NAME pinggen-run-str-helpers-success
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_str_helpers_success
+    )
+    add_test(
+        NAME pinggen-run-fs-remove-success
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_remove_success
+    )
+    add_test(
+        NAME pinggen-run-fs-remove-missing
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_remove_missing
+    )
+    add_test(
+        NAME pinggen-run-fs-create-dir-success
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_create_dir_success
+    )
+    add_test(
+        NAME pinggen-run-fs-create-dir-existing
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_create_dir_existing
+    )
+    add_test(
+        NAME pinggen-run-fs-cwd-success
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_cwd_success
+    )
+    add_test(
         NAME pinggen-run-env-get-success
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_env_get_success
     )
@@ -761,12 +889,47 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-diagnostics-dependency-root-import
         COMMAND powershell -NoProfile -Command
-                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_dependency_import_root' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*dependency imports must include a module path after ''shared::''*') { throw $text; }"
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_dependency_root_import' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*dependency imports must include a module path after ''shared::''*') { throw $text; }"
     )
     add_test(
         NAME pinggen-diagnostics-dependency-cycle
         COMMAND powershell -NoProfile -Command
-                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_dependency_cycle_root' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*circular project dependency detected at*invalid_dependency_cycle_root*') { throw $text; }"
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_dependency_cycle_app' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*circular project dependency detected at*invalid_dependency_cycle_app*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-dependency-both-sources
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_dependency_both_sources' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notmatch 'must define exactly one of \\[\\[dependency\\]\\] #1\\.path or \\[\\[dependency\\]\\] #1\\.version') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-dependency-neither-source
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_dependency_neither_source' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notmatch 'must define exactly one of \\[\\[dependency\\]\\] #1\\.path or \\[\\[dependency\\]\\] #1\\.version') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-missing-registry-index
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_dependency_missing_registry' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notmatch 'must define \\[registry\\]\\.index when any dependency uses \\.version') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-registry-unknown-package
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_registry_unknown_package' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*unknown registry package ''missing''*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-registry-unknown-version
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_registry_unknown_version' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*does not provide exact version ''9.9.9''*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-registry-checksum
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_registry_checksum' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*checksum mismatch for registry package ''shared'' version ''1.0.0''*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-registry-download
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_registry_download' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*registry package archive not found*' -and $text -notlike '*failed to download package archive*') { throw $text; }"
     )
     add_test(
         NAME pinggen-diagnostics-project-missing-entry
@@ -799,13 +962,18 @@ if(BUILD_TESTING)
                 "& '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target tool; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if (-not (Test-Path '${CMAKE_SOURCE_DIR}/examples/multi_target/build/tools/ping-tool.exe')) { throw 'expected named target exe'; }"
     )
     add_test(
+        NAME pinggen-lockfile-registry-app
+        COMMAND powershell -NoProfile -Command
+                "$lock = Join-Path '${CMAKE_SOURCE_DIR}/examples/registry_app' 'puff.lock'; if (Test-Path $lock) { Remove-Item -Force $lock }; & '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/registry_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if (-not (Test-Path $lock)) { throw 'expected puff.lock to be generated'; }; $text = Get-Content -Raw $lock; if ($text -notmatch 'registry_index' -or $text -notmatch '\\[\\[registry_dependency\\]\\]' -or $text -notmatch 'name = \"shared\"') { throw $text; }; & '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/registry_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+    )
+    add_test(
         NAME pinggen-release-sweep
         COMMAND powershell -NoProfile -Command
-                "& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target tool; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/file_process'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hierarchical_modules'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/path_dependency_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hello'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+                "& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target tool; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/file_process'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hierarchical_modules'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/path_dependency_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/registry_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hello'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
     )
     add_test(
         NAME pinggen-docs-consistency
         COMMAND powershell -NoProfile -Command
-                "$readme = Get-Content -Raw '${CMAKE_SOURCE_DIR}/README.md'; $reference = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/reference.md'; $release = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/release-checklist.md'; foreach ($path in @('starter','multi_target','file_process','hierarchical_modules','path_dependency_app','hello')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}/examples' $path))) { throw \"missing example $path\" } }; foreach ($path in @('editors/vscode/pinggen/package.json','editors/vscode/pinggen/language-configuration.json','editors/vscode/pinggen/syntaxes/pinggen.tmLanguage.json','editors/vscode/pinggen/README.md')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}' $path))) { throw \"missing editor support file $path\" } }; if ($readme -notmatch 'docs/reference\\.md' -or $readme -notmatch 'docs/release-checklist\\.md' -or $readme -notmatch 'editors/vscode/pinggen') { throw 'README missing docs or editor support links'; }; if ($reference -notmatch '\\[\\[target\\]\\]' -or $reference -notmatch '--target <name>' -or $reference -notmatch 'editors/vscode/pinggen') { throw 'reference missing manifest, target selector, or editor support docs'; }; if ($release -notmatch 'ctest --test-dir build -C Debug --output-on-failure' -or $release -notmatch 'examples/file_process') { throw 'release checklist missing verification coverage'; }"
+                "$readme = Get-Content -Raw '${CMAKE_SOURCE_DIR}/README.md'; $reference = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/reference.md'; $release = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/release-checklist.md'; foreach ($path in @('starter','multi_target','file_process','hierarchical_modules','path_dependency_app','registry_app','hello')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}/examples' $path))) { throw \"missing example $path\" } }; foreach ($path in @('editors/vscode/pinggen/package.json','editors/vscode/pinggen/language-configuration.json','editors/vscode/pinggen/syntaxes/pinggen.tmLanguage.json','editors/vscode/pinggen/README.md')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}' $path))) { throw \"missing editor support file $path\" } }; if ($readme -notmatch 'docs/reference\\.md' -or $readme -notmatch 'docs/release-checklist\\.md' -or $readme -notmatch 'editors/vscode/pinggen' -or $readme -notmatch 'puff\\.lock') { throw 'README missing docs, lockfile, or editor support links'; }; if ($reference -notmatch '\\[\\[target\\]\\]' -or $reference -notmatch '--target <name>' -or $reference -notmatch 'puff\\.lock' -or $reference -notmatch 'version = \"1\\.2\\.0\"') { throw 'reference missing manifest, target selector, or registry package docs'; }; if ($release -notmatch 'ctest --test-dir build -C Debug --output-on-failure' -or $release -notmatch 'examples/file_process' -or $release -notmatch 'examples/registry_app') { throw 'release checklist missing verification coverage'; }"
     )
 endif()

@@ -3,6 +3,9 @@ declare i32 @printf(ptr, ...)
 
 declare void @exit(i32)
 declare i64 @strlen(ptr)
+declare i32 @strcmp(ptr, ptr)
+declare i32 @pinggen_str_starts_with(ptr, ptr)
+declare i32 @pinggen_str_ends_with(ptr, ptr)
 declare ptr @malloc(i64)
 declare ptr @memcpy(ptr, ptr, i64)
 declare ptr @pinggen_vec_create(i64, i64)
@@ -16,6 +19,10 @@ declare i32 @fseek(ptr, i64, i32)
 declare i64 @ftell(ptr)
 declare i64 @fread(ptr, i64, i64, ptr)
 declare i64 @fwrite(ptr, i64, i64, ptr)
+
+declare ptr @pinggen_fs_remove_error(ptr)
+declare ptr @pinggen_fs_create_dir_error(ptr)
+declare ptr @pinggen_fs_cwd_raw()
 
 %enum.FsResult = type { i64, ptr, ptr }
 %enum.FsWriteResult = type { i64, ptr }
@@ -127,6 +134,50 @@ done:
   ret i1 %exists
 }
 
+define %enum.FsWriteResult @pinggen_fs_remove(ptr %path) {
+entry:
+  %error = call ptr @pinggen_fs_remove_error(ptr %path)
+  %ok = icmp eq ptr %error, null
+  br i1 %ok, label %success, label %fail
+success:
+  %ok_res = insertvalue %enum.FsWriteResult zeroinitializer, i64 0, 0
+  ret %enum.FsWriteResult %ok_res
+fail:
+  %err_res0 = insertvalue %enum.FsWriteResult zeroinitializer, i64 1, 0
+  %err_res1 = insertvalue %enum.FsWriteResult %err_res0, ptr %error, 1
+  ret %enum.FsWriteResult %err_res1
+}
+
+define %enum.FsWriteResult @pinggen_fs_create_dir(ptr %path) {
+entry:
+  %error = call ptr @pinggen_fs_create_dir_error(ptr %path)
+  %ok = icmp eq ptr %error, null
+  br i1 %ok, label %success, label %fail
+success:
+  %ok_res = insertvalue %enum.FsWriteResult zeroinitializer, i64 0, 0
+  ret %enum.FsWriteResult %ok_res
+fail:
+  %err_res0 = insertvalue %enum.FsWriteResult zeroinitializer, i64 1, 0
+  %err_res1 = insertvalue %enum.FsWriteResult %err_res0, ptr %error, 1
+  ret %enum.FsWriteResult %err_res1
+}
+
+define %enum.FsResult @pinggen_fs_cwd() {
+entry:
+  %value = call ptr @pinggen_fs_cwd_raw()
+  %ok = icmp ne ptr %value, null
+  br i1 %ok, label %success, label %fail
+success:
+  %ok_res0 = insertvalue %enum.FsResult zeroinitializer, i64 0, 0
+  %ok_res1 = insertvalue %enum.FsResult %ok_res0, ptr %value, 1
+  ret %enum.FsResult %ok_res1
+fail:
+  %err_msg = getelementptr inbounds [23 x i8], ptr @.fs.err.cwd, i64 0, i64 0
+  %err_res0 = insertvalue %enum.FsResult zeroinitializer, i64 1, 0
+  %err_res1 = insertvalue %enum.FsResult %err_res0, ptr %err_msg, 2
+  ret %enum.FsResult %err_res1
+}
+
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
 @.fs.mode.rb = private unnamed_addr constant [3 x i8] c"rb\00"
@@ -134,6 +185,9 @@ done:
 @.fs.err.open = private unnamed_addr constant [20 x i8] c"failed to open file\00"
 @.fs.err.read = private unnamed_addr constant [20 x i8] c"failed to read file\00"
 @.fs.err.write = private unnamed_addr constant [21 x i8] c"failed to write file\00"
+@.fs.err.remove = private unnamed_addr constant [22 x i8] c"failed to remove file\00"
+@.fs.err.mkdir = private unnamed_addr constant [21 x i8] c"failed to create dir\00"
+@.fs.err.cwd = private unnamed_addr constant [23 x i8] c"failed to get cwd path\00"
 @.str.1 = private unnamed_addr constant [12 x i8] c"message.txt\00"
 @.str.2 = private unnamed_addr constant [7 x i8] c"exists\00"
 @.str.3 = private unnamed_addr constant [8 x i8] c"missing\00"

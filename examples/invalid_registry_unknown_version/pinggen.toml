@@ -1,0 +1,15 @@
+[package]
+name = "invalid_registry_unknown_version"
+version = "0.1.0"
+
+[registry]
+index = "../registry_fixture/index.toml"
+
+[build]
+name = "invalid_registry_unknown_version"
+entry = "src/main.pg"
+output = "build/invalid_registry_unknown_version"
+
+[[dependency]]
+name = "shared"
+version = "9.9.9"
