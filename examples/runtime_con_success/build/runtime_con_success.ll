@@ -9,8 +9,8 @@ declare ptr @pinggen_con_group_create(i64)
 declare void @pinggen_con_spawn(ptr, ptr, ptr)
 declare void @pinggen_con_wait(ptr)
 
-%con.ctx.1 = type { ptr }
-%con.ctx.2 = type { ptr }
+%con.sync.1.ctx.0 = type { ptr }
+%con.sync.1.ctx.1 = type { ptr }
 
 define ptr @pinggen_concat(ptr %lhs, ptr %rhs) {
   %1 = call i64 @strlen(ptr %lhs)
@@ -34,16 +34,16 @@ define void @pinggen_bounds_abort() {
 define void @pinggen_con_task_1_0(ptr %ctx) {
 entry:
   %task_result = call i64 @left()
-  %result_ptr = getelementptr inbounds %con.ctx.1, ptr %ctx, i32 0, i32 0
+  %result_ptr = getelementptr inbounds %con.sync.1.ctx.0, ptr %ctx, i32 0, i32 0
   %result_slot = load ptr, ptr %result_ptr
   store i64 %task_result, ptr %result_slot
   ret void
 }
 
-define void @pinggen_con_task_2_1(ptr %ctx) {
+define void @pinggen_con_task_1_1(ptr %ctx) {
 entry:
   %task_result = call i64 @right()
-  %result_ptr = getelementptr inbounds %con.ctx.2, ptr %ctx, i32 0, i32 0
+  %result_ptr = getelementptr inbounds %con.sync.1.ctx.1, ptr %ctx, i32 0, i32 0
   %result_slot = load ptr, ptr %result_ptr
   store i64 %task_result, ptr %result_slot
   ret void
@@ -63,15 +63,15 @@ define i64 @right() {
 define i32 @main() {
   %1 = call ptr @pinggen_con_group_create(i64 2)
   %2 = alloca i64
-  %3 = alloca %con.ctx.1
-  %4 = getelementptr inbounds %con.ctx.1, ptr %3, i32 0, i32 0
+  %3 = alloca %con.sync.1.ctx.0
+  %4 = getelementptr inbounds %con.sync.1.ctx.0, ptr %3, i32 0, i32 0
   store ptr %2, ptr %4
   call void @pinggen_con_spawn(ptr %1, ptr @pinggen_con_task_1_0, ptr %3)
   %5 = alloca i64
-  %6 = alloca %con.ctx.2
-  %7 = getelementptr inbounds %con.ctx.2, ptr %6, i32 0, i32 0
+  %6 = alloca %con.sync.1.ctx.1
+  %7 = getelementptr inbounds %con.sync.1.ctx.1, ptr %6, i32 0, i32 0
   store ptr %5, ptr %7
-  call void @pinggen_con_spawn(ptr %1, ptr @pinggen_con_task_2_1, ptr %6)
+  call void @pinggen_con_spawn(ptr %1, ptr @pinggen_con_task_1_1, ptr %6)
   call void @pinggen_con_wait(ptr %1)
   %8 = alloca { i64, i64 }
   %9 = load i64, ptr %2

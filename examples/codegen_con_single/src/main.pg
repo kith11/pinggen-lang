@@ -1,0 +1,8 @@
+safe func one() -> int {
+    return 1;
+}
+
+func main() {
+    let (value) = con { one() };
+    return value;
+}

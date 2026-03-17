@@ -24,6 +24,27 @@ class LLVMIRGenerator {
     std::string generate(const Program& program);
 
   private:
+    enum class ConTaskKind { Function, Method };
+
+    struct LoweredConTask {
+        ConTaskKind kind = ConTaskKind::Function;
+        std::string lowered_callee;
+        std::vector<TypedIRValue> captures;
+        std::vector<Type> capture_types;
+        std::vector<bool> capture_is_receiver;
+        Type result_type = Type::void_type();
+        std::size_t source_index = 0;
+        std::string context_type_name;
+        std::string task_name;
+    };
+
+    struct LoweredConExpr {
+        std::size_t sync_region_id = 0;
+        std::vector<LoweredConTask> tasks;
+        std::vector<Type> result_types;
+        bool all_void = true;
+    };
+
     static std::string lowered_function_name(const FunctionDecl& function);
     Type normalize_type(const Type& type) const;
     bool enum_has_payload(const std::string& enum_name) const;
@@ -34,9 +55,11 @@ class LLVMIRGenerator {
     void emit_bounds_check(const std::string& index_ir, std::size_t size);
     std::string emit_enum_tag(const TypedIRValue& enum_value);
     std::string emit_string_constant(const std::string& value);
-    std::string emit_con_context_type(const std::vector<Type>& capture_types, bool has_result_slot);
-    std::string emit_con_task_function(const std::string& context_type_name, const Expr& item, const std::vector<Type>& capture_types,
-                                       std::size_t result_index, bool has_result_slot);
+    LoweredConTask lower_con_task(const Expr& item, std::size_t source_index);
+    LoweredConExpr lower_con_expr(const ConExpr& expr);
+    std::string emit_con_context_type(const LoweredConExpr& lowering, const LoweredConTask& task);
+    std::string emit_con_task_function(const LoweredConExpr& lowering, const LoweredConTask& task);
+    TypedIRValue emit_lowered_con_expr(const LoweredConExpr& lowering);
     TypedIRValue emit_con_expr(const ConExpr& expr);
     TypedIRValue emit_expr(const Expr& expr);
     AddressValue emit_address(const Expr& expr);

@@ -380,17 +380,73 @@ std::string LLVMIRGenerator::emit_string_constant(const std::string& value) {
     return name + "|" + std::to_string(byte_len);
 }
 
-std::string LLVMIRGenerator::emit_con_context_type(const std::vector<Type>& capture_types, bool has_result_slot) {
-    const std::string name = "%con.ctx." + std::to_string(++con_counter_);
+LLVMIRGenerator::LoweredConTask LLVMIRGenerator::lower_con_task(const Expr& item, std::size_t source_index) {
+    LoweredConTask task;
+    task.source_index = source_index;
+
+    if (const auto* call = dynamic_cast<const CallExpr*>(&item)) {
+        task.kind = ConTaskKind::Function;
+        task.lowered_callee = call->callee;
+        task.result_type = function_return_types_.at(call->callee);
+        for (const auto& arg : call->args) {
+            TypedIRValue value = emit_expr(*arg);
+            task.capture_types.push_back(value.type);
+            task.capture_is_receiver.push_back(false);
+            task.captures.push_back(std::move(value));
+        }
+        return task;
+    }
+
+    const auto* method = dynamic_cast<const MethodCallExpr*>(&item);
+    task.kind = ConTaskKind::Method;
+    const TypedIRValue object_value = emit_expr(*method->object);
+    task.lowered_callee = object_value.type.name + "__" + method->method;
+    task.result_type = function_return_types_.at(task.lowered_callee);
+    task.capture_types.push_back(object_value.type);
+    task.capture_is_receiver.push_back(true);
+    task.captures.push_back(object_value);
+    for (const auto& arg : method->args) {
+        TypedIRValue value = emit_expr(*arg);
+        task.capture_types.push_back(value.type);
+        task.capture_is_receiver.push_back(false);
+        task.captures.push_back(std::move(value));
+    }
+    return task;
+}
+
+LLVMIRGenerator::LoweredConExpr LLVMIRGenerator::lower_con_expr(const ConExpr& expr) {
+    LoweredConExpr lowering;
+    lowering.sync_region_id = ++con_counter_;
+    lowering.tasks.reserve(expr.items.size());
+
+    for (std::size_t i = 0; i < expr.items.size(); ++i) {
+        LoweredConTask task = lower_con_task(*expr.items[i], i);
+        task.context_type_name = emit_con_context_type(lowering, task);
+        task.task_name = emit_con_task_function(lowering, task);
+        if (task.result_type == Type::void_type()) {
+            lowering.tasks.push_back(std::move(task));
+            continue;
+        }
+        lowering.all_void = false;
+        lowering.result_types.push_back(task.result_type);
+        lowering.tasks.push_back(std::move(task));
+    }
+
+    return lowering;
+}
+
+std::string LLVMIRGenerator::emit_con_context_type(const LoweredConExpr& lowering, const LoweredConTask& task) {
+    const std::string name =
+        "%con.sync." + std::to_string(lowering.sync_region_id) + ".ctx." + std::to_string(task.source_index);
     extra_type_defs_ += name + " = type { ";
-    for (std::size_t i = 0; i < capture_types.size(); ++i) {
+    for (std::size_t i = 0; i < task.capture_types.size(); ++i) {
         if (i != 0) {
             extra_type_defs_ += ", ";
         }
-        extra_type_defs_ += llvm_type(capture_types[i]);
+        extra_type_defs_ += llvm_type(task.capture_types[i]);
     }
-    if (has_result_slot) {
-        if (!capture_types.empty()) {
+    if (task.result_type != Type::void_type()) {
+        if (!task.capture_types.empty()) {
             extra_type_defs_ += ", ";
         }
         extra_type_defs_ += "ptr";
@@ -399,58 +455,41 @@ std::string LLVMIRGenerator::emit_con_context_type(const std::vector<Type>& capt
     return name;
 }
 
-std::string LLVMIRGenerator::emit_con_task_function(const std::string& context_type_name, const Expr& item,
-                                                    const std::vector<Type>& capture_types, std::size_t result_index,
-                                                    bool has_result_slot) {
-    const std::string task_name = "pinggen_con_task_" + std::to_string(con_counter_) + "_" + std::to_string(result_index);
+std::string LLVMIRGenerator::emit_con_task_function(const LoweredConExpr& lowering, const LoweredConTask& task) {
+    const std::string task_name =
+        "pinggen_con_task_" + std::to_string(lowering.sync_region_id) + "_" + std::to_string(task.source_index);
     std::string fn;
     fn += "define void @" + task_name + "(ptr %ctx) {\n";
     fn += "entry:\n";
 
     std::vector<std::string> loaded_values;
-    for (std::size_t i = 0; i < capture_types.size(); ++i) {
+    for (std::size_t i = 0; i < task.capture_types.size(); ++i) {
         const std::string field_ptr = "%ctx_field_ptr_" + std::to_string(i + 1);
         const std::string field_value = "%ctx_field_value_" + std::to_string(i + 1);
-        fn += "  " + field_ptr + " = getelementptr inbounds " + context_type_name + ", ptr %ctx, i32 0, i32 " +
+        fn += "  " + field_ptr + " = getelementptr inbounds " + task.context_type_name + ", ptr %ctx, i32 0, i32 " +
               std::to_string(i) + "\n";
-        fn += "  " + field_value + " = load " + llvm_type(capture_types[i]) + ", ptr " + field_ptr + "\n";
+        fn += "  " + field_value + " = load " + llvm_type(task.capture_types[i]) + ", ptr " + field_ptr + "\n";
         loaded_values.push_back(field_value);
     }
 
-    Type result_type = Type::void_type();
-    std::string call_ir;
-    if (const auto* call = dynamic_cast<const CallExpr*>(&item)) {
-        result_type = function_return_types_.at(call->callee);
-        call_ir = "@" + call->callee + "(";
-        for (std::size_t i = 0; i < capture_types.size(); ++i) {
-            if (i != 0) {
-                call_ir += ", ";
-            }
-            call_ir += llvm_type(capture_types[i]) + " " + loaded_values[i];
+    std::string call_ir = "@" + task.lowered_callee + "(";
+    for (std::size_t i = 0; i < task.capture_types.size(); ++i) {
+        if (i != 0) {
+            call_ir += ", ";
         }
-        call_ir += ")";
-    } else if (const auto* method = dynamic_cast<const MethodCallExpr*>(&item)) {
-        const std::string lowered_name = capture_types[0].name + "__" + method->method;
-        result_type = function_return_types_.at(lowered_name);
-        call_ir = "@" + lowered_name + "(";
-        for (std::size_t i = 0; i < capture_types.size(); ++i) {
-            if (i != 0) {
-                call_ir += ", ";
-            }
-            call_ir += llvm_type(capture_types[i]) + " " + loaded_values[i];
-        }
-        call_ir += ")";
+        call_ir += llvm_type(task.capture_types[i]) + " " + loaded_values[i];
     }
+    call_ir += ")";
 
-    if (result_type == Type::void_type()) {
+    if (task.result_type == Type::void_type()) {
         fn += "  call void " + call_ir + "\n";
     } else {
-        fn += "  %task_result = call " + llvm_type(result_type) + " " + call_ir + "\n";
+        fn += "  %task_result = call " + llvm_type(task.result_type) + " " + call_ir + "\n";
         const std::string result_ptr = "%result_ptr";
-        fn += "  " + result_ptr + " = getelementptr inbounds " + context_type_name + ", ptr %ctx, i32 0, i32 " +
-              std::to_string(capture_types.size()) + "\n";
+        fn += "  " + result_ptr + " = getelementptr inbounds " + task.context_type_name + ", ptr %ctx, i32 0, i32 " +
+              std::to_string(task.capture_types.size()) + "\n";
         fn += "  %result_slot = load ptr, ptr " + result_ptr + "\n";
-        fn += "  store " + llvm_type(result_type) + " %task_result, ptr %result_slot\n";
+        fn += "  store " + llvm_type(task.result_type) + " %task_result, ptr %result_slot\n";
     }
     fn += "  ret void\n";
     fn += "}\n\n";
@@ -458,92 +497,62 @@ std::string LLVMIRGenerator::emit_con_task_function(const std::string& context_t
     return task_name;
 }
 
-TypedIRValue LLVMIRGenerator::emit_con_expr(const ConExpr& expr) {
-    uses_con_runtime_ = true;
-    std::vector<TypedIRValue> results;
-    std::vector<Type> result_types;
-    const bool returns_void = expr.items.empty() ? true : false;
+TypedIRValue LLVMIRGenerator::emit_lowered_con_expr(const LoweredConExpr& lowering) {
     const std::string group_reg = next_register();
-    body_ += "  " + group_reg + " = call ptr @pinggen_con_group_create(i64 " + std::to_string(expr.items.size()) + ")\n";
+    body_ += "  " + group_reg + " = call ptr @pinggen_con_group_create(i64 " + std::to_string(lowering.tasks.size()) + ")\n";
 
     std::vector<std::string> result_slots;
-    bool all_void = true;
-    for (std::size_t i = 0; i < expr.items.size(); ++i) {
-        const Expr& item = *expr.items[i];
-        std::vector<TypedIRValue> captures;
-        std::vector<Type> capture_types;
-        Type result_type = Type::void_type();
-
-        if (const auto* call = dynamic_cast<const CallExpr*>(&item)) {
-            for (const auto& arg : call->args) {
-                TypedIRValue value = emit_expr(*arg);
-                captures.push_back(value);
-                capture_types.push_back(value.type);
-            }
-            result_type = function_return_types_.at(call->callee);
-        } else if (const auto* method = dynamic_cast<const MethodCallExpr*>(&item)) {
-            TypedIRValue object_value = emit_expr(*method->object);
-            captures.push_back(object_value);
-            capture_types.push_back(object_value.type);
-            for (const auto& arg : method->args) {
-                TypedIRValue value = emit_expr(*arg);
-                captures.push_back(value);
-                capture_types.push_back(value.type);
-            }
-            result_type = function_return_types_.at(object_value.type.name + "__" + method->method);
-        }
-
-        const bool has_result_slot = result_type != Type::void_type();
-        if (has_result_slot) {
-            all_void = false;
-            result_types.push_back(result_type);
-        }
-
+    for (const auto& task : lowering.tasks) {
+        const bool has_result_slot = task.result_type != Type::void_type();
         const std::string result_slot = has_result_slot ? next_register() : "";
         if (has_result_slot) {
-            body_ += "  " + result_slot + " = alloca " + llvm_type(result_type) + "\n";
+            body_ += "  " + result_slot + " = alloca " + llvm_type(task.result_type) + "\n";
             result_slots.push_back(result_slot);
         }
 
-        const std::string context_type_name = emit_con_context_type(capture_types, has_result_slot);
-        const std::string task_name = emit_con_task_function(context_type_name, item, capture_types, i, has_result_slot);
         const std::string ctx_storage = next_register();
-        body_ += "  " + ctx_storage + " = alloca " + context_type_name + "\n";
-        for (std::size_t capture_index = 0; capture_index < captures.size(); ++capture_index) {
+        body_ += "  " + ctx_storage + " = alloca " + task.context_type_name + "\n";
+        for (std::size_t capture_index = 0; capture_index < task.captures.size(); ++capture_index) {
             const std::string field_ptr = next_register();
-            body_ += "  " + field_ptr + " = getelementptr inbounds " + context_type_name + ", ptr " + ctx_storage +
+            body_ += "  " + field_ptr + " = getelementptr inbounds " + task.context_type_name + ", ptr " + ctx_storage +
                      ", i32 0, i32 " + std::to_string(capture_index) + "\n";
-            body_ += "  store " + llvm_type(captures[capture_index].type) + " " + captures[capture_index].ir + ", ptr " + field_ptr +
-                     "\n";
+            body_ += "  store " + llvm_type(task.captures[capture_index].type) + " " + task.captures[capture_index].ir +
+                     ", ptr " + field_ptr + "\n";
         }
         if (has_result_slot) {
             const std::string field_ptr = next_register();
-            body_ += "  " + field_ptr + " = getelementptr inbounds " + context_type_name + ", ptr " + ctx_storage +
-                     ", i32 0, i32 " + std::to_string(captures.size()) + "\n";
+            body_ += "  " + field_ptr + " = getelementptr inbounds " + task.context_type_name + ", ptr " + ctx_storage +
+                     ", i32 0, i32 " + std::to_string(task.captures.size()) + "\n";
             body_ += "  store ptr " + result_slot + ", ptr " + field_ptr + "\n";
         }
-        body_ += "  call void @pinggen_con_spawn(ptr " + group_reg + ", ptr @" + task_name + ", ptr " + ctx_storage + ")\n";
+        body_ += "  call void @pinggen_con_spawn(ptr " + group_reg + ", ptr @" + task.task_name + ", ptr " + ctx_storage + ")\n";
     }
 
     body_ += "  call void @pinggen_con_wait(ptr " + group_reg + ")\n";
-    if (all_void) {
+    if (lowering.all_void) {
         return {"0", Type::void_type()};
     }
 
-    const Type tuple_type = Type::tuple_type(result_types);
+    const Type tuple_type = Type::tuple_type(lowering.result_types);
     const std::string tuple_storage = next_register();
     body_ += "  " + tuple_storage + " = alloca " + llvm_type(tuple_type) + "\n";
-    for (std::size_t i = 0; i < result_types.size(); ++i) {
+    for (std::size_t i = 0; i < lowering.result_types.size(); ++i) {
         const std::string value_reg = next_register();
         const std::string field_ptr = next_register();
-        body_ += "  " + value_reg + " = load " + llvm_type(result_types[i]) + ", ptr " + result_slots[i] + "\n";
+        body_ += "  " + value_reg + " = load " + llvm_type(lowering.result_types[i]) + ", ptr " + result_slots[i] + "\n";
         body_ += "  " + field_ptr + " = getelementptr inbounds " + llvm_type(tuple_type) + ", ptr " + tuple_storage +
                  ", i32 0, i32 " + std::to_string(i) + "\n";
-        body_ += "  store " + llvm_type(result_types[i]) + " " + value_reg + ", ptr " + field_ptr + "\n";
+        body_ += "  store " + llvm_type(lowering.result_types[i]) + " " + value_reg + ", ptr " + field_ptr + "\n";
     }
     const std::string tuple_reg = next_register();
     body_ += "  " + tuple_reg + " = load " + llvm_type(tuple_type) + ", ptr " + tuple_storage + "\n";
     return {tuple_reg, tuple_type};
+}
+
+TypedIRValue LLVMIRGenerator::emit_con_expr(const ConExpr& expr) {
+    uses_con_runtime_ = true;
+    const LoweredConExpr lowering = lower_con_expr(expr);
+    return emit_lowered_con_expr(lowering);
 }
 
 AddressValue LLVMIRGenerator::emit_address(const Expr& expr) {

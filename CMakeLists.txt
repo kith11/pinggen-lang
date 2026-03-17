@@ -371,6 +371,16 @@ if(BUILD_TESTING)
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_con_success
     )
     add_test(
+        NAME pinggen-codegen-con-single
+        COMMAND powershell -NoProfile -Command
+                "& '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/codegen_con_single'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $text = Get-Content -Raw '${CMAKE_SOURCE_DIR}/examples/codegen_con_single/build/codegen_con_single.ll'; if (([regex]::Matches($text, 'call ptr @pinggen_con_group_create')).Count -ne 1) { throw 'expected one group create'; }; if (([regex]::Matches($text, 'call void @pinggen_con_spawn')).Count -ne 1) { throw 'expected one spawn'; }; if (([regex]::Matches($text, 'call void @pinggen_con_wait')).Count -ne 1) { throw 'expected one wait'; }; if (([regex]::Matches($text, 'define void @pinggen_con_task_')).Count -ne 1) { throw 'expected one task thunk'; }"
+    )
+    add_test(
+        NAME pinggen-codegen-con-multi
+        COMMAND powershell -NoProfile -Command
+                "& '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/hello'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $text = Get-Content -Raw '${CMAKE_SOURCE_DIR}/examples/hello/build/hello.ll'; if (([regex]::Matches($text, 'call ptr @pinggen_con_group_create')).Count -ne 1) { throw 'expected one group create'; }; if (([regex]::Matches($text, 'call void @pinggen_con_spawn')).Count -ne 2) { throw 'expected two spawns'; }; if (([regex]::Matches($text, 'call void @pinggen_con_wait')).Count -ne 1) { throw 'expected one wait'; }; if (([regex]::Matches($text, 'define void @pinggen_con_task_')).Count -ne 2) { throw 'expected two task thunks'; }; if (([regex]::Matches($text, 'call i64 @Job__label_len')).Count -lt 1) { throw 'expected safe method call thunk'; }"
+    )
+    add_test(
         NAME pinggen-check-invalid-unknown-impl
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_unknown_impl
     )

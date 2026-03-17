@@ -18,8 +18,8 @@ declare i64 @fread(ptr, i64, i64, ptr)
 %enum.FsResult = type { i64, ptr, ptr }
 %enum.Result = type { i64, i64, ptr }
 %struct.Job = type { %enum.Result, ptr }
-%con.ctx.1 = type { ptr }
-%con.ctx.2 = type { %struct.Job, ptr }
+%con.sync.1.ctx.0 = type { ptr }
+%con.sync.1.ctx.1 = type { %struct.Job, ptr }
 
 define ptr @pinggen_concat(ptr %lhs, ptr %rhs) {
   %1 = call i64 @strlen(ptr %lhs)
@@ -89,18 +89,18 @@ read_fail:
 define void @pinggen_con_task_1_0(ptr %ctx) {
 entry:
   %task_result = call i64 @number_a()
-  %result_ptr = getelementptr inbounds %con.ctx.1, ptr %ctx, i32 0, i32 0
+  %result_ptr = getelementptr inbounds %con.sync.1.ctx.0, ptr %ctx, i32 0, i32 0
   %result_slot = load ptr, ptr %result_ptr
   store i64 %task_result, ptr %result_slot
   ret void
 }
 
-define void @pinggen_con_task_2_1(ptr %ctx) {
+define void @pinggen_con_task_1_1(ptr %ctx) {
 entry:
-  %ctx_field_ptr_1 = getelementptr inbounds %con.ctx.2, ptr %ctx, i32 0, i32 0
+  %ctx_field_ptr_1 = getelementptr inbounds %con.sync.1.ctx.1, ptr %ctx, i32 0, i32 0
   %ctx_field_value_1 = load %struct.Job, ptr %ctx_field_ptr_1
   %task_result = call i64 @Job__label_len(%struct.Job %ctx_field_value_1)
-  %result_ptr = getelementptr inbounds %con.ctx.2, ptr %ctx, i32 0, i32 1
+  %result_ptr = getelementptr inbounds %con.sync.1.ctx.1, ptr %ctx, i32 0, i32 1
   %result_slot = load ptr, ptr %result_ptr
   store i64 %task_result, ptr %result_slot
   ret void
@@ -244,23 +244,23 @@ define i32 @main() {
   %24 = load [3 x %enum.Result], ptr %11
   %25 = alloca [3 x %enum.Result]
   store [3 x %enum.Result] %24, ptr %25
-  %26 = call ptr @pinggen_con_group_create(i64 2)
-  %27 = alloca i64
-  %28 = alloca %con.ctx.1
-  %29 = getelementptr inbounds %con.ctx.1, ptr %28, i32 0, i32 0
-  store ptr %27, ptr %29
-  call void @pinggen_con_spawn(ptr %26, ptr @pinggen_con_task_1_0, ptr %28)
-  %30 = load %struct.Job, ptr %7
+  %26 = load %struct.Job, ptr %7
+  %27 = call ptr @pinggen_con_group_create(i64 2)
+  %28 = alloca i64
+  %29 = alloca %con.sync.1.ctx.0
+  %30 = getelementptr inbounds %con.sync.1.ctx.0, ptr %29, i32 0, i32 0
+  store ptr %28, ptr %30
+  call void @pinggen_con_spawn(ptr %27, ptr @pinggen_con_task_1_0, ptr %29)
   %31 = alloca i64
-  %32 = alloca %con.ctx.2
-  %33 = getelementptr inbounds %con.ctx.2, ptr %32, i32 0, i32 0
-  store %struct.Job %30, ptr %33
-  %34 = getelementptr inbounds %con.ctx.2, ptr %32, i32 0, i32 1
+  %32 = alloca %con.sync.1.ctx.1
+  %33 = getelementptr inbounds %con.sync.1.ctx.1, ptr %32, i32 0, i32 0
+  store %struct.Job %26, ptr %33
+  %34 = getelementptr inbounds %con.sync.1.ctx.1, ptr %32, i32 0, i32 1
   store ptr %31, ptr %34
-  call void @pinggen_con_spawn(ptr %26, ptr @pinggen_con_task_2_1, ptr %32)
-  call void @pinggen_con_wait(ptr %26)
+  call void @pinggen_con_spawn(ptr %27, ptr @pinggen_con_task_1_1, ptr %32)
+  call void @pinggen_con_wait(ptr %27)
   %35 = alloca { i64, i64 }
-  %36 = load i64, ptr %27
+  %36 = load i64, ptr %28
   %37 = getelementptr inbounds { i64, i64 }, ptr %35, i32 0, i32 0
   store i64 %36, ptr %37
   %38 = load i64, ptr %31
