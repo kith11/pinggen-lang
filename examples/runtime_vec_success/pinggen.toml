@@ -1,0 +1,8 @@
+[package]
+name = "runtime_vec_success"
+version = "0.1.0"
+
+[build]
+name = "runtime_vec_success"
+entry = "src/main.pg"
+output = "build/runtime_vec_success"

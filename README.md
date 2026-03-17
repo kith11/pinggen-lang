@@ -103,7 +103,7 @@ output = "build/tool"
 - flat project-local modules with `import name;`
 - `struct`, `enum`, payload enums, and exhaustive `match`
 - tuples and tuple destructuring
-- fixed-size arrays
+- fixed-size arrays and dynamic `Vec<T>`
 - `if`, `else if`, `else`, `while`, `for`, `break`, `continue`
 - methods with `impl`, `self`, and `mut self`
 - strict task-parallel `con { ... }` with `safe func`
@@ -138,6 +138,7 @@ output = "build/tool"
 - [starter](./examples/starter): small multi-file starter-grade project
 - [multi_target](./examples/multi_target): manifest v2 named targets
 - [file_process](./examples/file_process): practical `fs` + `match` example
+- [runtime_vec_success](./examples/runtime_vec_success): dynamic `Vec<T>` with aliasing, struct fields, params, returns, and enum payloads
 - [hello](./examples/hello): advanced multi-feature demo
 
 For the compact syntax and stdlib reference, use [docs/reference.md](./docs/reference.md).
@@ -148,7 +149,7 @@ A minimal VS Code extension for `.pg` syntax highlighting lives at [editors/vsco
 
 ## Current 1.0 Limits
 
-- arrays are fixed-size only
+- arrays are fixed-size; growable collections use built-in `Vec<T>`
 - `con` is intentionally strict and only allows approved safe calls
 - build configuration is declarative; there is no programmable build scripting
 - no generics, borrow checker, package manager, formatter, or LSP in this milestone

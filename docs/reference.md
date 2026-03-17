@@ -52,9 +52,22 @@ output = "build/tool"
 - primitives: `int`, `bool`, `string`, `void`
 - tuples: `(int, string)`, `(1, 2)`
 - arrays: `[int; 3]`, `[1, 2, 3]`
+- dynamic vectors: `Vec<int>`, `vec[1, 2, 3]`, `vec<int>[]`
 - structs: `struct Name { field: type }`
 - enums: `enum State { Ready, Done }`
 - payload enums: `enum Result { Ok(int), Err(string) }`
+
+### Collections
+
+- fixed arrays support indexing and indexed assignment: `values[0]`, `values[1] = 9`
+- vectors support:
+  - `values.len()`
+  - `values.push(value)` on mutable local vectors
+  - `values[index]`
+  - `values[index] = value`
+- `Vec<T>` uses shared-handle semantics in 1.0:
+  - assignment, params, and returns copy the handle
+  - mutating one alias updates the others
 
 ### Control flow
 
@@ -106,7 +119,7 @@ output = "build/tool"
 
 ## Intentional 1.0 Limits
 
-- fixed-size arrays only
+- fixed arrays plus built-in `Vec<T>` only; no general generics
 - declarative build configuration only
 - strict `con` restrictions
 - no generics

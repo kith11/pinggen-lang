@@ -1,0 +1,8 @@
+[package]
+name = "invalid_vec_method_non_vec"
+version = "0.1.0"
+
+[build]
+name = "invalid_vec_method_non_vec"
+entry = "src/main.pg"
+output = "build/invalid_vec_method_non_vec"

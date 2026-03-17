@@ -477,6 +477,9 @@ std::unique_ptr<Expr> Parser::parse_primary() {
     }
     if (match(TokenKind::Identifier)) {
         const Token first = previous();
+        if (first.lexeme == "vec" && (check(TokenKind::LBracket) || check(TokenKind::Less))) {
+            return parse_postfix(parse_vec_literal(first));
+        }
         if (!parsing_for_bound_ && !parsing_match_subject_ && check(TokenKind::LBrace)) {
             ++current_;
             std::vector<StructLiteralField> fields;
@@ -574,6 +577,23 @@ std::unique_ptr<Expr> Parser::parse_primary() {
     fail(current().location, "expected expression");
 }
 
+std::unique_ptr<Expr> Parser::parse_vec_literal(const Token& vec_token) {
+    std::optional<Type> declared_element_type;
+    if (match(TokenKind::Less)) {
+        declared_element_type = parse_type();
+        consume(TokenKind::Greater, "expected '>' after vec element type");
+    }
+    consume(TokenKind::LBracket, "expected '[' after vec");
+    std::vector<std::unique_ptr<Expr>> elements;
+    if (!check(TokenKind::RBracket)) {
+        do {
+            elements.push_back(parse_expression());
+        } while (match(TokenKind::Comma));
+    }
+    consume(TokenKind::RBracket, "expected ']' after vec literal");
+    return std::make_unique<VecLiteralExpr>(vec_token.location, std::move(declared_element_type), std::move(elements));
+}
+
 std::unique_ptr<Expr> Parser::parse_postfix(std::unique_ptr<Expr> expr) {
     while (true) {
         if (match(TokenKind::Dot)) {
@@ -631,6 +651,12 @@ Type Parser::parse_type() {
         return Type::array_type(element_type, static_cast<std::size_t>(std::stoull(size_token.lexeme)));
     }
     const Token token = consume(TokenKind::Identifier, "expected type name");
+    if (token.lexeme == "Vec") {
+        consume(TokenKind::Less, "expected '<' after Vec");
+        Type element_type = parse_type();
+        consume(TokenKind::Greater, "expected '>' after Vec element type");
+        return Type::vec_type(element_type);
+    }
     if (token.lexeme == "int") {
         return Type::int_type();
     }

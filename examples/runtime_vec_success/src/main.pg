@@ -1,0 +1,48 @@
+import std::{ io }
+
+enum Batch {
+    Ready(Vec<int>),
+    Empty,
+}
+
+struct Bag {
+    values: Vec<int>,
+}
+
+func alias(values: Vec<int>) -> Vec<int> {
+    return values;
+}
+
+func seeded() -> Vec<int> {
+    let mut values: Vec<int> = vec<int>[];
+    values.push(7);
+    values.push(8);
+    return values;
+}
+
+func batch(values: Vec<int>) -> Batch {
+    return Batch::Ready(values);
+}
+
+func main() {
+    let mut values = vec[1, 2, 3];
+    let alias_values = values;
+    values.push(4);
+    values[1] = 9;
+
+    let bag = Bag { values: alias_values };
+    let copied = alias(bag.values);
+
+    io::println(values.len());
+    io::println(alias_values[1]);
+    io::println(copied[3]);
+
+    match batch(seeded()) {
+        Batch::Ready(items) => {
+            io::println(items[0]);
+        }
+        Batch::Empty => {
+            io::println(0);
+        }
+    }
+}

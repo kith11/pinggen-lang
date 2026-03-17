@@ -18,7 +18,8 @@ enum class TypeKind {
     Enum,
     Struct,
     Array,
-    Tuple
+    Tuple,
+    Vec
 };
 
 struct Type {
@@ -38,6 +39,7 @@ struct Type {
         return {TypeKind::Array, "", std::make_shared<Type>(std::move(element)), size, {}};
     }
     static Type tuple_type(std::vector<Type> elements) { return {TypeKind::Tuple, "", nullptr, 0, std::move(elements)}; }
+    static Type vec_type(Type element) { return {TypeKind::Vec, "", std::make_shared<Type>(std::move(element)), 0, {}}; }
 
     bool operator==(const Type& other) const {
         if (kind != other.kind) {
@@ -49,6 +51,12 @@ struct Type {
         if (kind == TypeKind::Array) {
             if (array_size != other.array_size || !element_type || !other.element_type) {
                 return array_size == other.array_size && !element_type && !other.element_type;
+            }
+            return *element_type == *other.element_type;
+        }
+        if (kind == TypeKind::Vec) {
+            if (!element_type || !other.element_type) {
+                return !element_type && !other.element_type;
             }
             return *element_type == *other.element_type;
         }
@@ -114,6 +122,13 @@ struct StructLiteralField {
 
 struct ArrayLiteralExpr final : Expr {
     ArrayLiteralExpr(SourceLocation loc, std::vector<std::unique_ptr<Expr>> e) : Expr(loc), elements(std::move(e)) {}
+    std::vector<std::unique_ptr<Expr>> elements;
+};
+
+struct VecLiteralExpr final : Expr {
+    VecLiteralExpr(SourceLocation loc, std::optional<Type> t, std::vector<std::unique_ptr<Expr>> e)
+        : Expr(loc), declared_element_type(std::move(t)), elements(std::move(e)) {}
+    std::optional<Type> declared_element_type;
     std::vector<std::unique_ptr<Expr>> elements;
 };
 

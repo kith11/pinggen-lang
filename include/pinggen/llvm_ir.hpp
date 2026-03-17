@@ -55,7 +55,12 @@ class LLVMIRGenerator {
     std::string emit_fs_write_helper() const;
     std::string emit_fs_exists_helper() const;
     std::string emit_env_get_helper() const;
+    std::string emit_vec_create_helper() const;
+    std::string emit_vec_push_helper() const;
+    std::string emit_vec_len_helper() const;
+    std::string emit_vec_data_helper() const;
     void emit_bounds_check(const std::string& index_ir, std::size_t size);
+    void emit_dynamic_bounds_check(const std::string& index_ir, const std::string& size_ir);
     std::string emit_enum_tag(const TypedIRValue& enum_value);
     std::string emit_string_constant(const std::string& value);
     LoweredConTask lower_con_task(const Expr& item, std::size_t source_index);
@@ -69,6 +74,7 @@ class LLVMIRGenerator {
     bool emit_block(const std::vector<std::unique_ptr<Stmt>>& body);
     bool emit_stmt(const Stmt& stmt);
     std::string llvm_type(const Type& type) const;
+    std::string llvm_sizeof(const Type& type) const;
     std::string next_label(const std::string& prefix);
     void reset_function_state();
     std::string next_register();

@@ -1,0 +1,8 @@
+[package]
+name = "runtime_invalid_vec_bounds"
+version = "0.1.0"
+
+[build]
+name = "runtime_invalid_vec_bounds"
+entry = "src/main.pg"
+output = "build/runtime_invalid_vec_bounds"

@@ -45,6 +45,7 @@ class Parser {
     std::unique_ptr<Expr> parse_factor();
     std::unique_ptr<Expr> parse_unary();
     std::unique_ptr<Expr> parse_primary();
+    std::unique_ptr<Expr> parse_vec_literal(const Token& vec_token);
     std::unique_ptr<Expr> parse_postfix(std::unique_ptr<Expr> expr);
     std::unique_ptr<Expr> parse_for_bound_expression();
     std::unique_ptr<Expr> parse_match_subject_expression();

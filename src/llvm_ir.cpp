@@ -94,6 +94,12 @@ Type LLVMIRGenerator::normalize_type(const Type& type) const {
         }
         return Type::array_type(normalize_type(*type.element_type), type.array_size);
     }
+    if (type.kind == TypeKind::Vec) {
+        if (!type.element_type) {
+            return type;
+        }
+        return Type::vec_type(normalize_type(*type.element_type));
+    }
     if (type.kind == TypeKind::Tuple) {
         std::vector<Type> elements;
         elements.reserve(type.tuple_elements.size());
@@ -306,6 +312,10 @@ std::string LLVMIRGenerator::generate(const Program& program) {
     out << "declare i64 @strlen(ptr)\n";
     out << "declare ptr @malloc(i64)\n";
     out << "declare ptr @memcpy(ptr, ptr, i64)\n";
+    out << emit_vec_create_helper();
+    out << emit_vec_push_helper();
+    out << emit_vec_len_helper();
+    out << emit_vec_data_helper();
     if (uses_con_runtime_) {
         out << "declare ptr @pinggen_con_group_create(i64)\n";
         out << "declare void @pinggen_con_spawn(ptr, ptr, ptr)\n";
@@ -368,6 +378,14 @@ std::string LLVMIRGenerator::emit_bounds_abort_helper() const {
         "  unreachable\n"
         "}\n\n";
 }
+
+std::string LLVMIRGenerator::emit_vec_create_helper() const { return "declare ptr @pinggen_vec_create(i64, i64)\n"; }
+
+std::string LLVMIRGenerator::emit_vec_push_helper() const { return "declare void @pinggen_vec_push(ptr, ptr)\n"; }
+
+std::string LLVMIRGenerator::emit_vec_len_helper() const { return "declare i64 @pinggen_vec_len(ptr)\n"; }
+
+std::string LLVMIRGenerator::emit_vec_data_helper() const { return "declare ptr @pinggen_vec_data(ptr)\n"; }
 
 std::string LLVMIRGenerator::emit_fs_read_helper() const {
     return
@@ -491,6 +509,22 @@ void LLVMIRGenerator::emit_bounds_check(const std::string& index_ir, std::size_t
     const std::string ok_label = next_label("bounds_ok");
     body_ += "  " + nonnegative + " = icmp sge i64 " + index_ir + ", 0\n";
     body_ += "  " + within + " = icmp slt i64 " + index_ir + ", " + std::to_string(size) + "\n";
+    body_ += "  " + ok + " = and i1 " + nonnegative + ", " + within + "\n";
+    body_ += "  br i1 " + ok + ", label %" + ok_label + ", label %" + fail_label + "\n";
+    body_ += fail_label + ":\n";
+    body_ += "  call void @pinggen_bounds_abort()\n";
+    body_ += "  unreachable\n";
+    body_ += ok_label + ":\n";
+}
+
+void LLVMIRGenerator::emit_dynamic_bounds_check(const std::string& index_ir, const std::string& size_ir) {
+    const std::string nonnegative = next_register();
+    const std::string within = next_register();
+    const std::string ok = next_register();
+    const std::string fail_label = next_label("bounds_fail");
+    const std::string ok_label = next_label("bounds_ok");
+    body_ += "  " + nonnegative + " = icmp sge i64 " + index_ir + ", 0\n";
+    body_ += "  " + within + " = icmp slt i64 " + index_ir + ", " + size_ir + "\n";
     body_ += "  " + ok + " = and i1 " + nonnegative + ", " + within + "\n";
     body_ += "  br i1 " + ok + ", label %" + ok_label + ", label %" + fail_label + "\n";
     body_ += fail_label + ":\n";
@@ -700,11 +734,25 @@ AddressValue LLVMIRGenerator::emit_address(const Expr& expr) {
     if (const auto* node = dynamic_cast<const IndexExpr*>(&expr)) {
         const AddressValue base = emit_address(*node->object);
         const TypedIRValue index = emit_expr(*node->index);
-        emit_bounds_check(index.ir, base.type.array_size);
-        const std::string reg = next_register();
-        body_ += "  " + reg + " = getelementptr inbounds " + llvm_type(base.type) + ", ptr " + base.address +
-                 ", i32 0, i64 " + index.ir + "\n";
-        return {reg, *base.type.element_type};
+        if (base.type.kind == TypeKind::Array) {
+            emit_bounds_check(index.ir, base.type.array_size);
+            const std::string reg = next_register();
+            body_ += "  " + reg + " = getelementptr inbounds " + llvm_type(base.type) + ", ptr " + base.address +
+                     ", i32 0, i64 " + index.ir + "\n";
+            return {reg, *base.type.element_type};
+        }
+        if (base.type.kind == TypeKind::Vec) {
+            const TypedIRValue base_value = emit_expr(*node->object);
+            const std::string len_reg = next_register();
+            body_ += "  " + len_reg + " = call i64 @pinggen_vec_len(ptr " + base_value.ir + ")\n";
+            emit_dynamic_bounds_check(index.ir, len_reg);
+            const std::string data_reg = next_register();
+            const std::string reg = next_register();
+            body_ += "  " + data_reg + " = call ptr @pinggen_vec_data(ptr " + base_value.ir + ")\n";
+            body_ += "  " + reg + " = getelementptr inbounds " + llvm_type(*base.type.element_type) + ", ptr " + data_reg +
+                     ", i64 " + index.ir + "\n";
+            return {reg, *base.type.element_type};
+        }
     }
     const TypedIRValue value = emit_expr(expr);
     const std::string storage = next_register();
@@ -798,6 +846,26 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
         const std::string reg = next_register();
         body_ += "  " + reg + " = load " + llvm_type(array_type) + ", ptr " + storage + "\n";
         return {reg, array_type};
+    }
+    if (const auto* node = dynamic_cast<const VecLiteralExpr*>(&expr)) {
+        Type element_type;
+        if (!node->elements.empty()) {
+            element_type = emit_expr(*node->elements[0]).type;
+        } else {
+            element_type = normalize_type(*node->declared_element_type);
+        }
+        const Type vec_type = Type::vec_type(element_type);
+        const std::string vec_reg = next_register();
+        body_ += "  " + vec_reg + " = call ptr @pinggen_vec_create(i64 " + llvm_sizeof(element_type) + ", i64 " +
+                 std::to_string(node->elements.size()) + ")\n";
+        for (const auto& element : node->elements) {
+            const TypedIRValue value = emit_expr(*element);
+            const std::string storage = next_register();
+            body_ += "  " + storage + " = alloca " + llvm_type(element_type) + "\n";
+            body_ += "  store " + llvm_type(element_type) + " " + value.ir + ", ptr " + storage + "\n";
+            body_ += "  call void @pinggen_vec_push(ptr " + vec_reg + ", ptr " + storage + ")\n";
+        }
+        return {vec_reg, vec_type};
     }
     if (const auto* node = dynamic_cast<const StructLiteralExpr*>(&expr)) {
         const Type struct_type = Type::struct_type(node->struct_name);
@@ -945,15 +1013,40 @@ TypedIRValue LLVMIRGenerator::emit_expr(const Expr& expr) {
         return {reg, return_type};
     }
     if (const auto* node = dynamic_cast<const MethodCallExpr*>(&expr)) {
+        Type object_type;
+        std::optional<TypedIRValue> preloaded_object;
+        if (const auto* object_var = dynamic_cast<const VariableExpr*>(node->object.get())) {
+            object_type = variable_types_.at(object_var->name);
+        } else {
+            preloaded_object = emit_expr(*node->object);
+            object_type = preloaded_object->type;
+        }
+        if (object_type.kind == TypeKind::Vec) {
+            if (node->method == "len") {
+                const TypedIRValue object_value = preloaded_object.has_value() ? *preloaded_object : emit_expr(*node->object);
+                const std::string reg = next_register();
+                body_ += "  " + reg + " = call i64 @pinggen_vec_len(ptr " + object_value.ir + ")\n";
+                return {reg, Type::int_type()};
+            }
+            if (node->method == "push") {
+                const TypedIRValue object_value = preloaded_object.has_value() ? *preloaded_object : emit_expr(*node->object);
+                const Type element_type = *object_type.element_type;
+                const TypedIRValue value = emit_expr(*node->args[0]);
+                const std::string storage = next_register();
+                body_ += "  " + storage + " = alloca " + llvm_type(element_type) + "\n";
+                body_ += "  store " + llvm_type(element_type) + " " + value.ir + ", ptr " + storage + "\n";
+                body_ += "  call void @pinggen_vec_push(ptr " + object_value.ir + ", ptr " + storage + ")\n";
+                return {"0", Type::void_type()};
+            }
+        }
         std::vector<TypedIRValue> args;
         std::string lowered_name;
         bool is_mutating = false;
         if (const auto* object_var = dynamic_cast<const VariableExpr*>(node->object.get())) {
-            const Type object_type = variable_types_.at(object_var->name);
-            lowered_name = object_type.name + "__" + node->method;
+            lowered_name = variable_types_.at(object_var->name).name + "__" + node->method;
             is_mutating = mutating_methods_.at(lowered_name);
         } else {
-            const TypedIRValue object_value = emit_expr(*node->object);
+            const TypedIRValue object_value = preloaded_object.has_value() ? *preloaded_object : emit_expr(*node->object);
             lowered_name = object_value.type.name + "__" + node->method;
             is_mutating = mutating_methods_.at(lowered_name);
             args.push_back(object_value);
@@ -1062,13 +1155,26 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
     if (const auto* node = dynamic_cast<const IndexAssignStmt*>(&stmt)) {
         const AddressValue object_address = emit_address(*node->object);
         const TypedIRValue index = emit_expr(*node->index);
-        emit_bounds_check(index.ir, object_address.type.array_size);
         const Type element_type = *object_address.type.element_type;
         const TypedIRValue value = emit_expr(*node->value);
-        const std::string element_ptr = next_register();
-        body_ += "  " + element_ptr + " = getelementptr inbounds " + llvm_type(object_address.type) + ", ptr " +
-                 object_address.address + ", i32 0, i64 " + index.ir + "\n";
-        body_ += "  store " + llvm_type(element_type) + " " + value.ir + ", ptr " + element_ptr + "\n";
+        if (object_address.type.kind == TypeKind::Array) {
+            emit_bounds_check(index.ir, object_address.type.array_size);
+            const std::string element_ptr = next_register();
+            body_ += "  " + element_ptr + " = getelementptr inbounds " + llvm_type(object_address.type) + ", ptr " +
+                     object_address.address + ", i32 0, i64 " + index.ir + "\n";
+            body_ += "  store " + llvm_type(element_type) + " " + value.ir + ", ptr " + element_ptr + "\n";
+        } else {
+            const TypedIRValue object_value = emit_expr(*node->object);
+            const std::string len_reg = next_register();
+            body_ += "  " + len_reg + " = call i64 @pinggen_vec_len(ptr " + object_value.ir + ")\n";
+            emit_dynamic_bounds_check(index.ir, len_reg);
+            const std::string data_reg = next_register();
+            const std::string element_ptr = next_register();
+            body_ += "  " + data_reg + " = call ptr @pinggen_vec_data(ptr " + object_value.ir + ")\n";
+            body_ += "  " + element_ptr + " = getelementptr inbounds " + llvm_type(element_type) + ", ptr " + data_reg +
+                     ", i64 " + index.ir + "\n";
+            body_ += "  store " + llvm_type(element_type) + " " + value.ir + ", ptr " + element_ptr + "\n";
+        }
         return false;
     }
     if (const auto* node = dynamic_cast<const ExprStmt*>(&stmt)) {
@@ -1314,6 +1420,7 @@ std::string LLVMIRGenerator::llvm_type(const Type& type) const {
         case TypeKind::Enum: return enum_has_payload(type.name) ? "%enum." + type.name : "i64";
         case TypeKind::Struct: return "%struct." + type.name;
         case TypeKind::Array: return "[" + std::to_string(type.array_size) + " x " + llvm_type(*type.element_type) + "]";
+        case TypeKind::Vec: return "ptr";
         case TypeKind::Tuple: {
             std::string out = "{ ";
             for (std::size_t i = 0; i < type.tuple_elements.size(); ++i) {
@@ -1327,6 +1434,10 @@ std::string LLVMIRGenerator::llvm_type(const Type& type) const {
         }
     }
     return "void";
+}
+
+std::string LLVMIRGenerator::llvm_sizeof(const Type& type) const {
+    return "ptrtoint (ptr getelementptr (" + llvm_type(type) + ", ptr null, i32 1) to i64)";
 }
 
 std::string LLVMIRGenerator::next_label(const std::string& prefix) {

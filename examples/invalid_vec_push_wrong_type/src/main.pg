@@ -1,0 +1,4 @@
+func main() {
+    let mut values = vec[1, 2];
+    values.push(true);
+}

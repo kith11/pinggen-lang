@@ -52,6 +52,7 @@ class SemanticAnalyzer {
     bool analyze_stmt(const Stmt& stmt);
     const StructInfo& require_struct(const Type& type, const SourceLocation& location) const;
     const Type& require_array(const Type& type, const SourceLocation& location) const;
+    const Type& require_vec(const Type& type, const SourceLocation& location) const;
     void validate_type(const Type& type, const SourceLocation& location, bool allow_struct);
     void require_std_import(const std::string& item, const SourceLocation& location, const std::string& feature) const;
     void require_builtin_arity(const CallExpr& call, std::size_t expected) const;

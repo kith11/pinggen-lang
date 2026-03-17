@@ -1,6 +1,7 @@
 #include <windows.h>
 
 #include <stdint.h>
+#include <string.h>
 #include <stdlib.h>
 
 namespace {
@@ -43,6 +44,13 @@ struct Scheduler {
     volatile LONG next_worker;
     SRWLOCK wake_lock;
     CONDITION_VARIABLE wake_cv;
+};
+
+struct VecHandle {
+    void* data;
+    int64_t length;
+    int64_t capacity;
+    int64_t element_size;
 };
 
 INIT_ONCE g_scheduler_once = INIT_ONCE_STATIC_INIT;
@@ -183,6 +191,37 @@ void* pinggen_con_group_create(int64_t task_count) {
     InitializeSRWLock(&group->lock);
     InitializeConditionVariable(&group->cv);
     return group;
+}
+
+void* pinggen_vec_create(int64_t element_size, int64_t initial_capacity) {
+    VecHandle* vec = static_cast<VecHandle*>(malloc(sizeof(VecHandle)));
+    vec->length = 0;
+    vec->capacity = initial_capacity > 0 ? initial_capacity : 0;
+    vec->element_size = element_size;
+    vec->data = vec->capacity > 0 ? malloc(static_cast<size_t>(vec->capacity * vec->element_size)) : nullptr;
+    return vec;
+}
+
+int64_t pinggen_vec_len(void* raw_vec) {
+    VecHandle* vec = static_cast<VecHandle*>(raw_vec);
+    return vec->length;
+}
+
+void* pinggen_vec_data(void* raw_vec) {
+    VecHandle* vec = static_cast<VecHandle*>(raw_vec);
+    return vec->data;
+}
+
+void pinggen_vec_push(void* raw_vec, void* element) {
+    VecHandle* vec = static_cast<VecHandle*>(raw_vec);
+    if (vec->length == vec->capacity) {
+        const int64_t next_capacity = vec->capacity == 0 ? 4 : vec->capacity * 2;
+        vec->data = realloc(vec->data, static_cast<size_t>(next_capacity * vec->element_size));
+        vec->capacity = next_capacity;
+    }
+    void* destination = static_cast<unsigned char*>(vec->data) + (vec->length * vec->element_size);
+    memcpy(destination, element, static_cast<size_t>(vec->element_size));
+    ++vec->length;
 }
 
 void pinggen_con_spawn(void* raw_group, void* raw_fn, void* ctx) {

@@ -1,0 +1,8 @@
+[package]
+name = "invalid_vec_assign_immutable"
+version = "0.1.0"
+
+[build]
+name = "invalid_vec_assign_immutable"
+entry = "src/main.pg"
+output = "build/invalid_vec_assign_immutable"

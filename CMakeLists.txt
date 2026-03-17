@@ -483,10 +483,59 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-array-operator PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-vec-mixed-literal
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_vec_mixed_literal
+    )
+    set_tests_properties(pinggen-check-invalid-vec-mixed-literal PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-vec-empty-literal
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_vec_empty_literal
+    )
+    set_tests_properties(pinggen-check-invalid-vec-empty-literal PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-vec-index-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_vec_index_type
+    )
+    set_tests_properties(pinggen-check-invalid-vec-index-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-vec-push-immutable
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_vec_push_immutable
+    )
+    set_tests_properties(pinggen-check-invalid-vec-push-immutable PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-vec-assign-immutable
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_vec_assign_immutable
+    )
+    set_tests_properties(pinggen-check-invalid-vec-assign-immutable PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-vec-push-wrong-type
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_vec_push_wrong_type
+    )
+    set_tests_properties(pinggen-check-invalid-vec-push-wrong-type PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-vec-operator
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_vec_operator
+    )
+    set_tests_properties(pinggen-check-invalid-vec-operator PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-vec-method-non-vec
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_vec_method_non_vec
+    )
+    set_tests_properties(pinggen-check-invalid-vec-method-non-vec PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-run-invalid-array-bounds
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_invalid_array_bounds
     )
     set_tests_properties(pinggen-run-invalid-array-bounds PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-run-vec-success
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_vec_success
+    )
+    add_test(
+        NAME pinggen-run-invalid-vec-bounds
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_invalid_vec_bounds
+    )
+    set_tests_properties(pinggen-run-invalid-vec-bounds PROPERTIES WILL_FAIL TRUE)
     add_test(
         NAME pinggen-run-fs-read-success
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_read_success

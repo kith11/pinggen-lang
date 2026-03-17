@@ -103,6 +103,7 @@ std::string type_name(const Type& type) {
         case TypeKind::Enum: return type.name;
         case TypeKind::Struct: return type.name;
         case TypeKind::Array: return "[" + type_name(*type.element_type) + "; " + std::to_string(type.array_size) + "]";
+        case TypeKind::Vec: return "Vec<" + type_name(*type.element_type) + ">";
         case TypeKind::Tuple: {
             std::string out = "(";
             for (std::size_t i = 0; i < type.tuple_elements.size(); ++i) {
@@ -355,6 +356,12 @@ Type SemanticAnalyzer::normalize_type(const Type& type) const {
         }
         return Type::array_type(normalize_type(*type.element_type), type.array_size);
     }
+    if (type.kind == TypeKind::Vec) {
+        if (!type.element_type) {
+            return type;
+        }
+        return Type::vec_type(normalize_type(*type.element_type));
+    }
     if (type.kind == TypeKind::Tuple) {
         std::vector<Type> elements;
         elements.reserve(type.tuple_elements.size());
@@ -387,12 +394,29 @@ const Type& SemanticAnalyzer::require_array(const Type& type, const SourceLocati
     return type;
 }
 
+const Type& SemanticAnalyzer::require_vec(const Type& type, const SourceLocation& location) const {
+    if (type.kind != TypeKind::Vec || !type.element_type) {
+        fail(location, "expected Vec value");
+    }
+    return type;
+}
+
 void SemanticAnalyzer::validate_type(const Type& type, const SourceLocation& location, bool allow_struct) {
     if (type.kind == TypeKind::Array) {
         if (!type.element_type) {
             fail(location, "invalid array element type");
         }
         validate_type(*type.element_type, location, allow_struct);
+        return;
+    }
+    if (type.kind == TypeKind::Vec) {
+        if (!type.element_type) {
+            fail(location, "invalid Vec element type");
+        }
+        if (*type.element_type == Type::void_type()) {
+            fail(location, "Vec elements cannot be void");
+        }
+        validate_type(*type.element_type, location, true);
         return;
     }
     if (type.kind == TypeKind::Tuple) {
@@ -547,6 +571,41 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         }
         return Type::array_type(element_type, node->elements.size());
     }
+    if (const auto* node = dynamic_cast<const VecLiteralExpr*>(&expr)) {
+        if (node->elements.empty()) {
+            if (!node->declared_element_type.has_value()) {
+                fail(node->location, "empty vec literals require an explicit element type");
+            }
+            const Type declared_element_type = normalize_type(*node->declared_element_type);
+            validate_type(declared_element_type, node->location, true);
+            if (declared_element_type == Type::void_type()) {
+                fail(node->location, "Vec elements cannot be void");
+            }
+            return Type::vec_type(declared_element_type);
+        }
+        const Type first_element_type = analyze_expr(*node->elements[0]);
+        if (first_element_type == Type::void_type()) {
+            fail(node->elements[0]->location, "Vec elements cannot be void");
+        }
+        for (std::size_t i = 1; i < node->elements.size(); ++i) {
+            const Type current_type = analyze_expr(*node->elements[i]);
+            if (current_type != first_element_type) {
+                fail(node->elements[i]->location,
+                     "vec literal element expects " + type_name(first_element_type) + " but got " + type_name(current_type));
+            }
+        }
+        if (node->declared_element_type.has_value()) {
+            const Type declared_element_type = normalize_type(*node->declared_element_type);
+            validate_type(declared_element_type, node->location, true);
+            if (declared_element_type != first_element_type) {
+                fail(node->location,
+                     "vec literal element type " + type_name(first_element_type) +
+                         " does not match declared Vec element type " + type_name(declared_element_type));
+            }
+            return Type::vec_type(declared_element_type);
+        }
+        return Type::vec_type(first_element_type);
+    }
     if (const auto* node = dynamic_cast<const VariableExpr*>(&expr)) {
         if (node->name == "self" && current_method_struct_.empty()) {
             fail(node->location, "'self' can only be used inside a method");
@@ -611,12 +670,19 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
             }
         }
         const Type object_type = analyze_expr(*node->object);
-        const Type& array_type = require_array(object_type, node->location);
         const Type index_type = analyze_expr(*node->index);
         if (index_type != Type::int_type()) {
-            fail(node->index->location, "array index must be int");
+            fail(node->index->location, "index must be int");
         }
-        return *array_type.element_type;
+        if (object_type.kind == TypeKind::Array) {
+            const Type& array_type = require_array(object_type, node->location);
+            return *array_type.element_type;
+        }
+        if (object_type.kind == TypeKind::Vec) {
+            const Type& vec_type = require_vec(object_type, node->location);
+            return *vec_type.element_type;
+        }
+        fail(node->location, "expected array or Vec value");
     }
     if (const auto* node = dynamic_cast<const MethodCallExpr*>(&expr)) {
         if (const auto* prior_call = dynamic_cast<const MethodCallExpr*>(node->object.get())) {
@@ -628,6 +694,36 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
             }
         }
         const Type object_type = analyze_expr(*node->object);
+        if (object_type.kind == TypeKind::Vec) {
+            const Type& vec_type = require_vec(object_type, node->location);
+            if (node->method == "len") {
+                if (!node->args.empty()) {
+                    fail(node->location, "Vec.len expects 0 argument(s)");
+                }
+                return Type::int_type();
+            }
+            if (node->method == "push") {
+                const auto* receiver_var = dynamic_cast<const VariableExpr*>(node->object.get());
+                if (!receiver_var) {
+                    fail(node->location, "Vec.push can only be called on mutable local Vec variables");
+                }
+                const auto symbol_it = symbols_.find(receiver_var->name);
+                if (symbol_it == symbols_.end() || !symbol_it->second.is_mutable || !symbol_it->second.is_local) {
+                    fail(node->location, "Vec.push can only be called on mutable local Vec variables");
+                }
+                if (node->args.size() != 1) {
+                    fail(node->location, "Vec.push expects 1 argument(s)");
+                }
+                const Type arg_type = analyze_expr(*node->args[0]);
+                if (arg_type != *vec_type.element_type) {
+                    fail(node->args[0]->location,
+                         "argument 1 of Vec.push expects " + type_name(*vec_type.element_type) + " but got " +
+                             type_name(arg_type));
+                }
+                return Type::void_type();
+            }
+            fail(node->location, "unknown Vec method '" + node->method + "'");
+        }
         const auto& signature = require_method_signature(object_type, node->method, node->location);
         if (signature.is_mutating_receiver) {
             const auto* receiver_var = dynamic_cast<const VariableExpr*>(node->object.get());
@@ -673,9 +769,9 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
             return Type::bool_type();
         }
         if (node->op == "==" || node->op == "!=") {
-            if (left != right) {
-                fail(node->location, "comparison operands must have the same type");
-            }
+        if (left != right) {
+            fail(node->location, "comparison operands must have the same type");
+        }
             if (left.kind == TypeKind::Enum && enums_.at(left.name).has_payload) {
                 fail(node->location, "operator '" + node->op + "' is not supported for payload enums");
             }
@@ -926,17 +1022,28 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
             fail(node->location, "cannot assign through immutable variable '" + object_var->name + "'");
         }
         const Type object_type = analyze_expr(*node->object);
-        const Type& array_type = require_array(object_type, node->location);
         const Type index_type = analyze_expr(*node->index);
         if (index_type != Type::int_type()) {
-            fail(node->index->location, "array index must be int");
+            fail(node->index->location, "index must be int");
         }
         const Type rhs = analyze_expr(*node->value);
-        if (rhs != *array_type.element_type) {
-            fail(node->location,
-                 "cannot assign " + type_name(rhs) + " to array element of type " + type_name(*array_type.element_type));
+        if (object_type.kind == TypeKind::Array) {
+            const Type& array_type = require_array(object_type, node->location);
+            if (rhs != *array_type.element_type) {
+                fail(node->location, "cannot assign " + type_name(rhs) + " to array element of type " +
+                                         type_name(*array_type.element_type));
+            }
+            return false;
         }
-        return false;
+        if (object_type.kind == TypeKind::Vec) {
+            const Type& vec_type = require_vec(object_type, node->location);
+            if (rhs != *vec_type.element_type) {
+                fail(node->location,
+                     "cannot assign " + type_name(rhs) + " to Vec element of type " + type_name(*vec_type.element_type));
+            }
+            return false;
+        }
+        fail(node->location, "index assignment requires an array or Vec value");
     }
     if (const auto* node = dynamic_cast<const ExprStmt*>(&stmt)) {
         analyze_expr(*node->expr);
