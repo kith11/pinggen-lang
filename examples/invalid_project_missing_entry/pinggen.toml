@@ -1,0 +1,5 @@
+[package]
+name = "invalid_project_missing_entry"
+
+[build]
+output = "build/invalid_project_missing_entry"

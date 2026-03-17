@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <stdexcept>
 #include <string>
 
 #include "pinggen/diagnostics.hpp"
@@ -32,7 +33,7 @@ ProjectConfig load_project(const std::filesystem::path& project_dir) {
     const auto config_path = project_dir / "pinggen.toml";
     std::ifstream input(config_path);
     if (!input) {
-        fail({1, 1}, "missing pinggen.toml at " + config_path.string());
+        throw std::runtime_error("missing project config '" + config_path.string() + "'");
     }
 
     ProjectConfig config;
@@ -64,13 +65,17 @@ ProjectConfig load_project(const std::filesystem::path& project_dir) {
     }
 
     if (config.name.empty()) {
-        fail({1, 1}, "pinggen.toml is missing [package].name");
+        throw std::runtime_error("project config '" + config_path.string() + "' is missing [package].name");
     }
     if (config.entry.empty()) {
-        fail({1, 1}, "pinggen.toml is missing [build].entry");
+        throw std::runtime_error("project config '" + config_path.string() + "' is missing [build].entry");
     }
     if (config.output.empty()) {
         config.output = config.root / "build" / config.name;
+    }
+    if (!std::filesystem::exists(config.entry)) {
+        throw std::runtime_error("project entry file not found: " + config.entry.string() + " (from [build].entry in " +
+                                 config_path.string() + ")");
     }
     return config;
 }

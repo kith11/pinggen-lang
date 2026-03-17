@@ -1,0 +1,6 @@
+[package]
+name = "invalid_project_bad_entry"
+
+[build]
+entry = "src/missing.pg"
+output = "build/invalid_project_bad_entry"

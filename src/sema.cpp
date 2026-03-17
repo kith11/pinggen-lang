@@ -6,7 +6,20 @@
 
 namespace pinggen {
 
+std::string type_name(const Type& type);
+
 namespace {
+
+std::string join_type_names(const std::vector<Type>& types) {
+    std::string out;
+    for (std::size_t i = 0; i < types.size(); ++i) {
+        if (i != 0) {
+            out += " or ";
+        }
+        out += type_name(types[i]);
+    }
+    return out;
+}
 
 EnumDecl builtin_fs_result_enum() {
     EnumDecl decl;
@@ -162,11 +175,11 @@ void SemanticAnalyzer::collect_imports(const Program& program) {
             continue;
         }
         if (decl.module_name != "std") {
-            fail(decl.location, "unknown import namespace '" + decl.module_name + "'");
+            fail(decl.location, "unknown import namespace '" + decl.module_name + "'; use 'import std::{ ... }' for stdlib imports");
         }
         for (const auto& item : decl.items) {
             if (item != "io" && item != "str" && item != "fs" && item != "env") {
-                fail(decl.location, "unknown std import '" + item + "'");
+                fail(decl.location, "unknown std import '" + item + "'; valid std imports are io, str, fs, env");
             }
             imported_std_items_.insert(item);
         }
@@ -393,7 +406,7 @@ void SemanticAnalyzer::validate_type(const Type& type, const SourceLocation& loc
     }
     if (type.kind == TypeKind::Enum) {
         if (!enums_.contains(type.name)) {
-            fail(location, "unknown enum type '" + type.name + "'");
+            fail_unknown_type(type.name, location);
         }
         return;
     }
@@ -402,7 +415,7 @@ void SemanticAnalyzer::validate_type(const Type& type, const SourceLocation& loc
             fail(location, "nested struct types are not supported in this milestone");
         }
         if (!structs_.contains(type.name)) {
-            fail(location, "unknown struct type '" + type.name + "'");
+            fail_unknown_type(type.name, location);
         }
     }
 }
@@ -410,8 +423,57 @@ void SemanticAnalyzer::validate_type(const Type& type, const SourceLocation& loc
 void SemanticAnalyzer::require_std_import(const std::string& item, const SourceLocation& location,
                                           const std::string& feature) const {
     if (!imported_std_items_.contains(item)) {
-        fail(location, feature + " requires 'import std::{ " + item + " }'");
+        fail(location, "builtin '" + feature + "' requires 'import std::{ " + item + " }'");
     }
+}
+
+void SemanticAnalyzer::require_builtin_arity(const CallExpr& call, std::size_t expected) const {
+    if (call.args.size() != expected) {
+        fail(call.location, "builtin '" + call.callee + "' expects " + std::to_string(expected) + " argument(s) but got " +
+                                std::to_string(call.args.size()));
+    }
+}
+
+Type SemanticAnalyzer::require_builtin_arg_type(const CallExpr& call, std::size_t index, const Type& expected) {
+    const Type actual = analyze_expr(*call.args[index]);
+    if (actual != expected) {
+        fail(call.args[index]->location,
+             "argument " + std::to_string(index + 1) + " of builtin '" + call.callee + "' must be " +
+                 type_name(expected) + ", got " + type_name(actual));
+    }
+    return actual;
+}
+
+Type SemanticAnalyzer::require_builtin_arg_type(const CallExpr& call, std::size_t index, const std::vector<Type>& expected) {
+    const Type actual = analyze_expr(*call.args[index]);
+    for (const auto& candidate : expected) {
+        if (actual == candidate) {
+            return actual;
+        }
+    }
+    fail(call.args[index]->location,
+         "argument " + std::to_string(index + 1) + " of builtin '" + call.callee + "' must be " +
+             join_type_names(expected) + ", got " + type_name(actual));
+}
+
+bool SemanticAnalyzer::is_builtin_type_name(const std::string& name, std::string& required_import) const {
+    if (name == "FsResult" || name == "FsWriteResult") {
+        required_import = "fs";
+        return true;
+    }
+    if (name == "EnvResult") {
+        required_import = "env";
+        return true;
+    }
+    return false;
+}
+
+void SemanticAnalyzer::fail_unknown_type(const std::string& name, const SourceLocation& location) const {
+    std::string required_import;
+    if (is_builtin_type_name(name, required_import) && !imported_std_items_.contains(required_import)) {
+        fail(location, "builtin type '" + name + "' requires 'import std::{ " + required_import + " }'");
+    }
+    fail(location, "unknown type '" + name + "'");
 }
 
 Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
@@ -645,72 +707,39 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
     if (const auto* node = dynamic_cast<const CallExpr*>(&expr)) {
         if (node->callee == "io::println") {
             require_std_import("io", node->location, "io::println");
-            if (node->args.size() != 1) {
-                fail(node->location, "io::println expects exactly one argument");
-            }
-            const Type arg_type = analyze_expr(*node->args[0]);
-            if (arg_type != Type::int_type() && arg_type != Type::string_type()) {
-                fail(node->args[0]->location, "io::println only supports int and string arguments");
-            }
+            require_builtin_arity(*node, 1);
+            require_builtin_arg_type(*node, 0, {Type::int_type(), Type::string_type()});
             return Type::void_type();
         }
         if (node->callee == "str::len") {
             require_std_import("str", node->location, "str::len");
-            if (node->args.size() != 1) {
-                fail(node->location, "str::len expects exactly one argument");
-            }
-            const Type arg_type = analyze_expr(*node->args[0]);
-            if (arg_type != Type::string_type()) {
-                fail(node->args[0]->location, "str::len only supports string arguments");
-            }
+            require_builtin_arity(*node, 1);
+            require_builtin_arg_type(*node, 0, Type::string_type());
             return Type::int_type();
         }
         if (node->callee == "fs::read_to_string") {
             require_std_import("fs", node->location, "fs::read_to_string");
-            if (node->args.size() != 1) {
-                fail(node->location, "fs::read_to_string expects exactly one argument");
-            }
-            const Type arg_type = analyze_expr(*node->args[0]);
-            if (arg_type != Type::string_type()) {
-                fail(node->args[0]->location, "fs::read_to_string only supports string arguments");
-            }
+            require_builtin_arity(*node, 1);
+            require_builtin_arg_type(*node, 0, Type::string_type());
             return Type::enum_type("FsResult");
         }
         if (node->callee == "fs::write_string") {
             require_std_import("fs", node->location, "fs::write_string");
-            if (node->args.size() != 2) {
-                fail(node->location, "fs::write_string expects exactly two arguments");
-            }
-            const Type path_type = analyze_expr(*node->args[0]);
-            if (path_type != Type::string_type()) {
-                fail(node->args[0]->location, "fs::write_string only supports string path arguments");
-            }
-            const Type content_type = analyze_expr(*node->args[1]);
-            if (content_type != Type::string_type()) {
-                fail(node->args[1]->location, "fs::write_string only supports string contents arguments");
-            }
+            require_builtin_arity(*node, 2);
+            require_builtin_arg_type(*node, 0, Type::string_type());
+            require_builtin_arg_type(*node, 1, Type::string_type());
             return Type::enum_type("FsWriteResult");
         }
         if (node->callee == "fs::exists") {
             require_std_import("fs", node->location, "fs::exists");
-            if (node->args.size() != 1) {
-                fail(node->location, "fs::exists expects exactly one argument");
-            }
-            const Type path_type = analyze_expr(*node->args[0]);
-            if (path_type != Type::string_type()) {
-                fail(node->args[0]->location, "fs::exists only supports string path arguments");
-            }
+            require_builtin_arity(*node, 1);
+            require_builtin_arg_type(*node, 0, Type::string_type());
             return Type::bool_type();
         }
         if (node->callee == "env::get") {
             require_std_import("env", node->location, "env::get");
-            if (node->args.size() != 1) {
-                fail(node->location, "env::get expects exactly one argument");
-            }
-            const Type name_type = analyze_expr(*node->args[0]);
-            if (name_type != Type::string_type()) {
-                fail(node->args[0]->location, "env::get only supports string variable names");
-            }
+            require_builtin_arity(*node, 1);
+            require_builtin_arg_type(*node, 0, Type::string_type());
             return Type::enum_type("EnvResult");
         }
 

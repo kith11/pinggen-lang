@@ -21,7 +21,7 @@ namespace pinggen {
 static std::string read_file(const fs::path& path) {
     std::ifstream input(path);
     if (!input) {
-        throw std::runtime_error("failed to open " + path.string());
+        throw std::runtime_error("failed to read source file '" + path.string() + "'");
     }
     std::ostringstream out;
     out << input.rdbuf();
@@ -60,14 +60,15 @@ static void load_module_graph(const ProjectConfig& project, const fs::path& path
         }
         const std::string& imported_name = import_decl.module_name;
         if (active_modules.contains(imported_name)) {
-            fail(import_decl.location, "circular module import involving '" + imported_name + "'");
+            fail(import_decl.location, "circular module import detected for '" + imported_name + "'");
         }
         if (loaded_modules.contains(imported_name)) {
             continue;
         }
         const fs::path module_path = project.root / "src" / (imported_name + ".pg");
         if (!fs::exists(module_path)) {
-            fail(import_decl.location, "missing module '" + imported_name + "' at " + module_path.string());
+            fail(import_decl.location,
+                 "missing imported module '" + imported_name + "'; expected file '" + module_path.string() + "'");
         }
         loaded_modules.insert(imported_name);
         load_module_graph(project, module_path, imported_name, merged, loaded_modules, active_modules);

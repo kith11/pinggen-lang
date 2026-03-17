@@ -519,4 +519,59 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_mut_self_position
     )
     set_tests_properties(pinggen-check-invalid-mut-self-position PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-diagnostics-std-import-item
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_std_import_item' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*unknown std import ''nope''; valid std imports are io, str, fs, env*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-str-len-missing-import
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_str_len_missing_import' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*builtin ''str::len'' requires ''import std::{ str }''*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-str-len-arity
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_str_len_arity' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*builtin ''str::len'' expects 1 argument(s) but got 2*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-fs-read-type
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_fs_read_type' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*argument 1 of builtin ''fs::read_to_string'' must be string, got int*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-fs-write-type
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_fs_write_content_type' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*argument 2 of builtin ''fs::write_string'' must be string, got int*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-fs-exists-type
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_fs_exists_type' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*argument 1 of builtin ''fs::exists'' must be string, got int*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-env-get-arity
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_env_get_arity' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*builtin ''env::get'' expects 1 argument(s) but got 2*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-missing-module
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_missing_module' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*missing imported module ''missing''; expected file*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-module-cycle
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_module_cycle' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*circular module import detected for ''main''*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-project-missing-entry
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_project_missing_entry' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notmatch 'is missing \\[build\\]\\.entry') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-project-bad-entry
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_project_bad_entry' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*project entry file not found:*src/missing.pg*') { throw $text; }"
+    )
 endif()

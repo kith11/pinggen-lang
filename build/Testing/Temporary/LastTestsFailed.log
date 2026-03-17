@@ -1,6 +1,1 @@
-1:pinggen-check-example
-2:pinggen-build-example
-3:pinggen-run-example
-76:pinggen-run-fs-write-success
-77:pinggen-run-fs-write-missing
-80:pinggen-codegen-con-multi
+112:pinggen-diagnostics-project-missing-entry

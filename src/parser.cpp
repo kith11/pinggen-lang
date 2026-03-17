@@ -74,21 +74,21 @@ ImportDecl Parser::parse_import() {
     const Token import_token = consume(TokenKind::KwImport, "expected 'import'");
     ImportDecl decl;
     decl.location = import_token.location;
-    const Token first = consume(TokenKind::Identifier, "expected import target");
+    const Token first = consume(TokenKind::Identifier, "expected std import namespace or module name after 'import'");
     if (match(TokenKind::ColonColon)) {
         decl.kind = ImportKind::Std;
         decl.module_name = first.lexeme;
-        consume(TokenKind::LBrace, "expected '{' in import");
+        consume(TokenKind::LBrace, "expected '{' after '::' in std import");
         do {
-            decl.items.push_back(consume(TokenKind::Identifier, "expected import item").lexeme);
+            decl.items.push_back(consume(TokenKind::Identifier, "expected std import item").lexeme);
         } while (match(TokenKind::Comma));
-        consume(TokenKind::RBrace, "expected '}' after import list");
+        consume(TokenKind::RBrace, "expected '}' after std import list");
         return decl;
     }
 
     decl.kind = ImportKind::Module;
     decl.module_name = first.lexeme;
-    consume(TokenKind::Semicolon, "expected ';' after module import");
+    consume(TokenKind::Semicolon, "expected ';' after module import name");
     return decl;
 }
 
@@ -494,13 +494,13 @@ std::unique_ptr<Expr> Parser::parse_primary() {
             return parse_postfix(std::make_unique<StructLiteralExpr>(first.location, first.lexeme, std::move(fields)));
         }
         if (check(TokenKind::ColonColon)) {
-            consume(TokenKind::ColonColon, "expected '::'");
-            const Token second = consume(TokenKind::Identifier, "expected name after '::'");
+            consume(TokenKind::ColonColon, "expected '::' in qualified name");
+            const Token second = consume(TokenKind::Identifier, "expected identifier after '::' in qualified name");
             std::string name = first.lexeme + "::" + second.lexeme;
             while (check(TokenKind::ColonColon) && check_next(TokenKind::Identifier)) {
-                consume(TokenKind::ColonColon, "expected '::'");
+                consume(TokenKind::ColonColon, "expected '::' in qualified name");
                 name += "::";
-                name += consume(TokenKind::Identifier, "expected name after '::'").lexeme;
+                name += consume(TokenKind::Identifier, "expected identifier after '::' in qualified name").lexeme;
             }
             if (match(TokenKind::LParen)) {
                 std::vector<std::unique_ptr<Expr>> args;
@@ -608,7 +608,7 @@ std::string Parser::parse_qualified_name() {
     std::string name = consume(TokenKind::Identifier, "expected name").lexeme;
     while (match(TokenKind::ColonColon)) {
         name += "::";
-        name += consume(TokenKind::Identifier, "expected name after '::'").lexeme;
+        name += consume(TokenKind::Identifier, "expected identifier after '::' in qualified name").lexeme;
     }
     return name;
 }
