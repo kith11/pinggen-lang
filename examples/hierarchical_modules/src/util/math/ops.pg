@@ -1,0 +1,5 @@
+import util::path;
+
+func add_path(value: int) -> int {
+    return value + util_label().width();
+}

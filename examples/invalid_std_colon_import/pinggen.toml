@@ -1,0 +1,8 @@
+[package]
+name = "invalid_std_colon_import"
+version = "0.1.0"
+
+[build]
+name = "invalid_std_colon_import"
+entry = "src/main.pg"
+output = "build/invalid_std_colon_import"

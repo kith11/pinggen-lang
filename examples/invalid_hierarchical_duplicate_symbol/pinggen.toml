@@ -1,0 +1,8 @@
+[package]
+name = "invalid_hierarchical_duplicate_symbol"
+version = "0.1.0"
+
+[build]
+name = "invalid_hierarchical_duplicate_symbol"
+entry = "src/main.pg"
+output = "build/invalid_hierarchical_duplicate_symbol"

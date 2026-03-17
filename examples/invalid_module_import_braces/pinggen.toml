@@ -1,0 +1,8 @@
+[package]
+name = "invalid_module_import_braces"
+version = "0.1.0"
+
+[build]
+name = "invalid_module_import_braces"
+entry = "src/main.pg"
+output = "build/invalid_module_import_braces"

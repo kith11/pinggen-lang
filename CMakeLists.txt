@@ -39,8 +39,16 @@ if(BUILD_TESTING)
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/multi_target
     )
     add_test(
+        NAME pinggen-check-hierarchical-modules
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/hierarchical_modules
+    )
+    add_test(
         NAME pinggen-run-file-process
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/file_process
+    )
+    add_test(
+        NAME pinggen-run-hierarchical-modules
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/hierarchical_modules
     )
     add_test(
         NAME pinggen-build-example
@@ -398,6 +406,31 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-module-cycle PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-hierarchical-missing-module
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_hierarchical_missing_module
+    )
+    set_tests_properties(pinggen-check-invalid-hierarchical-missing-module PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-hierarchical-module-cycle
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_hierarchical_module_cycle
+    )
+    set_tests_properties(pinggen-check-invalid-hierarchical-module-cycle PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-hierarchical-duplicate-symbol
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_hierarchical_duplicate_symbol
+    )
+    set_tests_properties(pinggen-check-invalid-hierarchical-duplicate-symbol PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-module-import-braces
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_module_import_braces
+    )
+    set_tests_properties(pinggen-check-invalid-module-import-braces PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-std-colon-import
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_std_colon_import
+    )
+    set_tests_properties(pinggen-check-invalid-std-colon-import PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-std-import-item
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_std_import_item
     )
@@ -683,6 +716,16 @@ if(BUILD_TESTING)
                 "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_module_cycle' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*circular module import detected for ''main''*') { throw $text; }"
     )
     add_test(
+        NAME pinggen-diagnostics-hierarchical-missing-module
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_hierarchical_missing_module' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*missing imported module ''util::missing''; expected file*src\\util\\missing.pg*') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-diagnostics-std-colon-import
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_std_colon_import' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*stdlib imports must use ''import std::{ ... }''*') { throw $text; }"
+    )
+    add_test(
         NAME pinggen-diagnostics-project-missing-entry
         COMMAND powershell -NoProfile -Command
                 "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_project_missing_entry' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notmatch 'is missing \\[build\\]\\.entry') { throw $text; }"
@@ -715,11 +758,11 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-release-sweep
         COMMAND powershell -NoProfile -Command
-                "& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target tool; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/file_process'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hello'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+                "& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target tool; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/file_process'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hierarchical_modules'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hello'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
     )
     add_test(
         NAME pinggen-docs-consistency
         COMMAND powershell -NoProfile -Command
-                "$readme = Get-Content -Raw '${CMAKE_SOURCE_DIR}/README.md'; $reference = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/reference.md'; $release = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/release-checklist.md'; foreach ($path in @('starter','multi_target','file_process','hello')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}/examples' $path))) { throw \"missing example $path\" } }; foreach ($path in @('editors/vscode/pinggen/package.json','editors/vscode/pinggen/language-configuration.json','editors/vscode/pinggen/syntaxes/pinggen.tmLanguage.json','editors/vscode/pinggen/README.md')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}' $path))) { throw \"missing editor support file $path\" } }; if ($readme -notmatch 'docs/reference\\.md' -or $readme -notmatch 'docs/release-checklist\\.md' -or $readme -notmatch 'editors/vscode/pinggen') { throw 'README missing docs or editor support links'; }; if ($reference -notmatch '\\[\\[target\\]\\]' -or $reference -notmatch '--target <name>' -or $reference -notmatch 'editors/vscode/pinggen') { throw 'reference missing manifest, target selector, or editor support docs'; }; if ($release -notmatch 'ctest --test-dir build -C Debug --output-on-failure' -or $release -notmatch 'examples/file_process') { throw 'release checklist missing verification coverage'; }"
+                "$readme = Get-Content -Raw '${CMAKE_SOURCE_DIR}/README.md'; $reference = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/reference.md'; $release = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/release-checklist.md'; foreach ($path in @('starter','multi_target','file_process','hierarchical_modules','hello')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}/examples' $path))) { throw \"missing example $path\" } }; foreach ($path in @('editors/vscode/pinggen/package.json','editors/vscode/pinggen/language-configuration.json','editors/vscode/pinggen/syntaxes/pinggen.tmLanguage.json','editors/vscode/pinggen/README.md')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}' $path))) { throw \"missing editor support file $path\" } }; if ($readme -notmatch 'docs/reference\\.md' -or $readme -notmatch 'docs/release-checklist\\.md' -or $readme -notmatch 'editors/vscode/pinggen') { throw 'README missing docs or editor support links'; }; if ($reference -notmatch '\\[\\[target\\]\\]' -or $reference -notmatch '--target <name>' -or $reference -notmatch 'editors/vscode/pinggen') { throw 'reference missing manifest, target selector, or editor support docs'; }; if ($release -notmatch 'ctest --test-dir build -C Debug --output-on-failure' -or $release -notmatch 'examples/file_process') { throw 'release checklist missing verification coverage'; }"
     )
 endif()

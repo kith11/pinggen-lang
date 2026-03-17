@@ -1,0 +1,13 @@
+struct Label {
+    width_value: int,
+}
+
+impl Label {
+    func width(self) -> int {
+        return self.width_value;
+    }
+}
+
+func util_label() -> Label {
+    return Label { width_value: 4 };
+}

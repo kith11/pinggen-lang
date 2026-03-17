@@ -228,6 +228,51 @@ static std::string read_file(const fs::path& path) {
     return out.str();
 }
 
+static std::vector<std::string> split_module_name(const std::string& module_name) {
+    std::vector<std::string> segments;
+    std::size_t start = 0;
+    while (start < module_name.size()) {
+        const std::size_t separator = module_name.find("::", start);
+        if (separator == std::string::npos) {
+            segments.push_back(module_name.substr(start));
+            break;
+        }
+        segments.push_back(module_name.substr(start, separator - start));
+        start = separator + 2;
+    }
+    return segments;
+}
+
+static fs::path project_module_path(const ProjectConfig& project, const std::string& module_name) {
+    fs::path path = project.root / "src";
+    for (const auto& segment : split_module_name(module_name)) {
+        path /= segment;
+    }
+    path += ".pg";
+    return path;
+}
+
+static std::string module_name_from_source_path(const ProjectConfig& project, const fs::path& path) {
+    const fs::path source_root = project.root / "src";
+    std::error_code error;
+    fs::path relative = fs::relative(path, source_root, error);
+    if (error || relative.empty()) {
+        return path.stem().string();
+    }
+    relative.replace_extension();
+    std::string module_name;
+    for (const auto& segment : relative) {
+        if (!module_name.empty()) {
+            module_name += "::";
+        }
+        module_name += segment.string();
+    }
+    if (module_name.empty()) {
+        return path.stem().string();
+    }
+    return module_name;
+}
+
 static Program parse_file(const fs::path& path) {
     Lexer lexer(read_file(path));
     Parser parser(lexer.tokenize());
@@ -265,7 +310,7 @@ static void load_module_graph(const ProjectConfig& project, const fs::path& path
         if (loaded_modules.contains(imported_name)) {
             continue;
         }
-        const fs::path module_path = project.root / "src" / (imported_name + ".pg");
+        const fs::path module_path = project_module_path(project, imported_name);
         if (!fs::exists(module_path)) {
             fail(import_decl.location,
                  "missing imported module '" + imported_name + "'; expected file '" + module_path.string() + "'");
@@ -281,7 +326,7 @@ static Program compile_frontend(const ProjectConfig& project, const BuildTarget&
     Program program;
     std::unordered_set<std::string> loaded_modules;
     std::unordered_set<std::string> active_modules;
-    const std::string entry_module_name = target.entry.stem().string();
+    const std::string entry_module_name = module_name_from_source_path(project, target.entry);
     loaded_modules.insert(entry_module_name);
     load_module_graph(project, target.entry, entry_module_name, program, loaded_modules, active_modules);
     SemanticAnalyzer sema;

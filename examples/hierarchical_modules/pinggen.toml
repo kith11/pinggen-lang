@@ -1,0 +1,8 @@
+[package]
+name = "hierarchical_modules"
+version = "0.1.0"
+
+[build]
+name = "hierarchical_modules"
+entry = "src/main.pg"
+output = "build/hierarchical_modules"

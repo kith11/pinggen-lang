@@ -75,10 +75,13 @@ ImportDecl Parser::parse_import() {
     ImportDecl decl;
     decl.location = import_token.location;
     const Token first = consume(TokenKind::Identifier, "expected std import namespace or module name after 'import'");
-    if (match(TokenKind::ColonColon)) {
+    if (first.lexeme == "std" && check(TokenKind::ColonColon)) {
+        consume(TokenKind::ColonColon, "expected '::' after 'std'");
+        if (!match(TokenKind::LBrace)) {
+            fail(current().location, "stdlib imports must use 'import std::{ ... }'");
+        }
         decl.kind = ImportKind::Std;
         decl.module_name = first.lexeme;
-        consume(TokenKind::LBrace, "expected '{' after '::' in std import");
         do {
             decl.items.push_back(consume(TokenKind::Identifier, "expected std import item").lexeme);
         } while (match(TokenKind::Comma));
@@ -88,6 +91,10 @@ ImportDecl Parser::parse_import() {
 
     decl.kind = ImportKind::Module;
     decl.module_name = first.lexeme;
+    while (match(TokenKind::ColonColon)) {
+        decl.module_name += "::";
+        decl.module_name += consume(TokenKind::Identifier, "expected module name after '::' in import").lexeme;
+    }
     consume(TokenKind::Semicolon, "expected ';' after module import name");
     return decl;
 }

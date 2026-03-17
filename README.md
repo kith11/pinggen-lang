@@ -72,7 +72,7 @@ Launchers:
 
 ## Project Layout
 
-`puff` projects use `pinggen.toml` plus flat modules under `src/`.
+`puff` projects use `pinggen.toml` plus modules under `src/`.
 
 ```toml
 [package]
@@ -100,7 +100,7 @@ output = "build/tool"
 ### Core language
 
 - typed top-level functions
-- flat project-local modules with `import name;`
+- flat and hierarchical project-local modules with `import name;` and `import util::path;`
 - `struct`, `enum`, payload enums, and exhaustive `match`
 - tuples and tuple destructuring
 - fixed-size arrays and dynamic `Vec<T>`
@@ -138,6 +138,7 @@ output = "build/tool"
 - [starter](./examples/starter): small multi-file starter-grade project
 - [multi_target](./examples/multi_target): manifest v2 named targets
 - [file_process](./examples/file_process): practical `fs` + `match` example
+- [hierarchical_modules](./examples/hierarchical_modules): nested project modules with `import util::path;`
 - [runtime_vec_success](./examples/runtime_vec_success): dynamic `Vec<T>` with aliasing, struct fields, params, returns, and enum payloads
 - [hello](./examples/hello): advanced multi-feature demo
 

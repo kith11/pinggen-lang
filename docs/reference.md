@@ -6,7 +6,7 @@
 
 - Source files use the `.pg` extension.
 - Projects use `pinggen.toml`.
-- Modules are flat files under `src/` and are imported with `import name;`.
+- Modules live under `src/` and are imported with `import name;` or `import util::path;`.
 - From the repo root, use `.\puff ...`.
 - For a user-local install on Windows, run `.\install-puff.ps1`.
 
@@ -45,6 +45,7 @@ output = "build/tool"
 
 - `func name(arg: type) -> type { ... }`
 - `import name;`
+- `import util::path;`
 - `import std::{ io, str, fs, env }`
 
 ### Data types

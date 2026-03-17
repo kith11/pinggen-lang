@@ -1,0 +1,9 @@
+import std::{ io }
+import util::path;
+import util::math::ops;
+
+func main() {
+    let label = util_label();
+    io::println(label.width());
+    io::println(add_path(label.width()));
+}
