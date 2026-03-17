@@ -104,7 +104,9 @@ static int command_build(const fs::path& project_dir) {
     fs::create_directories(project.output.parent_path());
     const std::string ll_path = project.output.string() + ".ll";
     const std::string obj_path = project.output.string() + ".obj";
+    const std::string runtime_obj_path = project.output.string() + ".runtime.obj";
     const std::string exe_path = project.output.string() + ".exe";
+    const fs::path runtime_source = fs::path(PINGGEN_SOURCE_ROOT) / "runtime" / "pinggen_runtime.cpp";
 
     {
         std::ofstream ll_output(ll_path);
@@ -116,7 +118,14 @@ static int command_build(const fs::path& project_dir) {
         throw std::runtime_error("clang failed while compiling " + project.name);
     }
 
-    const std::string link_command = "clang \"" + obj_path + "\" -o \"" + exe_path + "\"";
+    const std::string runtime_compile_command =
+        "clang++ -c \"" + runtime_source.string() + "\" -o \"" + runtime_obj_path + "\"";
+    if (std::system(runtime_compile_command.c_str()) != 0) {
+        throw std::runtime_error("clang++ failed while compiling pinggen runtime");
+    }
+
+    const std::string link_command =
+        "clang++ \"" + obj_path + "\" \"" + runtime_obj_path + "\" -o \"" + exe_path + "\"";
     if (std::system(link_command.c_str()) != 0) {
         throw std::runtime_error("clang failed while linking " + project.name);
     }

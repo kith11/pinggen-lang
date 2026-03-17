@@ -5,6 +5,7 @@ import logic;
 func main() {
     let job = Job { result: finish(0), label: "pinggen" };
     let results: [Result; 3] = [Result::Pending, Result::Err("bad"), Result::Ok(9)];
+    let (left, right) = con { number_a(), job.label_len() };
 
     match job.result {
         Result::Ok(code) => {
@@ -19,7 +20,8 @@ func main() {
         }
     }
 
-    io::println(job.label_len());
+    io::println(left);
+    io::println(right);
     match fs::read_to_string("message.txt") {
         FsResult::Ok(text) => {
             io::println(text);

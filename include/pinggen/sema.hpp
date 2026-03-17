@@ -31,6 +31,7 @@ struct FunctionSignature {
     std::vector<Type> params;
     Type return_type = Type::void_type();
     bool is_mutating_receiver = false;
+    bool is_con_safe = false;
 };
 
 class SemanticAnalyzer {
@@ -62,6 +63,7 @@ class SemanticAnalyzer {
     std::unordered_map<std::string, std::unordered_map<std::string, FunctionSignature>> methods_;
     Type current_return_type_ = Type::void_type();
     bool inside_main_ = false;
+    bool inside_con_ = false;
     std::string current_method_struct_;
     std::size_t loop_depth_ = 0;
 };

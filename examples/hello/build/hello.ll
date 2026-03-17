@@ -5,6 +5,9 @@ declare void @exit(i32)
 declare i64 @strlen(ptr)
 declare ptr @malloc(i64)
 declare ptr @memcpy(ptr, ptr, i64)
+declare ptr @pinggen_con_group_create(i64)
+declare void @pinggen_con_spawn(ptr, ptr, ptr)
+declare void @pinggen_con_wait(ptr)
 
 declare ptr @fopen(ptr, ptr)
 declare i32 @fclose(ptr)
@@ -15,6 +18,8 @@ declare i64 @fread(ptr, i64, i64, ptr)
 %enum.FsResult = type { i64, ptr, ptr }
 %enum.Result = type { i64, i64, ptr }
 %struct.Job = type { %enum.Result, ptr }
+%con.ctx.1 = type { ptr }
+%con.ctx.2 = type { %struct.Job, ptr }
 
 define ptr @pinggen_concat(ptr %lhs, ptr %rhs) {
   %1 = call i64 @strlen(ptr %lhs)
@@ -81,6 +86,26 @@ read_fail:
   ret %enum.FsResult %read_res1
 }
 
+define void @pinggen_con_task_1_0(ptr %ctx) {
+entry:
+  %task_result = call i64 @number_a()
+  %result_ptr = getelementptr inbounds %con.ctx.1, ptr %ctx, i32 0, i32 0
+  %result_slot = load ptr, ptr %result_ptr
+  store i64 %task_result, ptr %result_slot
+  ret void
+}
+
+define void @pinggen_con_task_2_1(ptr %ctx) {
+entry:
+  %ctx_field_ptr_1 = getelementptr inbounds %con.ctx.2, ptr %ctx, i32 0, i32 0
+  %ctx_field_value_1 = load %struct.Job, ptr %ctx_field_ptr_1
+  %task_result = call i64 @Job__label_len(%struct.Job %ctx_field_value_1)
+  %result_ptr = getelementptr inbounds %con.ctx.2, ptr %ctx, i32 0, i32 1
+  %result_slot = load ptr, ptr %result_ptr
+  store i64 %task_result, ptr %result_slot
+  ret void
+}
+
 @.fmt.int = private unnamed_addr constant [6 x i8] c"%lld\0A\00"
 @.fmt.str = private unnamed_addr constant [4 x i8] c"%s\0A\00"
 @.fs.mode.rb = private unnamed_addr constant [3 x i8] c"rb\00"
@@ -102,6 +127,10 @@ define i64 @Job__label_len(%struct.Job %arg0) {
   %3 = load ptr, ptr %2
   %4 = call i64 @strlen(ptr %3)
   ret i64 %4
+}
+
+define i64 @number_a() {
+  ret i64 11
 }
 
 define %enum.Result @finish(i64 %arg0) {
@@ -215,102 +244,133 @@ define i32 @main() {
   %24 = load [3 x %enum.Result], ptr %11
   %25 = alloca [3 x %enum.Result]
   store [3 x %enum.Result] %24, ptr %25
-  %26 = getelementptr inbounds %struct.Job, ptr %7, i32 0, i32 0
-  %27 = load %enum.Result, ptr %26
-  %28 = extractvalue %enum.Result %27, 0
-  %29 = icmp eq i64 %28, 0
-  br i1 %29, label %match_arm.16, label %match_check.17
-match_arm.16:
-  %30 = extractvalue %enum.Result %27, 1
+  %26 = call ptr @pinggen_con_group_create(i64 2)
+  %27 = alloca i64
+  %28 = alloca %con.ctx.1
+  %29 = getelementptr inbounds %con.ctx.1, ptr %28, i32 0, i32 0
+  store ptr %27, ptr %29
+  call void @pinggen_con_spawn(ptr %26, ptr @pinggen_con_task_1_0, ptr %28)
+  %30 = load %struct.Job, ptr %7
   %31 = alloca i64
-  store i64 %30, ptr %31
-  %32 = getelementptr inbounds %struct.Job, ptr %7, i32 0, i32 1
-  %33 = load ptr, ptr %32
-  %34 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %35 = call i32 (ptr, ...) @printf(ptr %34, ptr %33)
-  %36 = load i64, ptr %31
-  %37 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %38 = call i32 (ptr, ...) @printf(ptr %37, i64 %36)
+  %32 = alloca %con.ctx.2
+  %33 = getelementptr inbounds %con.ctx.2, ptr %32, i32 0, i32 0
+  store %struct.Job %30, ptr %33
+  %34 = getelementptr inbounds %con.ctx.2, ptr %32, i32 0, i32 1
+  store ptr %31, ptr %34
+  call void @pinggen_con_spawn(ptr %26, ptr @pinggen_con_task_2_1, ptr %32)
+  call void @pinggen_con_wait(ptr %26)
+  %35 = alloca { i64, i64 }
+  %36 = load i64, ptr %27
+  %37 = getelementptr inbounds { i64, i64 }, ptr %35, i32 0, i32 0
+  store i64 %36, ptr %37
+  %38 = load i64, ptr %31
+  %39 = getelementptr inbounds { i64, i64 }, ptr %35, i32 0, i32 1
+  store i64 %38, ptr %39
+  %40 = load { i64, i64 }, ptr %35
+  %41 = extractvalue { i64, i64 } %40, 0
+  %42 = alloca i64
+  store i64 %41, ptr %42
+  %43 = extractvalue { i64, i64 } %40, 1
+  %44 = alloca i64
+  store i64 %43, ptr %44
+  %45 = getelementptr inbounds %struct.Job, ptr %7, i32 0, i32 0
+  %46 = load %enum.Result, ptr %45
+  %47 = extractvalue %enum.Result %46, 0
+  %48 = icmp eq i64 %47, 0
+  br i1 %48, label %match_arm.16, label %match_check.17
+match_arm.16:
+  %49 = extractvalue %enum.Result %46, 1
+  %50 = alloca i64
+  store i64 %49, ptr %50
+  %51 = getelementptr inbounds %struct.Job, ptr %7, i32 0, i32 1
+  %52 = load ptr, ptr %51
+  %53 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %54 = call i32 (ptr, ...) @printf(ptr %53, ptr %52)
+  %55 = load i64, ptr %50
+  %56 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %57 = call i32 (ptr, ...) @printf(ptr %56, i64 %55)
   br label %match_end.14
 match_check.17:
-  %39 = icmp eq i64 %28, 1
-  br i1 %39, label %match_arm.18, label %match_check.19
+  %58 = icmp eq i64 %47, 1
+  br i1 %58, label %match_arm.18, label %match_check.19
 match_arm.18:
-  %40 = extractvalue %enum.Result %27, 2
-  %41 = alloca ptr
-  store ptr %40, ptr %41
-  %42 = load ptr, ptr %41
-  %43 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %44 = call i32 (ptr, ...) @printf(ptr %43, ptr %42)
+  %59 = extractvalue %enum.Result %46, 2
+  %60 = alloca ptr
+  store ptr %59, ptr %60
+  %61 = load ptr, ptr %60
+  %62 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %63 = call i32 (ptr, ...) @printf(ptr %62, ptr %61)
   br label %match_end.14
 match_check.19:
-  %45 = icmp eq i64 %28, 2
-  br i1 %45, label %match_arm.20, label %match_unreachable.15
+  %64 = icmp eq i64 %47, 2
+  br i1 %64, label %match_arm.20, label %match_unreachable.15
 match_arm.20:
-  %46 = getelementptr inbounds [8 x i8], ptr @.str.7, i64 0, i64 0
-  %47 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %48 = call i32 (ptr, ...) @printf(ptr %47, ptr %46)
+  %65 = getelementptr inbounds [8 x i8], ptr @.str.7, i64 0, i64 0
+  %66 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %67 = call i32 (ptr, ...) @printf(ptr %66, ptr %65)
   br label %match_end.14
 match_unreachable.15:
   unreachable
 match_end.14:
-  %49 = load %struct.Job, ptr %7
-  %50 = call i64 @Job__label_len(%struct.Job %49)
-  %51 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
-  %52 = call i32 (ptr, ...) @printf(ptr %51, i64 %50)
-  %53 = getelementptr inbounds [12 x i8], ptr @.str.8, i64 0, i64 0
-  %54 = call %enum.FsResult @pinggen_fs_read_to_string(ptr %53)
-  %55 = extractvalue %enum.FsResult %54, 0
-  %56 = icmp eq i64 %55, 0
-  br i1 %56, label %match_arm.23, label %match_check.24
+  %68 = load i64, ptr %42
+  %69 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %70 = call i32 (ptr, ...) @printf(ptr %69, i64 %68)
+  %71 = load i64, ptr %44
+  %72 = getelementptr inbounds [6 x i8], ptr @.fmt.int, i64 0, i64 0
+  %73 = call i32 (ptr, ...) @printf(ptr %72, i64 %71)
+  %74 = getelementptr inbounds [12 x i8], ptr @.str.8, i64 0, i64 0
+  %75 = call %enum.FsResult @pinggen_fs_read_to_string(ptr %74)
+  %76 = extractvalue %enum.FsResult %75, 0
+  %77 = icmp eq i64 %76, 0
+  br i1 %77, label %match_arm.23, label %match_check.24
 match_arm.23:
-  %57 = extractvalue %enum.FsResult %54, 1
-  %58 = alloca ptr
-  store ptr %57, ptr %58
-  %59 = load ptr, ptr %58
-  %60 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %61 = call i32 (ptr, ...) @printf(ptr %60, ptr %59)
+  %78 = extractvalue %enum.FsResult %75, 1
+  %79 = alloca ptr
+  store ptr %78, ptr %79
+  %80 = load ptr, ptr %79
+  %81 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %82 = call i32 (ptr, ...) @printf(ptr %81, ptr %80)
   br label %match_end.21
 match_check.24:
-  %62 = icmp eq i64 %55, 1
-  br i1 %62, label %match_arm.25, label %match_unreachable.22
+  %83 = icmp eq i64 %76, 1
+  br i1 %83, label %match_arm.25, label %match_unreachable.22
 match_arm.25:
-  %63 = extractvalue %enum.FsResult %54, 2
-  %64 = alloca ptr
-  store ptr %63, ptr %64
-  %65 = load ptr, ptr %64
-  %66 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %67 = call i32 (ptr, ...) @printf(ptr %66, ptr %65)
+  %84 = extractvalue %enum.FsResult %75, 2
+  %85 = alloca ptr
+  store ptr %84, ptr %85
+  %86 = load ptr, ptr %85
+  %87 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %88 = call i32 (ptr, ...) @printf(ptr %87, ptr %86)
   br label %match_end.21
 match_unreachable.22:
   unreachable
 match_end.21:
-  %68 = icmp sge i64 2, 0
-  %69 = icmp slt i64 2, 3
-  %70 = and i1 %68, %69
-  br i1 %70, label %bounds_ok.27, label %bounds_fail.26
+  %89 = icmp sge i64 2, 0
+  %90 = icmp slt i64 2, 3
+  %91 = and i1 %89, %90
+  br i1 %91, label %bounds_ok.27, label %bounds_fail.26
 bounds_fail.26:
   call void @pinggen_bounds_abort()
   unreachable
 bounds_ok.27:
-  %71 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 2
-  %72 = load %enum.Result, ptr %71
-  %73 = call ptr @describe(%enum.Result %72)
-  %74 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %75 = call i32 (ptr, ...) @printf(ptr %74, ptr %73)
-  %76 = icmp sge i64 0, 0
-  %77 = icmp slt i64 0, 3
-  %78 = and i1 %76, %77
-  br i1 %78, label %bounds_ok.29, label %bounds_fail.28
+  %92 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 2
+  %93 = load %enum.Result, ptr %92
+  %94 = call ptr @describe(%enum.Result %93)
+  %95 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %96 = call i32 (ptr, ...) @printf(ptr %95, ptr %94)
+  %97 = icmp sge i64 0, 0
+  %98 = icmp slt i64 0, 3
+  %99 = and i1 %97, %98
+  br i1 %99, label %bounds_ok.29, label %bounds_fail.28
 bounds_fail.28:
   call void @pinggen_bounds_abort()
   unreachable
 bounds_ok.29:
-  %79 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 0
-  %80 = load %enum.Result, ptr %79
-  %81 = call ptr @describe(%enum.Result %80)
-  %82 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
-  %83 = call i32 (ptr, ...) @printf(ptr %82, ptr %81)
+  %100 = getelementptr inbounds [3 x %enum.Result], ptr %25, i32 0, i64 0
+  %101 = load %enum.Result, ptr %100
+  %102 = call ptr @describe(%enum.Result %101)
+  %103 = getelementptr inbounds [4 x i8], ptr @.fmt.str, i64 0, i64 0
+  %104 = call i32 (ptr, ...) @printf(ptr %103, ptr %102)
   ret i32 0
 }
 

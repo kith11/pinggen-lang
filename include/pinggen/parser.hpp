@@ -23,7 +23,7 @@ class Parser {
     ImportDecl parse_import();
     EnumDecl parse_enum();
     StructDecl parse_struct();
-    FunctionDecl parse_function(const std::string& impl_target = "");
+    FunctionDecl parse_function(bool is_con_safe = false, const std::string& impl_target = "");
     std::vector<std::unique_ptr<Stmt>> parse_block();
     std::unique_ptr<Stmt> parse_statement();
     std::unique_ptr<Stmt> parse_let_statement();
@@ -35,6 +35,7 @@ class Parser {
     std::unique_ptr<Stmt> parse_break_statement();
     std::unique_ptr<Stmt> parse_continue_statement();
     std::unique_ptr<Stmt> parse_assignment_or_expression_statement();
+    std::vector<std::string> parse_tuple_binding_names();
     std::unique_ptr<Expr> parse_expression();
     std::unique_ptr<Expr> parse_or();
     std::unique_ptr<Expr> parse_and();

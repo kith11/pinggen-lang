@@ -12,7 +12,7 @@ struct Job {
 }
 
 impl Job {
-    func label_len(self) -> int {
+    safe func label_len(self) -> int {
         return str::len(self.label);
     }
 }

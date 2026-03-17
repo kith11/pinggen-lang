@@ -1,0 +1,7 @@
+[package]
+name = "runtime_con_success"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/runtime_con_success"

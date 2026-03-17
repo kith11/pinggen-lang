@@ -17,6 +17,7 @@ add_executable(pinggen
 )
 
 target_include_directories(pinggen PRIVATE include)
+target_compile_definitions(pinggen PRIVATE PINGGEN_SOURCE_ROOT="${CMAKE_SOURCE_DIR}")
 
 include(CTest)
 if(BUILD_TESTING)
@@ -27,6 +28,10 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-build-example
         COMMAND pinggen build ${CMAKE_SOURCE_DIR}/examples/hello
+    )
+    add_test(
+        NAME pinggen-run-example
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/hello
     )
     add_test(
         NAME pinggen-check-invalid-arity
@@ -214,6 +219,41 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-fs-result-without-import PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-con-empty
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_con_empty
+    )
+    set_tests_properties(pinggen-check-invalid-con-empty PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-con-non-call
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_con_non_call
+    )
+    set_tests_properties(pinggen-check-invalid-con-non-call PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-con-unsafe-call
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_con_unsafe_call
+    )
+    set_tests_properties(pinggen-check-invalid-con-unsafe-call PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-con-mut-method
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_con_mut_method
+    )
+    set_tests_properties(pinggen-check-invalid-con-mut-method PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-con-nested
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_con_nested
+    )
+    set_tests_properties(pinggen-check-invalid-con-nested PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-tuple-destructure-arity
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_tuple_destructure_arity
+    )
+    set_tests_properties(pinggen-check-invalid-tuple-destructure-arity PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-con-mixed-void
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_con_mixed_void
+    )
+    set_tests_properties(pinggen-check-invalid-con-mixed-void PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-str-len-missing-import
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_str_len_missing_import
     )
@@ -325,6 +365,10 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-run-fs-read-missing
         COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_fs_read_missing
+    )
+    add_test(
+        NAME pinggen-run-con-success
+        COMMAND pinggen run ${CMAKE_SOURCE_DIR}/examples/runtime_con_success
     )
     add_test(
         NAME pinggen-check-invalid-unknown-impl

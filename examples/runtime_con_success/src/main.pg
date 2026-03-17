@@ -1,0 +1,15 @@
+import std::{ io }
+
+safe func left() -> int {
+    return 4;
+}
+
+safe func right() -> int {
+    return 9;
+}
+
+func main() {
+    let (a, b) = con { left(), right() };
+    io::println(a);
+    io::println(b);
+}

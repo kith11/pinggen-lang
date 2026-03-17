@@ -17,7 +17,8 @@ enum class TypeKind {
     Void,
     Enum,
     Struct,
-    Array
+    Array,
+    Tuple
 };
 
 struct Type {
@@ -25,16 +26,18 @@ struct Type {
     std::string name;
     std::shared_ptr<Type> element_type;
     std::size_t array_size = 0;
+    std::vector<Type> tuple_elements;
 
-    static Type int_type() { return {TypeKind::Int, "", nullptr, 0}; }
-    static Type bool_type() { return {TypeKind::Bool, "", nullptr, 0}; }
-    static Type string_type() { return {TypeKind::String, "", nullptr, 0}; }
-    static Type void_type() { return {TypeKind::Void, "", nullptr, 0}; }
-    static Type enum_type(std::string enum_name) { return {TypeKind::Enum, std::move(enum_name), nullptr, 0}; }
-    static Type struct_type(std::string struct_name) { return {TypeKind::Struct, std::move(struct_name), nullptr, 0}; }
+    static Type int_type() { return {TypeKind::Int, "", nullptr, 0, {}}; }
+    static Type bool_type() { return {TypeKind::Bool, "", nullptr, 0, {}}; }
+    static Type string_type() { return {TypeKind::String, "", nullptr, 0, {}}; }
+    static Type void_type() { return {TypeKind::Void, "", nullptr, 0, {}}; }
+    static Type enum_type(std::string enum_name) { return {TypeKind::Enum, std::move(enum_name), nullptr, 0, {}}; }
+    static Type struct_type(std::string struct_name) { return {TypeKind::Struct, std::move(struct_name), nullptr, 0, {}}; }
     static Type array_type(Type element, std::size_t size) {
-        return {TypeKind::Array, "", std::make_shared<Type>(std::move(element)), size};
+        return {TypeKind::Array, "", std::make_shared<Type>(std::move(element)), size, {}};
     }
+    static Type tuple_type(std::vector<Type> elements) { return {TypeKind::Tuple, "", nullptr, 0, std::move(elements)}; }
 
     bool operator==(const Type& other) const {
         if (kind != other.kind) {
@@ -48,6 +51,9 @@ struct Type {
                 return array_size == other.array_size && !element_type && !other.element_type;
             }
             return *element_type == *other.element_type;
+        }
+        if (kind == TypeKind::Tuple) {
+            return tuple_elements == other.tuple_elements;
         }
         return true;
     }
@@ -93,6 +99,11 @@ struct StringExpr final : Expr {
 struct BoolExpr final : Expr {
     BoolExpr(SourceLocation loc, bool v) : Expr(loc), value(v) {}
     bool value;
+};
+
+struct TupleExpr final : Expr {
+    TupleExpr(SourceLocation loc, std::vector<std::unique_ptr<Expr>> e) : Expr(loc), elements(std::move(e)) {}
+    std::vector<std::unique_ptr<Expr>> elements;
 };
 
 struct StructLiteralField {
@@ -165,6 +176,11 @@ struct CallExpr final : Expr {
     std::vector<std::unique_ptr<Expr>> args;
 };
 
+struct ConExpr final : Expr {
+    ConExpr(SourceLocation loc, std::vector<std::unique_ptr<Expr>> i) : Expr(loc), items(std::move(i)) {}
+    std::vector<std::unique_ptr<Expr>> items;
+};
+
 struct BinaryExpr final : Expr {
     BinaryExpr(SourceLocation loc, std::string o, std::unique_ptr<Expr> l, std::unique_ptr<Expr> r)
         : Expr(loc), op(std::move(o)), left(std::move(l)), right(std::move(r)) {}
@@ -185,6 +201,14 @@ struct LetStmt final : Stmt {
     std::string name;
     bool is_mutable;
     std::optional<Type> declared_type;
+    std::unique_ptr<Expr> initializer;
+};
+
+struct TupleLetStmt final : Stmt {
+    TupleLetStmt(SourceLocation loc, std::vector<std::string> n, bool m, std::unique_ptr<Expr> i)
+        : Stmt(loc), names(std::move(n)), is_mutable(m), initializer(std::move(i)) {}
+    std::vector<std::string> names;
+    bool is_mutable;
     std::unique_ptr<Expr> initializer;
 };
 
@@ -301,6 +325,7 @@ struct FunctionDecl {
     Type return_type = Type::void_type();
     std::vector<std::unique_ptr<Stmt>> body;
     std::string impl_target;
+    bool is_con_safe = false;
 
     bool is_method() const { return !impl_target.empty(); }
     bool is_mutating_method() const { return is_method() && !params.empty() && params[0].is_mut_self; }

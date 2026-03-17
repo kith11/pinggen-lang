@@ -52,6 +52,17 @@ std::string type_name(const Type& type) {
         case TypeKind::Enum: return type.name;
         case TypeKind::Struct: return type.name;
         case TypeKind::Array: return "[" + type_name(*type.element_type) + "; " + std::to_string(type.array_size) + "]";
+        case TypeKind::Tuple: {
+            std::string out = "(";
+            for (std::size_t i = 0; i < type.tuple_elements.size(); ++i) {
+                if (i != 0) {
+                    out += ", ";
+                }
+                out += type_name(type.tuple_elements[i]);
+            }
+            out += ")";
+            return out;
+        }
     }
     return "unknown";
 }
@@ -198,6 +209,7 @@ void SemanticAnalyzer::collect_signatures(const Program& program) {
         signature.lowered_name = lowered_function_name(function);
         signature.return_type = normalized_return_type;
         signature.is_mutating_receiver = function.is_mutating_method();
+        signature.is_con_safe = function.is_con_safe;
         if (function.is_method() && function.params.empty()) {
             fail(function.location, "methods must declare 'self' as the first parameter");
         }
@@ -265,6 +277,14 @@ Type SemanticAnalyzer::normalize_type(const Type& type) const {
         }
         return Type::array_type(normalize_type(*type.element_type), type.array_size);
     }
+    if (type.kind == TypeKind::Tuple) {
+        std::vector<Type> elements;
+        elements.reserve(type.tuple_elements.size());
+        for (const auto& element : type.tuple_elements) {
+            elements.push_back(normalize_type(element));
+        }
+        return Type::tuple_type(std::move(elements));
+    }
     if (type.kind == TypeKind::Struct && enums_.contains(type.name)) {
         return Type::enum_type(type.name);
     }
@@ -295,6 +315,15 @@ void SemanticAnalyzer::validate_type(const Type& type, const SourceLocation& loc
             fail(location, "invalid array element type");
         }
         validate_type(*type.element_type, location, allow_struct);
+        return;
+    }
+    if (type.kind == TypeKind::Tuple) {
+        if (type.tuple_elements.empty()) {
+            fail(location, "tuple type must contain at least one element");
+        }
+        for (const auto& element : type.tuple_elements) {
+            validate_type(element, location, true);
+        }
         return;
     }
     if (type.kind == TypeKind::Enum) {
@@ -329,6 +358,21 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
     }
     if (dynamic_cast<const StringExpr*>(&expr)) {
         return Type::string_type();
+    }
+    if (const auto* node = dynamic_cast<const TupleExpr*>(&expr)) {
+        if (node->elements.empty()) {
+            fail(node->location, "tuple expression must contain at least one element");
+        }
+        std::vector<Type> elements;
+        elements.reserve(node->elements.size());
+        for (const auto& element : node->elements) {
+            const Type element_type = analyze_expr(*element);
+            if (element_type == Type::void_type()) {
+                fail(element->location, "tuple elements cannot be void");
+            }
+            elements.push_back(element_type);
+        }
+        return Type::tuple_type(std::move(elements));
     }
     if (const auto* node = dynamic_cast<const EnumValueExpr*>(&expr)) {
         const auto enum_it = enums_.find(node->enum_name);
@@ -586,6 +630,67 @@ Type SemanticAnalyzer::analyze_expr(const Expr& expr) {
         }
         return it->second.return_type;
     }
+    if (const auto* node = dynamic_cast<const ConExpr*>(&expr)) {
+        if (inside_con_) {
+            fail(node->location, "nested 'con' expressions are not supported");
+        }
+        if (node->items.empty()) {
+            fail(node->location, "con block must contain at least one expression");
+        }
+
+        inside_con_ = true;
+        std::vector<Type> result_types;
+        bool saw_void = false;
+        bool saw_non_void = false;
+        for (const auto& item : node->items) {
+            if (const auto* call = dynamic_cast<const CallExpr*>(item.get())) {
+                if (call->callee == "io::println" || call->callee == "str::len" || call->callee == "fs::read_to_string") {
+                    inside_con_ = false;
+                    fail(call->location, "builtin function '" + call->callee + "' is not supported inside con");
+                }
+                const auto it = functions_.find(call->callee);
+                if (it == functions_.end()) {
+                    inside_con_ = false;
+                    fail(call->location, "unknown function '" + call->callee + "'");
+                }
+                if (!it->second.is_con_safe) {
+                    inside_con_ = false;
+                    fail(call->location, "function '" + call->callee + "' is not marked safe for con");
+                }
+            } else if (const auto* method = dynamic_cast<const MethodCallExpr*>(item.get())) {
+                const Type object_type = analyze_expr(*method->object);
+                const auto& signature = require_method_signature(object_type, method->method, method->location);
+                if (signature.is_mutating_receiver) {
+                    inside_con_ = false;
+                    fail(method->location, "mutating methods are not supported inside con");
+                }
+                if (!signature.is_con_safe) {
+                    inside_con_ = false;
+                    fail(method->location, "method '" + method->method + "' is not marked safe for con");
+                }
+            } else {
+                inside_con_ = false;
+                fail(item->location, "con items must be direct function or non-mutating method calls");
+            }
+
+            const Type item_type = analyze_expr(*item);
+            if (item_type == Type::void_type()) {
+                saw_void = true;
+            } else {
+                saw_non_void = true;
+                result_types.push_back(item_type);
+            }
+        }
+        inside_con_ = false;
+
+        if (saw_void && saw_non_void) {
+            fail(node->location, "con block cannot mix void and non-void results");
+        }
+        if (saw_void) {
+            return Type::void_type();
+        }
+        return Type::tuple_type(std::move(result_types));
+    }
     fail(expr.location, "unsupported expression");
 }
 
@@ -618,6 +723,22 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
             type = declared_type;
         }
         symbols_[node->name] = Symbol{type, node->is_mutable, true};
+        return false;
+    }
+    if (const auto* node = dynamic_cast<const TupleLetStmt*>(&stmt)) {
+        const Type initializer_type = analyze_expr(*node->initializer);
+        if (initializer_type.kind != TypeKind::Tuple) {
+            fail(node->location, "tuple destructuring requires a tuple value");
+        }
+        if (initializer_type.tuple_elements.size() != node->names.size()) {
+            fail(node->location, "tuple destructuring arity does not match initializer");
+        }
+        for (std::size_t i = 0; i < node->names.size(); ++i) {
+            if (node->names[i] == "self") {
+                fail(node->location, "'self' is reserved for method receivers");
+            }
+            symbols_[node->names[i]] = Symbol{initializer_type.tuple_elements[i], node->is_mutable, true};
+        }
         return false;
     }
     if (const auto* node = dynamic_cast<const AssignStmt*>(&stmt)) {

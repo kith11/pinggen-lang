@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "pinggen/ast.hpp"
@@ -33,6 +34,10 @@ class LLVMIRGenerator {
     void emit_bounds_check(const std::string& index_ir, std::size_t size);
     std::string emit_enum_tag(const TypedIRValue& enum_value);
     std::string emit_string_constant(const std::string& value);
+    std::string emit_con_context_type(const std::vector<Type>& capture_types, bool has_result_slot);
+    std::string emit_con_task_function(const std::string& context_type_name, const Expr& item, const std::vector<Type>& capture_types,
+                                       std::size_t result_index, bool has_result_slot);
+    TypedIRValue emit_con_expr(const ConExpr& expr);
     TypedIRValue emit_expr(const Expr& expr);
     AddressValue emit_address(const Expr& expr);
     bool emit_block(const std::vector<std::unique_ptr<Stmt>>& body);
@@ -56,6 +61,7 @@ class LLVMIRGenerator {
     std::unordered_map<std::string, Type> variable_types_;
     std::unordered_map<std::string, Type> function_return_types_;
     std::unordered_map<std::string, bool> mutating_methods_;
+    std::unordered_map<std::string, bool> con_safe_functions_;
     std::string current_function_name_;
     Type current_return_type_ = Type::void_type();
     std::vector<std::string> break_labels_;
@@ -63,6 +69,10 @@ class LLVMIRGenerator {
     std::size_t register_counter_ = 0;
     std::size_t string_counter_ = 0;
     std::size_t label_counter_ = 0;
+    std::size_t con_counter_ = 0;
+    bool uses_con_runtime_ = false;
+    std::string extra_type_defs_;
+    std::string helper_functions_;
 };
 
 }  // namespace pinggen

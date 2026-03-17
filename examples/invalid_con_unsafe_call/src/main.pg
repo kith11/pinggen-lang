@@ -1,0 +1,7 @@
+func slow() -> int {
+    return 1;
+}
+
+func main() {
+    let (value) = con { slow() };
+}

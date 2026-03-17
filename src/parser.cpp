@@ -27,12 +27,14 @@ Program Parser::parse() {
             const std::string impl_target = consume(TokenKind::Identifier, "expected impl target type").lexeme;
             consume(TokenKind::LBrace, "expected '{' after impl target");
             while (!check(TokenKind::RBrace) && !is_at_end()) {
-                program.functions.push_back(parse_function(impl_target));
+                const bool is_con_safe = match(TokenKind::KwSafe);
+                program.functions.push_back(parse_function(is_con_safe, impl_target));
             }
             consume(TokenKind::RBrace, "expected '}' after impl block");
             continue;
         }
-        program.functions.push_back(parse_function(""));
+        const bool is_con_safe = match(TokenKind::KwSafe);
+        program.functions.push_back(parse_function(is_con_safe, ""));
     }
     return program;
 }
@@ -130,10 +132,11 @@ StructDecl Parser::parse_struct() {
     return decl;
 }
 
-FunctionDecl Parser::parse_function(const std::string& impl_target) {
+FunctionDecl Parser::parse_function(bool is_con_safe, const std::string& impl_target) {
     const Token func_token = consume(TokenKind::KwFunc, "expected 'func'");
     FunctionDecl decl;
     decl.location = func_token.location;
+    decl.is_con_safe = is_con_safe;
     decl.name = consume(TokenKind::Identifier, "expected function name").lexeme;
     decl.impl_target = impl_target;
     consume(TokenKind::LParen, "expected '(' after function name");
@@ -217,6 +220,13 @@ std::unique_ptr<Stmt> Parser::parse_statement() {
 std::unique_ptr<Stmt> Parser::parse_let_statement() {
     const Token let_token = consume(TokenKind::KwLet, "expected 'let'");
     const bool is_mutable = match(TokenKind::KwMut);
+    if (check(TokenKind::LParen)) {
+        auto names = parse_tuple_binding_names();
+        consume(TokenKind::Equal, "expected '=' after tuple binding");
+        auto initializer = parse_expression();
+        consume(TokenKind::Semicolon, "expected ';' after variable declaration");
+        return std::make_unique<TupleLetStmt>(let_token.location, std::move(names), is_mutable, std::move(initializer));
+    }
     const std::string name = consume(TokenKind::Identifier, "expected variable name").lexeme;
     std::optional<Type> declared_type;
     if (match(TokenKind::Colon)) {
@@ -336,6 +346,16 @@ std::unique_ptr<Stmt> Parser::parse_assignment_or_expression_statement() {
     }
     consume(TokenKind::Semicolon, "expected ';' after expression");
     return std::make_unique<ExprStmt>(expr->location, std::move(expr));
+}
+
+std::vector<std::string> Parser::parse_tuple_binding_names() {
+    consume(TokenKind::LParen, "expected '(' in tuple binding");
+    std::vector<std::string> names;
+    do {
+        names.push_back(consume(TokenKind::Identifier, "expected tuple binding name").lexeme);
+    } while (match(TokenKind::Comma));
+    consume(TokenKind::RParen, "expected ')' after tuple binding");
+    return names;
 }
 
 std::unique_ptr<Expr> Parser::parse_expression() { return parse_or(); }
@@ -523,8 +543,30 @@ std::unique_ptr<Expr> Parser::parse_primary() {
         }
         return parse_postfix(std::make_unique<VariableExpr>(first.location, first.lexeme));
     }
+    if (match(TokenKind::KwCon)) {
+        const SourceLocation location = previous().location;
+        consume(TokenKind::LBrace, "expected '{' after 'con'");
+        std::vector<std::unique_ptr<Expr>> items;
+        if (!check(TokenKind::RBrace)) {
+            do {
+                items.push_back(parse_expression());
+            } while (match(TokenKind::Comma));
+        }
+        consume(TokenKind::RBrace, "expected '}' after con block");
+        return std::make_unique<ConExpr>(location, std::move(items));
+    }
     if (match(TokenKind::LParen)) {
-        auto expr = parse_expression();
+        auto first = parse_expression();
+        if (match(TokenKind::Comma)) {
+            std::vector<std::unique_ptr<Expr>> elements;
+            elements.push_back(std::move(first));
+            do {
+                elements.push_back(parse_expression());
+            } while (match(TokenKind::Comma));
+            consume(TokenKind::RParen, "expected ')' after tuple expression");
+            return parse_postfix(std::make_unique<TupleExpr>(previous().location, std::move(elements)));
+        }
+        auto expr = std::move(first);
         consume(TokenKind::RParen, "expected ')' after expression");
         return parse_postfix(std::move(expr));
     }
@@ -571,6 +613,15 @@ std::string Parser::parse_qualified_name() {
 }
 
 Type Parser::parse_type() {
+    if (match(TokenKind::LParen)) {
+        std::vector<Type> elements;
+        elements.push_back(parse_type());
+        while (match(TokenKind::Comma)) {
+            elements.push_back(parse_type());
+        }
+        consume(TokenKind::RParen, "expected ')' after tuple type");
+        return Type::tuple_type(std::move(elements));
+    }
     if (match(TokenKind::LBracket)) {
         Type element_type = parse_type();
         consume(TokenKind::Semicolon, "expected ';' in array type");

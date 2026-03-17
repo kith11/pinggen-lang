@@ -1,0 +1,11 @@
+safe func one() -> int {
+    return 1;
+}
+
+safe func two() -> int {
+    return 2;
+}
+
+func main() {
+    let (a, b, c) = con { one(), two() };
+}

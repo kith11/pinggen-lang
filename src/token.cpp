@@ -8,6 +8,8 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::Identifier: return "identifier";
         case TokenKind::Integer: return "integer";
         case TokenKind::String: return "string";
+        case TokenKind::KwCon: return "con";
+        case TokenKind::KwSafe: return "safe";
         case TokenKind::KwTrue: return "true";
         case TokenKind::KwFalse: return "false";
         case TokenKind::KwImport: return "import";

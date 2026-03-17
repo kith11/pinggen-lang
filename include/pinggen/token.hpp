@@ -9,6 +9,8 @@ enum class TokenKind {
     Identifier,
     Integer,
     String,
+    KwCon,
+    KwSafe,
     KwTrue,
     KwFalse,
     KwImport,

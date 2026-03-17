@@ -1,5 +1,9 @@
 import model;
 
+safe func number_a() -> int {
+    return 11;
+}
+
 func finish(code: int) -> Result {
     if code == 0 {
         return Result::Ok(7);

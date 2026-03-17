@@ -1,0 +1,11 @@
+safe func value() -> int {
+    return 1;
+}
+
+safe func log() {
+    return;
+}
+
+func main() {
+    let pair = con { value(), log() };
+}

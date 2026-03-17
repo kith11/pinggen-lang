@@ -10,12 +10,15 @@ Current features:
 
 - `import std::{ io, str, fs }`
 - project-local flat modules with `import name;`
+- `safe func` and `con { ... }` for strict task-parallel calls
 - typed top-level functions with `func name(arg: type) -> type`
 - top-level `enum` declarations with qualified variants like `State::Ready`
 - single-payload enum variants like `Result::Ok(1)`
 - payload enum binding in match arms like `Result::Ok(value) => { ... }`
 - plain `struct` declarations with named fields
 - named-field struct literals and `value.field` access
+- tuple types and values like `(int, string)` and `(1, 2)`
+- tuple destructuring like `let (a, b) = pair;`
 - `bool`, `true`, `false`
 - `if`, `else if`, and `else`
 - exhaustive enum `match` statements by variant tag
@@ -65,6 +68,7 @@ import logic;
 func main() {
     let job = Job { result: finish(0), label: "pinggen" };
     let results: [Result; 3] = [Result::Pending, Result::Err("bad"), Result::Ok(9)];
+    let (left, right) = con { number_a(), job.label_len() };
 
     match job.result {
         Result::Ok(code) => {
@@ -79,7 +83,8 @@ func main() {
         }
     }
 
-    io::println(job.label_len());
+    io::println(left);
+    io::println(right);
     match fs::read_to_string("message.txt") {
         FsResult::Ok(text) => {
             io::println(text);
@@ -109,7 +114,7 @@ struct Job {
 }
 
 impl Job {
-    func label_len(self) -> int {
+    safe func label_len(self) -> int {
         return str::len(self.label);
     }
 }
@@ -118,6 +123,10 @@ impl Job {
 ```pinggen
 // src/logic.pg
 import model;
+
+safe func number_a() -> int {
+    return 11;
+}
 
 func finish(code: int) -> Result {
     if code == 0 {

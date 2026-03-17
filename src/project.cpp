@@ -97,6 +97,7 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
     main_source << "func main() {\n";
     main_source << "    let job = Job { result: finish(0), label: \"pinggen\" };\n";
     main_source << "    let results: [Result; 3] = [Result::Pending, Result::Err(\"bad\"), Result::Ok(9)];\n";
+    main_source << "    let (left, right) = con { number_a(), job.label_len() };\n";
     main_source << "    match job.result {\n";
     main_source << "        Result::Ok(code) => {\n";
     main_source << "            io::println(job.label);\n";
@@ -109,7 +110,8 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
     main_source << "            io::println(\"pending\");\n";
     main_source << "        }\n";
     main_source << "    }\n";
-    main_source << "    io::println(job.label_len());\n";
+    main_source << "    io::println(left);\n";
+    main_source << "    io::println(right);\n";
     main_source << "    match fs::read_to_string(\"message.txt\") {\n";
     main_source << "        FsResult::Ok(text) => {\n";
     main_source << "            io::println(text);\n";
@@ -134,13 +136,16 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
     model_source << "    label: string,\n";
     model_source << "}\n\n";
     model_source << "impl Job {\n";
-    model_source << "    func label_len(self) -> int {\n";
+    model_source << "    safe func label_len(self) -> int {\n";
     model_source << "        return str::len(self.label);\n";
     model_source << "    }\n";
     model_source << "}\n";
 
     std::ofstream logic_source(target_dir / "src" / "logic.pg");
     logic_source << "import model;\n\n";
+    logic_source << "safe func number_a() -> int {\n";
+    logic_source << "    return 11;\n";
+    logic_source << "}\n\n";
     logic_source << "func finish(code: int) -> Result {\n";
     logic_source << "    if code == 0 {\n";
     logic_source << "        return Result::Ok(7);\n";

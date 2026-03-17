@@ -1,0 +1,7 @@
+safe func good() -> int {
+    return 1;
+}
+
+func main() {
+    let pair = con { 1 + 2, good() };
+}
