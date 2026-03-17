@@ -10,6 +10,47 @@ $localBin = if ($env:LOCALAPPDATA) {
     Join-Path $HOME ".puff\\bin"
 }
 
+function Split-PathEntries([string] $pathValue) {
+    if ([string]::IsNullOrWhiteSpace($pathValue)) {
+        return @()
+    }
+    return ($pathValue -split ';' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
+
+function PathContainsEntry([string] $pathValue, [string] $entry) {
+    $normalizedEntry = [System.IO.Path]::GetFullPath($entry).TrimEnd('\')
+    foreach ($existing in Split-PathEntries $pathValue) {
+        $normalizedExisting = [System.IO.Path]::GetFullPath($existing).TrimEnd('\')
+        if ($normalizedExisting.Equals($normalizedEntry, [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $true
+        }
+    }
+    return $false
+}
+
+function Ensure-UserPathContains([string] $entry) {
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    $alreadyPresent = PathContainsEntry $userPath $entry
+
+    if (-not $alreadyPresent) {
+        $newPath = if ([string]::IsNullOrWhiteSpace($userPath)) {
+            $entry
+        } else {
+            "$userPath;$entry"
+        }
+        [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+        $env:Path = "$env:Path;$entry"
+        return "added"
+    }
+
+    if (-not (PathContainsEntry $env:Path $entry)) {
+        $env:Path = "$env:Path;$entry"
+        return "session-added"
+    }
+
+    return "already-present"
+}
+
 function Resolve-PuffExe {
     if (Test-Path $debugExe) { return $debugExe }
     if (Test-Path $releaseExe) { return $releaseExe }
@@ -36,12 +77,25 @@ set SCRIPT_DIR=%~dp0
 '@
 Set-Content -Path (Join-Path $localBin "puff.cmd") -Value $launcher -NoNewline
 
+$pathUpdateStatus = Ensure-UserPathContains $localBin
+
 Write-Host ""
 Write-Host "Installed puff to:" -ForegroundColor Green
 Write-Host "  $localBin"
 Write-Host ""
+if ($pathUpdateStatus -eq "added") {
+    Write-Host "Updated your user PATH automatically." -ForegroundColor Green
+    Write-Host "Open a new terminal to use 'puff' everywhere." -ForegroundColor Yellow
+    Write-Host ""
+} elseif ($pathUpdateStatus -eq "session-added") {
+    Write-Host "Your user PATH already contains puff, and this terminal session was refreshed." -ForegroundColor Green
+    Write-Host ""
+} else {
+    Write-Host "Your user PATH already contains puff." -ForegroundColor Green
+    Write-Host ""
+}
 Write-Host "Use it now from this repo with:" -ForegroundColor Cyan
 Write-Host "  .\\puff init .\\my_app"
 Write-Host ""
-Write-Host "To use 'puff' globally, add this directory to PATH:" -ForegroundColor Yellow
-Write-Host "  $localBin"
+Write-Host "After opening a new terminal, you can run:" -ForegroundColor Cyan
+Write-Host "  puff init .\\my_app"

@@ -42,6 +42,8 @@ Install `puff` to your user bin directory:
 .\install-puff.ps1
 ```
 
+That script now installs `puff`, adds its user-local bin directory to your `PATH`, and tells you when to open a new terminal.
+
 Run the included starter example:
 
 ```powershell
