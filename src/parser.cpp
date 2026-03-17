@@ -191,6 +191,9 @@ std::unique_ptr<Stmt> Parser::parse_statement() {
     if (check(TokenKind::KwFor)) {
         return parse_for_statement();
     }
+    if (check(TokenKind::KwMatch)) {
+        return parse_match_statement();
+    }
     if (check(TokenKind::KwBreak)) {
         return parse_break_statement();
     }
@@ -263,6 +266,26 @@ std::unique_ptr<Stmt> Parser::parse_for_statement() {
     return std::make_unique<ForStmt>(for_token.location, name, std::move(start), std::move(end), std::move(loop_body));
 }
 
+std::unique_ptr<Stmt> Parser::parse_match_statement() {
+    const Token match_token = consume(TokenKind::KwMatch, "expected 'match'");
+    auto subject = parse_match_subject_expression();
+    consume(TokenKind::LBrace, "expected '{' before match body");
+    std::vector<MatchArm> arms;
+    while (!check(TokenKind::RBrace) && !is_at_end()) {
+        MatchArm arm;
+        arm.location = current().location;
+        arm.enum_name = consume(TokenKind::Identifier, "expected enum type in match arm").lexeme;
+        consume(TokenKind::ColonColon, "expected '::' in match arm");
+        arm.variant = consume(TokenKind::Identifier, "expected enum variant in match arm").lexeme;
+        consume(TokenKind::FatArrow, "expected '=>' after match arm pattern");
+        consume(TokenKind::LBrace, "expected '{' before match arm body");
+        arm.body = parse_block();
+        arms.push_back(std::move(arm));
+    }
+    consume(TokenKind::RBrace, "expected '}' after match body");
+    return std::make_unique<MatchStmt>(match_token.location, std::move(subject), std::move(arms));
+}
+
 std::unique_ptr<Stmt> Parser::parse_break_statement() {
     const Token break_token = consume(TokenKind::KwBreak, "expected 'break'");
     consume(TokenKind::Semicolon, "expected ';' after break");
@@ -307,6 +330,14 @@ std::unique_ptr<Expr> Parser::parse_for_bound_expression() {
     parsing_for_bound_ = true;
     auto expr = parse_expression();
     parsing_for_bound_ = previous;
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::parse_match_subject_expression() {
+    const bool previous = parsing_match_subject_;
+    parsing_match_subject_ = true;
+    auto expr = parse_expression();
+    parsing_match_subject_ = previous;
     return expr;
 }
 
@@ -411,7 +442,7 @@ std::unique_ptr<Expr> Parser::parse_primary() {
     }
     if (match(TokenKind::Identifier)) {
         const Token first = previous();
-        if (!parsing_for_bound_ && check(TokenKind::LBrace)) {
+        if (!parsing_for_bound_ && !parsing_match_subject_ && check(TokenKind::LBrace)) {
             ++current_;
             std::vector<StructLiteralField> fields;
             if (!check(TokenKind::RBrace)) {

@@ -1,0 +1,7 @@
+[package]
+name = "invalid_match_wrong_enum_arm"
+version = "0.1.0"
+
+[build]
+entry = "src/main.pg"
+output = "build/invalid_match_wrong_enum_arm"

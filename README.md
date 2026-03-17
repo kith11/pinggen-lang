@@ -15,6 +15,7 @@ Current features:
 - named-field struct literals and `value.field` access
 - `bool`, `true`, `false`
 - `if`, `else if`, and `else`
+- exhaustive enum `match` statements
 - `while condition { ... }`
 - `for name in start..end { ... }`
 - `break` and `continue` inside loops
@@ -68,18 +69,48 @@ func is_ready(state: State) -> bool {
     return state == State::Ready;
 }
 
+func code(state: State) -> int {
+    match state {
+        State::Idle => {
+            return 0;
+        }
+        State::Ready => {
+            return 1;
+        }
+        State::Done => {
+            return 2;
+        }
+    }
+}
+
 func main() {
     let job = Job { state: State::Ready, label: "pinggen" };
     let states: [State; 3] = [State::Idle, State::Ready, State::Done];
 
-    if is_ready(job.state) {
-        io::println(job.label);
-    } else {
-        io::println("not ready");
+    match job.state {
+        State::Idle => {
+            io::println("idle");
+        }
+        State::Ready => {
+            io::println(job.label);
+        }
+        State::Done => {
+            io::println("done");
+        }
     }
 
-    if states[2] == State::Done {
-        io::println("done");
+    match states[2] {
+        State::Idle => {
+            io::println("zero");
+        }
+        State::Ready => {
+            io::println("one");
+        }
+        State::Done => {
+            io::println("two");
+        }
     }
+
+    io::println(code(State::Done));
 }
 ```

@@ -242,6 +242,20 @@ struct ForStmt final : Stmt {
     std::vector<std::unique_ptr<Stmt>> body;
 };
 
+struct MatchArm {
+    SourceLocation location;
+    std::string enum_name;
+    std::string variant;
+    std::vector<std::unique_ptr<Stmt>> body;
+};
+
+struct MatchStmt final : Stmt {
+    MatchStmt(SourceLocation loc, std::unique_ptr<Expr> s, std::vector<MatchArm> a)
+        : Stmt(loc), subject(std::move(s)), arms(std::move(a)) {}
+    std::unique_ptr<Expr> subject;
+    std::vector<MatchArm> arms;
+};
+
 struct BreakStmt final : Stmt {
     explicit BreakStmt(SourceLocation loc) : Stmt(loc) {}
 };

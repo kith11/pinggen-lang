@@ -576,6 +576,39 @@ bool SemanticAnalyzer::analyze_stmt(const Stmt& stmt) {
         const bool else_returns = !node->else_body.empty() && analyze_block(node->else_body);
         return then_returns && else_returns;
     }
+    if (const auto* node = dynamic_cast<const MatchStmt*>(&stmt)) {
+        const Type subject_type = analyze_expr(*node->subject);
+        if (subject_type.kind != TypeKind::Enum) {
+            fail(node->subject->location, "match subject must be an enum value");
+        }
+        const auto enum_it = enums_.find(subject_type.name);
+        if (enum_it == enums_.end()) {
+            fail(node->subject->location, "unknown enum '" + subject_type.name + "'");
+        }
+        std::unordered_set<std::string> seen_variants;
+        bool all_return = true;
+        if (node->arms.empty()) {
+            fail(node->location, "match must have at least one arm");
+        }
+        for (const auto& arm : node->arms) {
+            if (arm.enum_name != subject_type.name) {
+                fail(arm.location, "match arm must use variants of enum '" + subject_type.name + "'");
+            }
+            if (!enum_it->second.variant_indices.contains(arm.variant)) {
+                fail(arm.location, "unknown variant '" + arm.variant + "' for enum '" + arm.enum_name + "'");
+            }
+            if (!seen_variants.insert(arm.variant).second) {
+                fail(arm.location, "duplicate match arm for variant '" + arm.variant + "'");
+            }
+            if (!analyze_block(arm.body)) {
+                all_return = false;
+            }
+        }
+        if (seen_variants.size() != enum_it->second.variant_indices.size()) {
+            fail(node->location, "match must cover all variants of enum '" + subject_type.name + "'");
+        }
+        return all_return;
+    }
     if (const auto* node = dynamic_cast<const WhileStmt*>(&stmt)) {
         const Type condition_type = analyze_expr(*node->condition);
         if (condition_type != Type::bool_type()) {

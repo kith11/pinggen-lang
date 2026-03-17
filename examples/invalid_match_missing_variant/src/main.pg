@@ -1,0 +1,17 @@
+enum State {
+    Idle,
+    Ready,
+    Done,
+}
+
+func main() {
+    let state = State::Ready;
+    match state {
+        State::Idle => {
+            return;
+        }
+        State::Ready => {
+            return;
+        }
+    }
+}

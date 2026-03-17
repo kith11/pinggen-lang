@@ -129,6 +129,36 @@ if(BUILD_TESTING)
     )
     set_tests_properties(pinggen-check-invalid-enum-impl PROPERTIES WILL_FAIL TRUE)
     add_test(
+        NAME pinggen-check-invalid-match-non-enum
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_match_non_enum_subject
+    )
+    set_tests_properties(pinggen-check-invalid-match-non-enum PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-match-missing-variant
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_match_missing_variant
+    )
+    set_tests_properties(pinggen-check-invalid-match-missing-variant PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-match-duplicate-arm
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_match_duplicate_arm
+    )
+    set_tests_properties(pinggen-check-invalid-match-duplicate-arm PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-match-wrong-enum
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_match_wrong_enum_arm
+    )
+    set_tests_properties(pinggen-check-invalid-match-wrong-enum PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-match-unknown-variant
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_match_unknown_variant
+    )
+    set_tests_properties(pinggen-check-invalid-match-unknown-variant PROPERTIES WILL_FAIL TRUE)
+    add_test(
+        NAME pinggen-check-invalid-match-non-block-arm
+        COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_match_non_block_arm
+    )
+    set_tests_properties(pinggen-check-invalid-match-non-block-arm PROPERTIES WILL_FAIL TRUE)
+    add_test(
         NAME pinggen-check-invalid-struct-duplicate-field
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_struct_duplicate_field
     )

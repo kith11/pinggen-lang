@@ -1,0 +1,7 @@
+func main() {
+    match 1 {
+        State::Idle => {
+            return;
+        }
+    }
+}

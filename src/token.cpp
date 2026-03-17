@@ -23,6 +23,7 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::KwWhile: return "while";
         case TokenKind::KwFor: return "for";
         case TokenKind::KwIn: return "in";
+        case TokenKind::KwMatch: return "match";
         case TokenKind::KwBreak: return "break";
         case TokenKind::KwContinue: return "continue";
         case TokenKind::LBrace: return "{";
@@ -52,6 +53,7 @@ std::string token_kind_name(TokenKind kind) {
         case TokenKind::DotDot: return "..";
         case TokenKind::Colon: return ":";
         case TokenKind::ColonColon: return "::";
+        case TokenKind::FatArrow: return "=>";
         case TokenKind::Arrow: return "->";
     }
     return "unknown";

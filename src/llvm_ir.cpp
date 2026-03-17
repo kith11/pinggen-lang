@@ -508,6 +508,55 @@ bool LLVMIRGenerator::emit_stmt(const Stmt& stmt) {
         }
         return then_returns && has_else && else_returns;
     }
+    if (const auto* node = dynamic_cast<const MatchStmt*>(&stmt)) {
+        const TypedIRValue subject = emit_expr(*node->subject);
+        const std::string end_label = next_label("match_end");
+        const std::string fail_label = next_label("match_unreachable");
+        std::vector<std::string> arm_labels;
+        std::vector<std::string> check_labels;
+        std::vector<bool> arm_return_flags;
+        arm_labels.reserve(node->arms.size());
+        check_labels.reserve(node->arms.size());
+        arm_return_flags.reserve(node->arms.size());
+        for (std::size_t i = 0; i < node->arms.size(); ++i) {
+            arm_labels.push_back(next_label("match_arm"));
+            if (i + 1 < node->arms.size()) {
+                check_labels.push_back(next_label("match_check"));
+            }
+        }
+
+        for (std::size_t i = 0; i < node->arms.size(); ++i) {
+            const auto& arm = node->arms[i];
+            const std::string next_label_name = i + 1 < node->arms.size() ? check_labels[i] : fail_label;
+            const std::string cmp_reg = next_register();
+            const std::size_t ordinal = enum_variant_indices_.at(arm.enum_name).at(arm.variant);
+            body_ += "  " + cmp_reg + " = icmp eq i64 " + subject.ir + ", " + std::to_string(ordinal) + "\n";
+            body_ += "  br i1 " + cmp_reg + ", label %" + arm_labels[i] + ", label %" + next_label_name + "\n";
+            body_ += arm_labels[i] + ":\n";
+            const bool arm_returns = emit_block(arm.body);
+            arm_return_flags.push_back(arm_returns);
+            if (!arm_returns) {
+                body_ += "  br label %" + end_label + "\n";
+            }
+            if (i + 1 < node->arms.size()) {
+                body_ += check_labels[i] + ":\n";
+            }
+        }
+        body_ += fail_label + ":\n";
+        body_ += "  unreachable\n";
+
+        bool all_return = true;
+        for (bool current_arm_returns : arm_return_flags) {
+            if (!current_arm_returns) {
+                all_return = false;
+                break;
+            }
+        }
+        if (!all_return) {
+            body_ += end_label + ":\n";
+        }
+        return all_return;
+    }
     if (const auto* node = dynamic_cast<const WhileStmt*>(&stmt)) {
         const std::string cond_label = next_label("while_cond");
         const std::string body_label = next_label("while_body");

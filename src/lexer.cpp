@@ -71,6 +71,8 @@ std::vector<Token> Lexer::tokenize() {
             case '=':
                 if (match('=')) {
                     tokens.push_back(make_token(TokenKind::EqualEqual, start_line, start_column, "=="));
+                } else if (match('>')) {
+                    tokens.push_back(make_token(TokenKind::FatArrow, start_line, start_column, "=>"));
                 } else {
                     tokens.push_back(make_token(TokenKind::Equal, start_line, start_column, "="));
                 }
@@ -185,6 +187,7 @@ Token Lexer::lex_identifier(std::size_t start_line, std::size_t start_column) {
         {"while", TokenKind::KwWhile},
         {"for", TokenKind::KwFor},
         {"in", TokenKind::KwIn},
+        {"match", TokenKind::KwMatch},
         {"break", TokenKind::KwBreak},
         {"continue", TokenKind::KwContinue},
         {"struct", TokenKind::KwStruct},
