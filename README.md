@@ -56,6 +56,14 @@ Build a named target:
 .\puff build .\examples\multi_target --target tool
 ```
 
+Add and update a registry dependency from the current project:
+
+```powershell
+.\puff add shared
+.\puff deps
+.\puff update
+```
+
 Reference docs:
 
 - [1.0 Reference](./docs/reference.md)
@@ -104,6 +112,7 @@ version = "1.2.0"
 - `[build]` defines the default executable target.
 - `[[target]]` defines additional named executable targets.
 - `[[dependency]]` defines either a local path dependency or an exact-version registry dependency imported by its `name`.
+- Registry dependency requirements support exact versions like `1.0.0` and narrow caret ranges like `^1.0.0`.
 - `[registry].index` configures the package registry used by versioned dependencies.
 - `puff.lock` is generated automatically for registry-backed projects and reused on later builds.
 - `puff build` and `puff run` use the default target.
@@ -143,6 +152,9 @@ version = "1.2.0"
 - `puff check`
 - `puff build`
 - `puff run`
+- `puff add`
+- `puff update`
+- `puff deps`
 - `puff targets`
 - `puff doctor`
 - `puff install`
@@ -156,6 +168,7 @@ version = "1.2.0"
 - [hierarchical_modules](./examples/hierarchical_modules): nested project modules with `import util::path;`
 - [path_dependency_app](./examples/path_dependency_app): local package dependency imported with `import shared::util::text;`
 - [registry_app](./examples/registry_app): exact-version registry dependency with generated `puff.lock`
+- [registry_add_app](./examples/registry_add_app): consumer package flow with `puff add`, `puff update`, and `puff deps`
 - [runtime_vec_success](./examples/runtime_vec_success): dynamic `Vec<T>` with aliasing, struct fields, params, returns, and enum payloads
 - [hello](./examples/hello): advanced multi-feature demo
 
@@ -170,6 +183,6 @@ A minimal VS Code extension for `.pg` syntax highlighting lives at [editors/vsco
 - arrays are fixed-size; growable collections use built-in `Vec<T>`
 - `con` is intentionally strict and only allows approved safe calls
 - build configuration is declarative; there is no programmable build scripting
-- package management is exact-version only in 1.0: one registry per project, a generated `puff.lock`, and a user-local cache
+- package management uses one registry per project, exact or caret version requirements, a generated `puff.lock`, and a user-local cache
 - no generics, borrow checker, formatter, or LSP in this milestone
 - post-1.0 work is documented in [docs/release-checklist.md](./docs/release-checklist.md)

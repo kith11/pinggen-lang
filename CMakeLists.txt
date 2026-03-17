@@ -118,6 +118,36 @@ if(BUILD_TESTING)
                 "$text = (& '${CMAKE_SOURCE_DIR}/puff.cmd' help 2>&1 | Out-String); if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if ($text -notlike '*puff commands:*') { throw $text; }"
     )
     add_test(
+        NAME pinggen-add-registry-dependency
+        COMMAND powershell -NoProfile -Command
+                "$dir = Join-Path $env:TEMP 'puff_add_registry_test'; if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }; Copy-Item -Recurse -Force '${CMAKE_SOURCE_DIR}/examples/registry_add_app' $dir; $manifest = Join-Path $dir 'pinggen.toml'; $text = Get-Content -Raw $manifest; $text = $text -replace '\\.\\./registry_fixture/index\\.toml', '${CMAKE_SOURCE_DIR}/examples/registry_fixture/index.toml'.Replace('\\','/'); Set-Content -Path $manifest -Value $text -NoNewline; & '$<TARGET_FILE:pinggen>' add shared $dir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $updated = Get-Content -Raw $manifest; if ($updated -notmatch 'version = \"\\^1\\.1\\.0\"') { throw $updated; }; $lock = Get-Content -Raw (Join-Path $dir 'puff.lock'); if ($lock -notmatch 'resolved_version = \"1\\.1\\.0\"') { throw $lock; }; & '$<TARGET_FILE:pinggen>' run $dir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+    )
+    add_test(
+        NAME pinggen-update-registry-dependency
+        COMMAND powershell -NoProfile -Command
+                "$dir = Join-Path $env:TEMP 'puff_update_registry_test'; if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }; Copy-Item -Recurse -Force '${CMAKE_SOURCE_DIR}/examples/registry_add_app' $dir; $manifest = Join-Path $dir 'pinggen.toml'; $text = Get-Content -Raw $manifest; $text = $text -replace '\\.\\./registry_fixture/index\\.toml', '${CMAKE_SOURCE_DIR}/examples/registry_fixture/index.toml'.Replace('\\','/'); Set-Content -Path $manifest -Value $text -NoNewline; & '$<TARGET_FILE:pinggen>' add shared@1.0.0 $dir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $text = Get-Content -Raw $manifest; $text = $text -replace 'version = \"1\\.0\\.0\"', 'version = \"^1.0.0\"'; Set-Content -Path $manifest -Value $text -NoNewline; & '$<TARGET_FILE:pinggen>' update shared $dir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $deps = (& '$<TARGET_FILE:pinggen>' deps $dir 2>&1 | Out-String); if ($deps -notmatch 'resolved:\\s+1\\.1\\.0') { throw $deps; }"
+    )
+    add_test(
+        NAME pinggen-deps-registry-list
+        COMMAND powershell -NoProfile -Command
+                "$text = (& '$<TARGET_FILE:pinggen>' deps '${CMAKE_SOURCE_DIR}/examples/registry_app' 2>&1 | Out-String); if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if ($text -notmatch 'requirement:\\s+1\\.0\\.0' -or $text -notmatch 'resolved:\\s+1\\.0\\.0') { throw $text; }"
+    )
+    add_test(
+        NAME pinggen-add-invalid-version-requirement
+        COMMAND powershell -NoProfile -Command
+                "$dir = Join-Path $env:TEMP 'puff_add_invalid_requirement_test'; if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }; Copy-Item -Recurse -Force '${CMAKE_SOURCE_DIR}/examples/registry_add_app' $dir; $manifest = Join-Path $dir 'pinggen.toml'; $text = Get-Content -Raw $manifest; $text = $text -replace '\\.\\./registry_fixture/index\\.toml', '${CMAKE_SOURCE_DIR}/examples/registry_fixture/index.toml'.Replace('\\','/'); Set-Content -Path $manifest -Value $text -NoNewline; $out = (& '$<TARGET_FILE:pinggen>' add shared@bad $dir 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($out -notmatch 'invalid version requirement') { throw $out; }"
+    )
+    add_test(
+        NAME pinggen-add-unknown-package
+        COMMAND powershell -NoProfile -Command
+                "$dir = Join-Path $env:TEMP 'puff_add_unknown_package_test'; if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }; Copy-Item -Recurse -Force '${CMAKE_SOURCE_DIR}/examples/registry_add_app' $dir; $manifest = Join-Path $dir 'pinggen.toml'; $text = Get-Content -Raw $manifest; $text = $text -replace '\\.\\./registry_fixture/index\\.toml', '${CMAKE_SOURCE_DIR}/examples/registry_fixture/index.toml'.Replace('\\','/'); Set-Content -Path $manifest -Value $text -NoNewline; $out = (& '$<TARGET_FILE:pinggen>' add missing $dir 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($out -notmatch 'unknown registry package') { throw $out; }"
+    )
+    add_test(
+        NAME pinggen-update-missing-dependency
+        COMMAND powershell -NoProfile -Command
+                "$out = (& '$<TARGET_FILE:pinggen>' update missing '${CMAKE_SOURCE_DIR}/examples/registry_app' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($out -notmatch 'does not define registry dependency ''missing''') { throw $out; }"
+    )
+    add_test(
         NAME pinggen-check-invalid-arity
         COMMAND pinggen check ${CMAKE_SOURCE_DIR}/examples/invalid_wrong_arity
     )
@@ -919,7 +949,7 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-diagnostics-registry-unknown-version
         COMMAND powershell -NoProfile -Command
-                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_registry_unknown_version' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*does not provide exact version ''9.9.9''*') { throw $text; }"
+                "$text = (& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/invalid_registry_unknown_version' 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected failure'; }; if ($text -notlike '*does not provide a version matching ''9.9.9''*') { throw $text; }"
     )
     add_test(
         NAME pinggen-diagnostics-registry-checksum
@@ -964,16 +994,21 @@ if(BUILD_TESTING)
     add_test(
         NAME pinggen-lockfile-registry-app
         COMMAND powershell -NoProfile -Command
-                "$lock = Join-Path '${CMAKE_SOURCE_DIR}/examples/registry_app' 'puff.lock'; if (Test-Path $lock) { Remove-Item -Force $lock }; & '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/registry_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if (-not (Test-Path $lock)) { throw 'expected puff.lock to be generated'; }; $text = Get-Content -Raw $lock; if ($text -notmatch 'registry_index' -or $text -notmatch '\\[\\[registry_dependency\\]\\]' -or $text -notmatch 'name = \"shared\"') { throw $text; }; & '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/registry_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+                "$lock = Join-Path '${CMAKE_SOURCE_DIR}/examples/registry_app' 'puff.lock'; if (Test-Path $lock) { Remove-Item -Force $lock }; & '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/registry_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if (-not (Test-Path $lock)) { throw 'expected puff.lock to be generated'; }; $text = Get-Content -Raw $lock; if ($text -notmatch 'registry_index' -or $text -notmatch '\\[\\[registry_dependency\\]\\]' -or $text -notmatch 'name = \"shared\"' -or $text -notmatch 'requirement = \"1\\.0\\.0\"' -or $text -notmatch 'resolved_version = \"1\\.0\\.0\"') { throw $text; }; & '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/registry_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+    )
+    add_test(
+        NAME pinggen-stale-lockfile-registry-app
+        COMMAND powershell -NoProfile -Command
+                "$dir = Join-Path $env:TEMP 'puff_stale_lock_test'; if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }; Copy-Item -Recurse -Force '${CMAKE_SOURCE_DIR}/examples/registry_add_app' $dir; $manifest = Join-Path $dir 'pinggen.toml'; $text = Get-Content -Raw $manifest; $text = $text -replace '\\.\\./registry_fixture/index\\.toml', '${CMAKE_SOURCE_DIR}/examples/registry_fixture/index.toml'.Replace('\\','/'); Set-Content -Path $manifest -Value $text -NoNewline; & '$<TARGET_FILE:pinggen>' add shared@1.0.0 $dir; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $text = Get-Content -Raw $manifest; $text = $text -replace 'version = \"1\\.0\\.0\"', 'version = \"^1.0.0\"'; Set-Content -Path $manifest -Value $text -NoNewline; $out = (& '$<TARGET_FILE:pinggen>' check $dir 2>&1 | Out-String); if ($LASTEXITCODE -eq 0) { throw 'expected stale lockfile failure'; }; if ($out -notlike '*is stale for the current*' -or $out -notlike '*puff update*') { throw $out; }"
     )
     add_test(
         NAME pinggen-release-sweep
         COMMAND powershell -NoProfile -Command
-                "& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target tool; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/file_process'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hierarchical_modules'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/path_dependency_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/registry_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hello'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+                "& '$<TARGET_FILE:pinggen>' check '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/starter'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' build '${CMAKE_SOURCE_DIR}/examples/multi_target' --target tool; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/file_process'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hierarchical_modules'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/path_dependency_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/registry_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' deps '${CMAKE_SOURCE_DIR}/examples/registry_app'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '$<TARGET_FILE:pinggen>' run '${CMAKE_SOURCE_DIR}/examples/hello'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
     )
     add_test(
         NAME pinggen-docs-consistency
         COMMAND powershell -NoProfile -Command
-                "$readme = Get-Content -Raw '${CMAKE_SOURCE_DIR}/README.md'; $reference = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/reference.md'; $release = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/release-checklist.md'; foreach ($path in @('starter','multi_target','file_process','hierarchical_modules','path_dependency_app','registry_app','hello')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}/examples' $path))) { throw \"missing example $path\" } }; foreach ($path in @('editors/vscode/pinggen/package.json','editors/vscode/pinggen/language-configuration.json','editors/vscode/pinggen/syntaxes/pinggen.tmLanguage.json','editors/vscode/pinggen/README.md')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}' $path))) { throw \"missing editor support file $path\" } }; if ($readme -notmatch 'docs/reference\\.md' -or $readme -notmatch 'docs/release-checklist\\.md' -or $readme -notmatch 'editors/vscode/pinggen' -or $readme -notmatch 'puff\\.lock') { throw 'README missing docs, lockfile, or editor support links'; }; if ($reference -notmatch '\\[\\[target\\]\\]' -or $reference -notmatch '--target <name>' -or $reference -notmatch 'puff\\.lock' -or $reference -notmatch 'version = \"1\\.2\\.0\"') { throw 'reference missing manifest, target selector, or registry package docs'; }; if ($release -notmatch 'ctest --test-dir build -C Debug --output-on-failure' -or $release -notmatch 'examples/file_process' -or $release -notmatch 'examples/registry_app') { throw 'release checklist missing verification coverage'; }"
+                "$readme = Get-Content -Raw '${CMAKE_SOURCE_DIR}/README.md'; $reference = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/reference.md'; $release = Get-Content -Raw '${CMAKE_SOURCE_DIR}/docs/release-checklist.md'; foreach ($path in @('starter','multi_target','file_process','hierarchical_modules','path_dependency_app','registry_app','registry_add_app','hello')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}/examples' $path))) { throw \"missing example $path\" } }; foreach ($path in @('editors/vscode/pinggen/package.json','editors/vscode/pinggen/language-configuration.json','editors/vscode/pinggen/syntaxes/pinggen.tmLanguage.json','editors/vscode/pinggen/README.md')) { if (-not (Test-Path (Join-Path '${CMAKE_SOURCE_DIR}' $path))) { throw \"missing editor support file $path\" } }; if ($readme -notmatch 'docs/reference\\.md' -or $readme -notmatch 'docs/release-checklist\\.md' -or $readme -notmatch 'editors/vscode/pinggen' -or $readme -notmatch 'puff\\.lock' -or $readme -notmatch 'puff add') { throw 'README missing docs, package-manager, lockfile, or editor support links'; }; if ($reference -notmatch '\\[\\[target\\]\\]' -or $reference -notmatch '--target <name>' -or $reference -notmatch 'puff\\.lock' -or $reference -notmatch 'puff add <name>\\[@version\\]' -or $reference -notmatch '\\^1\\.2\\.0') { throw 'reference missing manifest, package-manager, target selector, or registry package docs'; }; if ($release -notmatch 'ctest --test-dir build -C Debug --output-on-failure' -or $release -notmatch 'examples/file_process' -or $release -notmatch 'examples/registry_app' -or $release -notmatch 'puff add') { throw 'release checklist missing verification coverage'; }"
     )
 endif()

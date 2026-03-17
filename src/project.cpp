@@ -41,6 +41,10 @@ std::string unquote(const std::string& value) {
     return value;
 }
 
+bool starts_with(const std::string& value, const std::string& prefix) {
+    return value.rfind(prefix, 0) == 0;
+}
+
 BuildTarget normalize_target(const std::filesystem::path& root, const RawTargetConfig& raw, const std::string& fallback_name,
                              const std::filesystem::path& fallback_output_dir, const std::filesystem::path& config_path,
                              const std::string& section_name) {
@@ -136,6 +140,13 @@ ProjectConfig load_project(const std::filesystem::path& project_dir, bool allow_
     if (config.name.empty()) {
         throw std::runtime_error("project config '" + config_path.string() + "' is missing [package].name");
     }
+    if (config.registry.index.has_value()) {
+        const std::filesystem::path index_path(*config.registry.index);
+        if (!starts_with(*config.registry.index, "http://") && !starts_with(*config.registry.index, "https://") &&
+            !starts_with(*config.registry.index, "file://") && !index_path.is_absolute()) {
+            config.registry.index = (config.root / index_path).lexically_normal().string();
+        }
+    }
     if (build_section.entry.empty()) {
         throw std::runtime_error("project config '" + config_path.string() + "' is missing [build].entry");
     }
@@ -197,7 +208,7 @@ ProjectConfig load_project(const std::filesystem::path& project_dir, bool allow_
             }
         } else {
             dependency.source_kind = DependencySourceKind::Registry;
-            dependency.version = raw_dependency.version;
+            dependency.version_requirement = raw_dependency.version;
         }
         config.dependencies.push_back(std::move(dependency));
     }
@@ -250,6 +261,27 @@ void create_project(const std::filesystem::path& target_dir, const std::string& 
     greet_source << "func greeting(name: string) -> string {\n";
     greet_source << "    return \"hello, \" + name;\n";
     greet_source << "}\n";
+}
+
+void add_registry_dependency(const std::filesystem::path& project_dir, const std::string& name, const std::string& version_requirement) {
+    const ProjectConfig project = load_project(project_dir);
+    if (!project.registry.index.has_value()) {
+        throw std::runtime_error("project '" + project.name + "' must define [registry].index before using 'puff add'");
+    }
+    for (const auto& dependency : project.dependencies) {
+        if (dependency.name == name) {
+            throw std::runtime_error("project '" + project.name + "' already defines dependency '" + name + "'");
+        }
+    }
+
+    const std::filesystem::path config_path = project.root / "pinggen.toml";
+    std::ofstream config(config_path, std::ios::app);
+    if (!config) {
+        throw std::runtime_error("failed to update project config '" + config_path.string() + "'");
+    }
+    config << "\n[[dependency]]\n";
+    config << "name = \"" << name << "\"\n";
+    config << "version = \"" << version_requirement << "\"\n";
 }
 
 }  // namespace pinggen

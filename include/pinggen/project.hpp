@@ -22,7 +22,8 @@ struct DependencyConfig {
     std::string name;
     DependencySourceKind source_kind = DependencySourceKind::Path;
     std::optional<std::filesystem::path> path;
-    std::optional<std::string> version;
+    std::optional<std::string> version_requirement;
+    std::optional<std::string> resolved_version;
     std::filesystem::path resolved_path;
 };
 
@@ -42,5 +43,6 @@ struct ProjectConfig {
 ProjectConfig load_project(const std::filesystem::path& project_dir, bool allow_inherited_registry = false);
 const BuildTarget& resolve_target(const ProjectConfig& project, const std::optional<std::string>& name);
 void create_project(const std::filesystem::path& target_dir, const std::string& name);
+void add_registry_dependency(const std::filesystem::path& project_dir, const std::string& name, const std::string& version_requirement);
 
 }  // namespace pinggen

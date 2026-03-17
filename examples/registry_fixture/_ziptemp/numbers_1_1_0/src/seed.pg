@@ -1,0 +1,3 @@
+func base() -> int {
+    return 6;
+}

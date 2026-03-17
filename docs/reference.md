@@ -43,6 +43,7 @@ version = "1.2.0"
 - `[[target]]` defines additional named executable targets.
 - `[[dependency]]` defines either a local path dependency or an exact-version registry dependency imported by its `name`.
 - `[registry].index` is required when any dependency uses `version = "..."`
+- Registry dependency requirements support exact versions like `1.2.0` and narrow caret ranges like `^1.2.0`.
 - `puff build` and `puff run` use the default target.
 - `puff build <project> --target <name>` and `puff run <project> --target <name>` select a named target.
 - `puff targets <project>` prints the available targets.
@@ -129,6 +130,9 @@ version = "1.2.0"
 - `puff check [path]`
 - `puff build [path] [--target <name>]`
 - `puff run [path] [--target <name>]`
+- `puff add <name>[@version] [path]`
+- `puff update [name] [path]`
+- `puff deps [path]`
 - `puff targets [path]`
 - `puff doctor [path]`
 - `puff install [--bin-dir <path>]`
@@ -138,7 +142,7 @@ version = "1.2.0"
 
 - fixed arrays plus built-in `Vec<T>` only; no general generics
 - declarative build configuration only
-- package management uses one registry per project with exact versions only; no semver ranges or publishing flow
+- package management uses one registry per project with exact or caret requirements only; no full solver or publishing flow
 - strict `con` restrictions
 - no generics
 - no formatter or LSP

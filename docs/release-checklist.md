@@ -5,8 +5,8 @@
 - core language: functions, modules, structs, enums, payload `match`, tuples, fixed-size arrays, loops, methods, and strict `con`
 - std modules: `io`, `str`, `fs`, `env`
 - manifest v2 targets in `pinggen.toml`
-- package dependencies via local paths or exact-version registry entries with `puff.lock`
-- CLI: `puff help`, `puff init`, `puff check`, `puff build`, `puff run`, `puff targets`, `puff doctor`, `puff install`, `puff setup`
+- package dependencies via local paths or exact/caret registry entries with `puff.lock`
+- CLI: `puff help`, `puff init`, `puff check`, `puff build`, `puff run`, `puff add`, `puff update`, `puff deps`, `puff targets`, `puff doctor`, `puff install`, `puff setup`
 
 ## Intentionally Deferred
 
@@ -30,6 +30,8 @@
   - local path dependency flow
 - `examples/registry_app`
   - registry dependency resolution plus lockfile generation
+- `examples/registry_add_app`
+  - consumer dependency flow with `puff add`, `puff update`, and `puff deps`
 - `examples/hello`
   - advanced multi-feature demo
 
@@ -55,6 +57,7 @@ Key acceptance coverage:
 - named target build/run works
 - file-processing example runs
 - registry dependency example resolves and runs
+- package-manager commands cover add, update, and dependency listing
 - advanced demo still builds and runs
 - `puff doctor` reports toolchain and project status
 - diagnostics checks still cover the main failure classes

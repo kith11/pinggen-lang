@@ -29,7 +29,8 @@ struct RegistryPackageRecord {
 struct LockDependencyRecord {
     std::string name;
     std::string package;
-    std::string version;
+    std::string requirement;
+    std::string resolved_version;
     std::string registry_index;
     std::string checksum;
     fs::path path;
@@ -38,6 +39,12 @@ struct LockDependencyRecord {
 struct Lockfile {
     std::string registry_index;
     std::vector<LockDependencyRecord> dependencies;
+};
+
+struct SemVer {
+    int major = 0;
+    int minor = 0;
+    int patch = 0;
 };
 
 std::string trim(const std::string& value) {
@@ -121,6 +128,77 @@ std::string to_hex(std::uint64_t value) {
     std::ostringstream out;
     out << std::hex << value;
     return out.str();
+}
+
+int compare_semver(const SemVer& lhs, const SemVer& rhs) {
+    if (lhs.major != rhs.major) {
+        return lhs.major < rhs.major ? -1 : 1;
+    }
+    if (lhs.minor != rhs.minor) {
+        return lhs.minor < rhs.minor ? -1 : 1;
+    }
+    if (lhs.patch != rhs.patch) {
+        return lhs.patch < rhs.patch ? -1 : 1;
+    }
+    return 0;
+}
+
+SemVer parse_semver(const std::string& text) {
+    SemVer version;
+    std::stringstream stream(text);
+    std::string segment;
+    if (!std::getline(stream, segment, '.')) {
+        throw std::runtime_error("invalid version requirement '" + text + "'");
+    }
+    version.major = std::stoi(segment);
+    if (!std::getline(stream, segment, '.')) {
+        throw std::runtime_error("invalid version requirement '" + text + "'");
+    }
+    version.minor = std::stoi(segment);
+    if (!std::getline(stream, segment, '.')) {
+        throw std::runtime_error("invalid version requirement '" + text + "'");
+    }
+    version.patch = std::stoi(segment);
+    if (std::getline(stream, segment, '.')) {
+        throw std::runtime_error("invalid version requirement '" + text + "'");
+    }
+    return version;
+}
+
+bool is_valid_version_requirement(const std::string& requirement) {
+    try {
+        if (starts_with(requirement, "^")) {
+            parse_semver(requirement.substr(1));
+            return true;
+        }
+        parse_semver(requirement);
+        return true;
+    } catch (const std::exception&) {
+        return false;
+    }
+}
+
+bool version_matches_requirement(const std::string& version_text, const std::string& requirement) {
+    const SemVer version = parse_semver(version_text);
+    if (starts_with(requirement, "^")) {
+        const SemVer base = parse_semver(requirement.substr(1));
+        if (compare_semver(version, base) < 0) {
+            return false;
+        }
+        SemVer upper = base;
+        if (base.major > 0) {
+            upper.major += 1;
+            upper.minor = 0;
+            upper.patch = 0;
+        } else if (base.minor > 0) {
+            upper.minor += 1;
+            upper.patch = 0;
+        } else {
+            upper.patch += 1;
+        }
+        return compare_semver(version, upper) < 0;
+    }
+    return version_text == requirement;
 }
 
 fs::path default_cache_root() {
@@ -285,8 +363,10 @@ std::optional<Lockfile> load_lockfile(const fs::path& path) {
                 current->name = value;
             } else if (key == "package") {
                 current->package = value;
-            } else if (key == "version") {
-                current->version = value;
+            } else if (key == "requirement") {
+                current->requirement = value;
+            } else if (key == "resolved_version") {
+                current->resolved_version = value;
             } else if (key == "registry_index") {
                 current->registry_index = value;
             } else if (key == "checksum") {
@@ -312,7 +392,8 @@ void write_lockfile(const fs::path& path, const Lockfile& lockfile) {
         output << "[[registry_dependency]]\n";
         output << "name = \"" << dependency.name << "\"\n";
         output << "package = \"" << dependency.package << "\"\n";
-        output << "version = \"" << dependency.version << "\"\n";
+        output << "requirement = \"" << dependency.requirement << "\"\n";
+        output << "resolved_version = \"" << dependency.resolved_version << "\"\n";
         output << "registry_index = \"" << dependency.registry_index << "\"\n";
         output << "checksum = \"" << dependency.checksum << "\"\n";
         output << "path = \"" << dependency.path.string() << "\"\n\n";
@@ -369,7 +450,7 @@ bool lockfile_matches_project(const Lockfile& lockfile, const ProjectConfig& pro
         ++registry_dependency_count;
         const auto match_it =
             std::find_if(lockfile.dependencies.begin(), lockfile.dependencies.end(), [&](const LockDependencyRecord& record) {
-                return record.name == dependency.name && record.version == *dependency.version &&
+                return record.name == dependency.name && record.requirement == *dependency.version_requirement &&
                        record.package == dependency.name && record.registry_index == registry_index &&
                        fs::exists(record.path / "pinggen.toml");
             });
@@ -382,26 +463,37 @@ bool lockfile_matches_project(const Lockfile& lockfile, const ProjectConfig& pro
 
 const RegistryPackageRecord& find_registry_package(const std::vector<RegistryPackageRecord>& packages,
                                                    const std::string& name,
-                                                   const std::string& version,
+                                                   const std::string& requirement,
                                                    const std::string& index) {
-    const auto it = std::find_if(packages.begin(), packages.end(), [&](const RegistryPackageRecord& record) {
-        return record.name == name && record.version == version;
-    });
-    if (it == packages.end()) {
+    if (!is_valid_version_requirement(requirement)) {
+        throw std::runtime_error("invalid version requirement '" + requirement + "'");
+    }
+    std::vector<const RegistryPackageRecord*> candidates;
+    for (const auto& record : packages) {
+        if (record.name == name && version_matches_requirement(record.version, requirement)) {
+            candidates.push_back(&record);
+        }
+    }
+    if (candidates.empty()) {
         const bool package_exists =
             std::any_of(packages.begin(), packages.end(), [&](const RegistryPackageRecord& record) { return record.name == name; });
         if (!package_exists) {
             throw std::runtime_error("unknown registry package '" + name + "' in registry '" + index + "'");
         }
-        throw std::runtime_error("registry package '" + name + "' does not provide exact version '" + version + "'");
+        throw std::runtime_error("registry package '" + name + "' does not provide a version matching '" + requirement + "'");
     }
-    return *it;
+    const auto best = std::max_element(candidates.begin(), candidates.end(), [](const RegistryPackageRecord* lhs,
+                                                                                const RegistryPackageRecord* rhs) {
+        return compare_semver(parse_semver(lhs->version), parse_semver(rhs->version)) < 0;
+    });
+    return **best;
 }
 
 }  // namespace
 
 ProjectConfig resolve_registry_dependencies(const ProjectConfig& project,
-                                            const std::optional<std::string>& inherited_registry_index) {
+                                            const std::optional<std::string>& inherited_registry_index,
+                                            bool force_refresh) {
     ProjectConfig resolved = project;
     const bool has_registry_dependencies =
         std::any_of(resolved.dependencies.begin(), resolved.dependencies.end(), [](const DependencyConfig& dependency) {
@@ -426,7 +518,12 @@ ProjectConfig resolve_registry_dependencies(const ProjectConfig& project,
     if (use_lockfile) {
         lockfile = load_lockfile(lockfile_path);
     }
-    const bool lockfile_valid = lockfile.has_value() && lockfile_matches_project(*lockfile, resolved, *effective_registry);
+    const bool lockfile_valid =
+        !force_refresh && lockfile.has_value() && lockfile_matches_project(*lockfile, resolved, *effective_registry);
+    if (use_lockfile && !force_refresh && lockfile.has_value() && !lockfile_valid) {
+        throw std::runtime_error("lockfile '" + lockfile_path.string() +
+                                 "' is stale for the current manifest; run 'puff update' to refresh dependencies");
+    }
 
     std::vector<RegistryPackageRecord> registry_packages;
     bool registry_loaded = false;
@@ -444,6 +541,7 @@ ProjectConfig resolve_registry_dependencies(const ProjectConfig& project,
                 std::find_if(lockfile->dependencies.begin(), lockfile->dependencies.end(),
                              [&](const LockDependencyRecord& record) { return record.name == dependency.name; });
             dependency.resolved_path = record_it->path;
+            dependency.resolved_version = record_it->resolved_version;
             continue;
         }
 
@@ -453,9 +551,9 @@ ProjectConfig resolve_registry_dependencies(const ProjectConfig& project,
         }
 
         const RegistryPackageRecord& record =
-            find_registry_package(registry_packages, dependency.name, *dependency.version, *effective_registry);
+            find_registry_package(registry_packages, dependency.name, *dependency.version_requirement, *effective_registry);
         const fs::path cache_base =
-            default_cache_root() / to_hex(fnv1a_hash(*effective_registry)) / dependency.name / *dependency.version;
+            default_cache_root() / to_hex(fnv1a_hash(*effective_registry)) / dependency.name / record.version;
         const fs::path archive_path = cache_base / "package.zip";
         const fs::path unpacked_path = cache_base / "package";
         if (!fs::exists(archive_path) || compute_sha256(archive_path) != record.checksum) {
@@ -464,7 +562,7 @@ ProjectConfig resolve_registry_dependencies(const ProjectConfig& project,
         const std::string actual_checksum = compute_sha256(archive_path);
         if (actual_checksum != record.checksum) {
             throw std::runtime_error("checksum mismatch for registry package '" + dependency.name + "' version '" +
-                                     *dependency.version + "'");
+                                     record.version + "'");
         }
         if (!fs::exists(unpacked_path / "pinggen.toml")) {
             unpack_archive(archive_path, unpacked_path);
@@ -474,15 +572,58 @@ ProjectConfig resolve_registry_dependencies(const ProjectConfig& project,
         }
 
         dependency.resolved_path = unpacked_path;
+        dependency.resolved_version = record.version;
         new_lockfile.dependencies.push_back(
-            {dependency.name, dependency.name, *dependency.version, *effective_registry, actual_checksum, unpacked_path});
+            {dependency.name, dependency.name, *dependency.version_requirement, record.version, *effective_registry,
+             actual_checksum, unpacked_path});
     }
 
-    if (use_lockfile && !lockfile_valid) {
+    if (use_lockfile && (!lockfile_valid || force_refresh || !lockfile.has_value())) {
         write_lockfile(lockfile_path, new_lockfile);
     }
 
     return resolved;
+}
+
+std::string select_default_registry_requirement(const std::string& registry_index, const std::string& package_name) {
+    const std::vector<RegistryPackageRecord> packages = load_registry_index_records(registry_index);
+    std::vector<const RegistryPackageRecord*> candidates;
+    for (const auto& record : packages) {
+        if (record.name == package_name) {
+            candidates.push_back(&record);
+        }
+    }
+    if (candidates.empty()) {
+        throw std::runtime_error("unknown registry package '" + package_name + "' in registry '" + registry_index + "'");
+    }
+    const auto best = std::max_element(candidates.begin(), candidates.end(), [](const RegistryPackageRecord* lhs,
+                                                                                const RegistryPackageRecord* rhs) {
+        return compare_semver(parse_semver(lhs->version), parse_semver(rhs->version)) < 0;
+    });
+    return "^" + (*best)->version;
+}
+
+std::vector<DependencyStatus> collect_dependency_status(const ProjectConfig& project,
+                                                        const std::optional<std::string>& inherited_registry_index) {
+    const ProjectConfig resolved = resolve_registry_dependencies(project, inherited_registry_index);
+    std::vector<DependencyStatus> statuses;
+    statuses.reserve(resolved.dependencies.size());
+    const fs::path lockfile_path = resolved.root / "puff.lock";
+    const std::optional<Lockfile> lockfile = load_lockfile(lockfile_path);
+    for (const auto& dependency : resolved.dependencies) {
+        DependencyStatus status;
+        status.name = dependency.name;
+        status.source_kind = dependency.source_kind;
+        status.version_requirement = dependency.version_requirement;
+        status.resolved_version = dependency.resolved_version;
+        status.path = dependency.source_kind == DependencySourceKind::Path ? *dependency.path : dependency.resolved_path;
+        if (lockfile.has_value() && dependency.source_kind == DependencySourceKind::Registry) {
+            status.from_lockfile = std::any_of(lockfile->dependencies.begin(), lockfile->dependencies.end(),
+                                               [&](const LockDependencyRecord& record) { return record.name == dependency.name; });
+        }
+        statuses.push_back(std::move(status));
+    }
+    return statuses;
 }
 
 }  // namespace pinggen
